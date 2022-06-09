@@ -1,15 +1,13 @@
 import asyncio
 from telegram import Bot
 from telegram.ext import Application
-from typing import Union
 
 from logger import get_logger
 from os_tools import get_secret
 
 LOGGER = get_logger("Bot")
 # --------------------------------------------------------------------------------------------- #
-# Следует создать и указать в config.py                                                         #
-# настройки webhook'а telegram bot'а                                                            #
+# Следует создать и указать в config.py настройки webhook'а telegram bot'а                      #
 # https://github.com/python-telegram-bot/python-telegram-bot/wiki/Webhooks                      #
 # --------------------------------------------------------------------------------------------- #
 TOKEN = get_secret("TELEGRAM_TOKEN")
