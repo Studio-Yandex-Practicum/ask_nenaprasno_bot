@@ -1,9 +1,7 @@
 import asyncio
 
-from telegram import Bot, error, Update
-from telegram.ext import JobQueue
-from queue import Queue
-from threading import Thread
+from telegram import Bot
+from telegram.ext import Application
 from typing import Union
 
 from logger import get_logger
@@ -11,7 +9,6 @@ from os_tools import get_secret
 
 LOGGER = get_logger("Bot")
 TOKEN = get_secret("TELEGRAM_TOKEN")
-BOT = Bot(TOKEN)
 # --------------------------------------------------------------------------------------------- #
 # Настройки webhook'а telegram bot'а                                                            #
 # https://docs-python.ru/packages/biblioteka-python-telegram-bot-python/ispolzovanie-webhook/   #
@@ -34,8 +31,9 @@ async def send_message(chat_id: Union[str, int], text: str, message_type: str = 
     :param text: текст сообщения
     :param message_type: тип сообщения для отправки: text - для текстовых сообщений, ...
     """
+    bot = Bot(TOKEN)
     if message_type.lower() == "text":
-        await BOT.send_message(text=text, chat_id=chat_id)
+        await bot.send_message(text=text, chat_id=chat_id)
         LOGGER.debug("Сообщение успешно доставлено.")
     else:
         exc = "Тип сообщения временно не поддерживается."
@@ -43,5 +41,11 @@ async def send_message(chat_id: Union[str, int], text: str, message_type: str = 
         raise TypeError(exc)
 
 
-async def bot_init():
-    await BOT.set_webhook()
+async def init():
+    app = Application.builder().token(TOKEN).build()
+    if not app.bot.set_webhook(WEBHOOK_URL):
+        exc = "Не удалось запустить webhook telegram bot'а"
+        LOGGER.error(exc)
+        raise AttributeError(exc)
+    return app
+
