@@ -1,6 +1,5 @@
 import asyncio
 
-
 from telegram import Bot, error, Update
 from telegram.ext import JobQueue
 from queue import Queue
@@ -12,7 +11,7 @@ from os_tools import get_secret
 
 LOGGER = get_logger("Bot")
 TOKEN = get_secret("TELEGRAM_TOKEN")
-
+BOT = Bot(TOKEN)
 # --------------------------------------------------------------------------------------------- #
 # Настройки webhook'а telegram bot'а                                                            #
 # https://docs-python.ru/packages/biblioteka-python-telegram-bot-python/ispolzovanie-webhook/   #
@@ -26,24 +25,6 @@ PRIVATE_KEY = "private.key"
 WEBHOOK_URL = "https://some.url/" + TOKEN
 # --------------------------------------------------------------------------------------------- #
 
-# --------------------------------------------------------------------------------------------- #
-# Инициализация бота                                                                            #
-# --------------------------------------------------------------------------------------------- #
-async def check_bot(bot):
-    try:
-        await bot.get_me()
-    except Exception as exception:
-        LOGGER.error(exception)
-        raise exception
-    else:
-        LOGGER.debug("Bot has been loaded.")
-
-
-if not (BOT := None):
-    BOT = Bot(TOKEN)
-    asyncio.run(check_bot(BOT))
-# ---------------------------------------------------------------------------------------------- #
-
 
 async def send_message(chat_id: Union[str, int], text: str, message_type: str = "text"):
     """
@@ -55,7 +36,7 @@ async def send_message(chat_id: Union[str, int], text: str, message_type: str = 
     """
     if message_type.lower() == "text":
         await BOT.send_message(text=text, chat_id=chat_id)
-        LOGGER.info("Сообщение успешно доставлено.")
+        LOGGER.debug("Сообщение успешно доставлено.")
     else:
         exc = "Тип сообщения временно не поддерживается."
         LOGGER.warning(exc)
