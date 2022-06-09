@@ -23,7 +23,7 @@ WEBHOOK_URL = "https://some.url/" + TOKEN
 async def init() -> Application:
     """
     Make telegram bot base including dispatcher, bot, updater, etc.
-    :return:
+    :return: telegram.ext.Application
     """
     app = Application.builder().token(TOKEN).build()
     if not await app.bot.set_webhook(WEBHOOK_URL):
