@@ -1,5 +1,3 @@
-import asyncio
-import html
 import uvicorn
 
 from starlette.applications import Starlette
@@ -7,36 +5,46 @@ from starlette.requests import Request
 from starlette.responses import PlainTextResponse, Response
 from starlette.routing import Route
 from telegram import Update
-from telegram.ext import Application, ApplicationBuilder, CommandHandler, CallbackContext, ContextTypes, ExtBot
+from telegram.ext import Application, ApplicationBuilder, CommandHandler, CallbackContext
 
 from logger import get_logger
 from os_tools import get_secret
 
 logger = get_logger("Bot")
 # --------------------------------------------------------------------------------------------- #
-# Следует создать и указать в config.py настройки webhook'а telegram bot'а                      #
-# https://github.com/python-telegram-bot/python-telegram-bot/wiki/Webhooks                      #
+# Необходимо создать .env файл и указать в нем переменные для telegram bot'а                    #
 # --------------------------------------------------------------------------------------------- #
 TOKEN = get_secret("TELEGRAM_TOKEN")
-HOST = "127.0.0.1"
+HOST = get_secret("HOST")
 PORT = int(get_secret("BOT_PORT"))
 WEBHOOK_URL = get_secret("WEBHOOK_URL")
-CHAT_ID = get_secret("CHAT_ID")
 # --------------------------------------------------------------------------------------------- #
+
 
 async def start(update: Update, context: CallbackContext.DEFAULT_TYPE):
     await context.bot.send_message(chat_id=update.effective_chat.id, text="Привет! Я постараюсь помочь вам.")
 
 
+def add_handlers(app: Application) -> None:
+    """
+    Add handlers to telegram bot application
+    :param app: Telegram bot application
+    """
+    handlers = {
+        CommandHandler: (
+            ("start", start),
+        ),
+    }
+    for handler in handlers:
+        for params in handlers[handler]:
+            app.add_handler(handler(*params))
+
+
 async def init_webhook() -> None:
     app = Application.builder().updater(None).token(TOKEN).build()
-    app.bot_data["url"] = WEBHOOK_URL
-    app.bot_data["admin_chat_id"] = CHAT_ID
 
-    app.add_handler(CommandHandler("start", start))
-    # -------------------------------------------- #
-    # Здесь добавляются хэндлеры                   #
-    # -------------------------------------------- #
+    add_handlers(app)
+
     await app.bot.set_webhook(url=f"{WEBHOOK_URL}/telegram")
 
     async def telegram(request: Request) -> Response:
@@ -54,6 +62,7 @@ async def init_webhook() -> None:
             Route("/health", health, methods=["GET"]),
         ]
     )
+
     webserver = uvicorn.Server(
         config=uvicorn.Config(
             app=starlette_app,
@@ -62,6 +71,7 @@ async def init_webhook() -> None:
             host=HOST,
         )
     )
+
     async with app:
         await app.start()
         await webserver.serve()
@@ -70,14 +80,13 @@ async def init_webhook() -> None:
 
 def init_pooling():
     app = ApplicationBuilder().token(TOKEN).build()
-    start_handler = CommandHandler('start', start)
-    # -------------------------------------------- #
-    # Здесь добавляются хэндлеры                   #
-    # -------------------------------------------- #
-    app.add_handler(start_handler)
+
+    add_handlers(app)
+
     app.run_polling()
     return app
 
 
-asyncio.run(init_webhook())
-init_pooling()
+if __name__ == '__main__':
+    import asyncio
+    asyncio.run(init_webhook())
