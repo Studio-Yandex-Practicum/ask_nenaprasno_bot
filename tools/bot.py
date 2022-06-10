@@ -7,18 +7,7 @@ from starlette.routing import Route
 from telegram import Update
 from telegram.ext import Application, ApplicationBuilder, CommandHandler, CallbackContext
 
-from logger import get_logger
-from os_tools import get_secret
-
-logger = get_logger("Bot")
-# --------------------------------------------------------------------------------------------- #
-# Необходимо создать .env файл и указать в нем переменные для telegram bot'а                    #
-# --------------------------------------------------------------------------------------------- #
-TOKEN = get_secret("TELEGRAM_TOKEN")
-HOST = get_secret("HOST")
-PORT = int(get_secret("BOT_PORT"))
-WEBHOOK_URL = get_secret("WEBHOOK_URL")
-# --------------------------------------------------------------------------------------------- #
+import config
 
 
 async def start(update: Update, context: CallbackContext.DEFAULT_TYPE):
@@ -41,11 +30,11 @@ def add_handlers(app: Application) -> None:
 
 
 async def init_webhook() -> None:
-    app = Application.builder().updater(None).token(TOKEN).build()
+    app = Application.builder().updater(None).token(config.TOKEN).build()
 
     add_handlers(app)
 
-    await app.bot.set_webhook(url=f"{WEBHOOK_URL}/telegram")
+    await app.bot.set_webhook(url=f"{config.WEBHOOK_URL}/telegram")
 
     async def telegram(request: Request) -> Response:
         await app.update_queue.put(
@@ -66,9 +55,9 @@ async def init_webhook() -> None:
     webserver = uvicorn.Server(
         config=uvicorn.Config(
             app=starlette_app,
-            port=PORT,
+            port=config.PORT,
             use_colors=False,
-            host=HOST,
+            host=config.HOST,
         )
     )
 
@@ -79,14 +68,9 @@ async def init_webhook() -> None:
 
 
 def init_pooling():
-    app = ApplicationBuilder().token(TOKEN).build()
+    app = ApplicationBuilder().token(config.TOKEN).build()
 
     add_handlers(app)
 
     app.run_polling()
     return app
-
-
-if __name__ == '__main__':
-    import asyncio
-    asyncio.run(init_webhook())
