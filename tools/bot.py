@@ -34,6 +34,9 @@ async def init_webhook() -> None:
     app.bot_data["admin_chat_id"] = CHAT_ID
 
     app.add_handler(CommandHandler("start", start))
+    # -------------------------------------------- #
+    # Здесь добавляются хэндлеры                   #
+    # -------------------------------------------- #
     await app.bot.set_webhook(url=f"{WEBHOOK_URL}/telegram")
 
     async def telegram(request: Request) -> Response:
