@@ -6,7 +6,7 @@ from starlette.requests import Request
 from starlette.responses import PlainTextResponse, Response
 from starlette.routing import Route
 
-from tools import init_webhook, init_pooling
+from bot import init_webhook, init_pooling
 import config
 
 

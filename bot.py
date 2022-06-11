@@ -8,37 +8,27 @@ async def start(update: Update, context: CallbackContext.DEFAULT_TYPE):
     await context.bot.send_message(chat_id=update.effective_chat.id, text="Привет! Я постараюсь помочь вам.")
 
 
-def add_handlers(app: Application) -> None:
-    """
-    Add handlers to telegram bot application
-    :param app: Telegram bot application
-    """
-    handlers = {
-        CommandHandler: (
-            ("start", start),
-        ),
-    }
-    for handler in handlers:
-        for params in handlers[handler]:
-            app.add_handler(handler(*params))
-
-
 async def init_webhook() -> Application:
     """
-    Init webhook bot
+    Init bot webhook
+    :return: initiated application
     """
     app = Application.builder().updater(None).token(config.TOKEN).build()
 
-    add_handlers(app)
+    app.add_handler(CommandHandler("start", start))
 
     await app.bot.set_webhook(url=f"{config.WEBHOOK_URL}/telegram")
     return app
 
 
-def init_pooling():
+def init_pooling() -> Application:
+    """
+    Init bot pooling
+    :return: initiated application
+    """
     app = ApplicationBuilder().token(config.TOKEN).build()
 
-    add_handlers(app)
+    app.add_handler(CommandHandler("start", start))
 
     app.run_polling()
     return app
