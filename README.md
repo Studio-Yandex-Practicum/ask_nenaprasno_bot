@@ -1,1 +1,10 @@
-# ask_nenaprasno_bot
+# Бот "Спросить не напрасно". 
+### Основа для телеграм бота, которую можно запускать, как в режиме polling'а, так и в режиме webhook'а
+
+## Запуск приложения
+### В режиме polling'а:
+> python3 Bot/src/bot.py
+
+### В режиме webhook'а:
+> python3 Bot/src/main.py
+

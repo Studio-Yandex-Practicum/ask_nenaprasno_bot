@@ -1,28 +1,13 @@
-from dotenv import load_dotenv, dotenv_values
-from pathlib import Path
-from pydantic import (BaseSettings, HttpUrl, IPvAnyAddress)
+from dotenv import dotenv_values
 
-BASE_DIR = Path(__name__).resolve().parent.parent.parent
 # --------------------------------------------------------------------------------- #
 # Getting variables from .env                                                       #
 # --------------------------------------------------------------------------------- #
-load_dotenv()
+ENVS = dotenv_values()
 
-
-class Settings(BaseSettings):
-    host: str
-    webhook_url: HttpUrl
-    port: int
-    token: str
-    webhook_ip: str
-
-    class Config:
-        fields = {"port": {"env": "bot_port"}, "token": {"env": "telegram_token"}}
-
-
-HOST = (s := Settings()).host
-WEBHOOK_URL = s.webhook_url
-PORT = s.port
-TOKEN = s.token
-WEBHOOK_IP = s.webhook_ip
+HOST = ENVS["HOST"]
+WEBHOOK_URL = ENVS["WEBHOOK_URL"]
+PORT = int(ENVS["BOT_PORT"])
+TOKEN = ENVS["TELEGRAM_TOKEN"]
+WEBHOOK_IP = ENVS["WEBHOOK_IP"]
 # --------------------------------------------------------------------------------- #

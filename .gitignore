@@ -136,7 +136,3 @@ dmypy.json
 # Media && static
 media_value
 static_value
-
-installation.file
-tools/cert.pem
-tools/private.key
