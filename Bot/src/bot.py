@@ -1,6 +1,7 @@
+from contextlib import asynccontextmanager
+from starlette.applications import Starlette
 from telegram import Update
 from telegram.ext import Application, ApplicationBuilder, CommandHandler, CallbackContext
-from contextlib import asynccontextmanager
 from typing import AsyncGenerator
 
 from core import config
@@ -28,18 +29,31 @@ async def init() -> AsyncGenerator[Application, None]:
     Init bot webhook
     :return: Webhook application generator
     """
-    bot = create_bot()
-    bot.updater = None
-    # ------------------------------------------------------------- #
-    # Can be used config.WEBHOOK_URL or config.WEBHOOK_IP           #
-    # ------------------------------------------------------------- #
-    await bot.bot.set_webhook(url=f"{config.WEBHOOK_URL}/telegram")
-    async with bot:
-        await bot.start()
+    bot_app = create_bot()
+    bot_app.updater = None
+    await bot_app.bot.set_webhook(url=f"{config.WEBHOOK_IP}/telegram")
+    async with bot_app:
+        await bot_app.start()
         try:
-            yield bot
+            yield bot_app
         finally:
-            await bot.stop()
+            await bot_app.stop()
+
+
+@asynccontextmanager
+async def manage_bot(api: Starlette) -> AsyncGenerator:
+    """
+    Create bot managing generator
+    :param api: Starlette application api
+    :return: Async generator
+    """
+    async with init() as bot:
+        # ------------------------------------------------- #
+        # Adding bot application into Starlette api context #
+        # for using it later like send messages or replies  #
+        # ------------------------------------------------- #
+        api.state.bot = bot
+        yield
 
 
 if __name__ == '__main__':

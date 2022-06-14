@@ -6,5 +6,5 @@
 > python3 Bot/src/bot.py
 
 ### В режиме webhook'а:
-> python3 Bot/src/main.py
+> python3 Bot/src/run_bot.py
 
