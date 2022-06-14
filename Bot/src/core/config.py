@@ -11,4 +11,5 @@ PORT = int(ENVS["BOT_PORT"])
 TOKEN = ENVS["TELEGRAM_TOKEN"]
 WEBHOOK_IP = ENVS["WEBHOOK_IP"]
 CHAT_ID = ENVS["CHAT_ID"]
+TEST_PERIOD = int(ENVS["TEST_PERIOD"])
 # --------------------------------------------------------------------------------- #

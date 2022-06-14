@@ -16,8 +16,8 @@ async def test(context: CallbackContext) -> None:
     Send test message after running
     :param context: CallbackContext
     """
-    bot_id = 971967681
-    await context.bot.send_message(chat_id=bot_id, text="HGHJKLKJHLKJH")
+    chat_id = config.CHAT_ID
+    await context.bot.send_message(chat_id=chat_id, text="Bot still running.")
 
 
 def create_bot():
@@ -27,7 +27,7 @@ def create_bot():
     """
     bot_app = ApplicationBuilder().token(config.TOKEN).build()
     bot_app.add_handler(CommandHandler("start", start))
-    bot_app.job_queue.run_repeating(test, 10)
+    bot_app.job_queue.run_repeating(test, config.TEST_PERIOD)
     return bot_app
 
 
