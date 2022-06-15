@@ -23,17 +23,17 @@ request_buttons = [
 reminder_buttons = [
     [
         InlineKeyboardButton(
-            text='Напомнить через час', callback_data='Month statistic'
+            text='Напомнить через час', callback_data='Hour remind'
         )
     ],
     [
         InlineKeyboardButton(
-            text='Скоро отправлю', callback_data='Actual requests'
+            text='Скоро отправлю', callback_data='Soon'
         )
     ],
     [
         InlineKeyboardButton(
-            text='Уже отправил(а)', callback_data='Week statistic'
+            text='Уже отправил(а)', callback_data='Already send'
         )
     ]
 ]
