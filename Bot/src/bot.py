@@ -41,7 +41,7 @@ async def init_webhook() -> Application:
 
 def init_polling() -> None:
     """
-    Init bot pooling
+    Init bot polling
     :return: Initiated application
     """
     bot_app = create_bot()

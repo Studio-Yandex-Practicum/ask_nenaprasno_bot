@@ -9,7 +9,7 @@
 
 ### В режиме webhook'а:
 > python3 Bot/src/run_webhook_api.py
-## Проверка сервера с использованием ngrok на локальном компьютере:
+## Проверка API сервера с использованием ngrok на локальном компьютере:
 - Установить ngrok с [сайта](https://ngrok.com/download)
 - [Зарегистрироваться](https://dashboard.ngrok.com/) и получить [токен](https://dashboard.ngrok.com/get-started/your-authtoken)
 - в консоль вставить:
