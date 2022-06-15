@@ -38,7 +38,7 @@ async def init_webhook() -> Application:
     """
     bot_app = create_bot()
     bot_app.updater = None
-    await bot_app.bot.set_webhook(url=f"{config.WEBHOOK_IP}/telegram")
+    await bot_app.bot.set_webhook(url=f"{config.WEBHOOK_URL}/telegram")
     return bot_app
 
 
