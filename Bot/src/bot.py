@@ -1,8 +1,5 @@
-from contextlib import asynccontextmanager
-from starlette.applications import Starlette
 from telegram import Update
 from telegram.ext import Application, ApplicationBuilder, CommandHandler, CallbackContext
-from typing import AsyncGenerator
 
 from core import config
 
