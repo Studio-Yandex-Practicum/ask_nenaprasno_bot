@@ -39,7 +39,7 @@ async def init_webhook() -> Application:
     return bot_app
 
 
-async def init_polling() -> None:
+def init_polling() -> None:
     """
     Init bot pooling
     :return: Initiated application
