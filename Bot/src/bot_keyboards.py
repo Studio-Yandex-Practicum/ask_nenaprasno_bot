@@ -2,6 +2,7 @@ from telegram import InlineKeyboardButton, InlineKeyboardMarkup
 
 from core.config import MAIN_URL
 
+
 request_buttons = [
     [
         InlineKeyboardButton(
