@@ -2,4 +2,3 @@ python-telegram-bot==20.0a1
 starlette==0.20.2
 uvicorn==0.17.6
 python-dotenv==0.19.2
-pydantic==1.9.1
