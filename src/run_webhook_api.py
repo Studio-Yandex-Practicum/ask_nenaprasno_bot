@@ -33,7 +33,7 @@ async def health(request: Request) -> PlainTextResponse:
 
 
 async def telegram(request: Request) -> Response:
-    bot_app = request.app.state.bot
+    bot_app = request.app.state.bot_app
     await bot_app.update_queue.put(Update.de_json(data=await request.json(), bot=bot_app.bot))
     return Response()
 
