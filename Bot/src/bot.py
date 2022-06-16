@@ -3,7 +3,7 @@ from contextlib import asynccontextmanager
 from typing import AsyncGenerator
 
 from starlette.applications import Starlette
-from telegram import Update
+from telegram import Update, ReplyKeyboardMarkup
 from telegram.ext import (Application, ApplicationBuilder, CallbackContext,
                           CommandHandler, MessageHandler)
 
@@ -12,16 +12,29 @@ from core import config
 from site_handler import site_requests as from_site
 
 
+async def send_message(context: CallbackContext, chat_id: int, text: str) -> None:
+    """
+    Send message with handling errors.
+    :param update: Update
+    :param context: CallbackContext
+    """
+    try:
+        await context.bot.send_message(
+            chat_id=chat_id,
+            text=text
+        )
+    except Exception:
+        ...
+
+
 async def help(update: Update, context: CallbackContext) -> None:
     """
     Send help message.
     :param update: Update
     :param context: CallbackContext
     """
-    await context.bot.send_message(
-        chat_id=update.effective_chat.id,
-        text=texts.HELP
-    )
+    chat_id = update.effective_chat.id
+    await send_message(context, chat_id, texts.HELP)
 
 
 async def start(update: Update, context: CallbackContext) -> None:
@@ -29,15 +42,10 @@ async def start(update: Update, context: CallbackContext) -> None:
     :param update: Update
     :param context: CallbackContext
     """
-    await context.bot.send_message(
-        chat_id=update.effective_chat.id,
-        text=texts.GREETING
-    )
+    chat_id = update.effective_chat.id
+    await send_message(context, chat_id, texts.GREETING)
     await asyncio.sleep(1)
-    await context.bot.send_message(
-        chat_id=update.effective_chat.id,
-        text=texts.ARE_YOUR_AN_EXPERT
-    )
+    await send_message(context, chat_id, texts.ARE_YOUR_AN_EXPERT)
 
 
 async def orders(update: Update, context: CallbackContext) -> None:
@@ -45,14 +53,12 @@ async def orders(update: Update, context: CallbackContext) -> None:
     :param update: Update
     :param context: CallbackContext
     """
+    chat_id = update.effective_chat.id
     user_id = update.effective_user.id
     current_orders = await from_site.get_current_orders(user_id)
     text = texts.CURRENT_ORDERS % (len(current_orders), current_orders)
 
-    await context.bot.send_message(
-        chat_id=update.effective_chat.id,
-        text=text
-    )
+    await send_message(context, chat_id, text)
 
 
 async def overdue(update: Update, context: CallbackContext) -> None:
@@ -60,14 +66,12 @@ async def overdue(update: Update, context: CallbackContext) -> None:
     :param update: Update
     :param context: CallbackContext
     """
+    chat_id = update.effective_chat.id
     user_id = update.effective_user.id
     overdue_orders = await from_site.get_overdue_orders(user_id)
     text = texts.OVERDUE_ORDERS % (len(overdue_orders), overdue_orders)
 
-    await context.bot.send_message(
-        chat_id=update.effective_chat.id,
-        text=text
-    )
+    await send_message(context, chat_id, text)
 
 
 async def terms(update: Update, context: CallbackContext) -> None:
@@ -75,10 +79,8 @@ async def terms(update: Update, context: CallbackContext) -> None:
     :param update: Update
     :param context: CallbackContext
     """
-    await context.bot.send_message(
-        chat_id=update.effective_chat.id,
-        text=texts.TERMS
-    )
+    chat_id = update.effective_chat.id
+    await send_message(context, chat_id, texts.TERMS)
 
 
 async def test(context: CallbackContext) -> None:
@@ -87,7 +89,7 @@ async def test(context: CallbackContext) -> None:
     :param context: CallbackContext
     """
     chat_id = config.CHAT_ID
-    await context.bot.send_message(chat_id=chat_id, text="Bot still running.")
+    await send_message(context, chat_id, "Bot still running.")
 
 
 def create_bot() -> Application:
