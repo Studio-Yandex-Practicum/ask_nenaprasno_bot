@@ -132,6 +132,7 @@ dmypy.json
 
 # .idea
 .idea
+.vscode/
 
 # Media && static
 media_value
