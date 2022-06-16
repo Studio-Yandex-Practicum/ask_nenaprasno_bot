@@ -5,6 +5,7 @@ from telegram.ext import Application, ApplicationBuilder, CommandHandler, Callba
 from typing import AsyncGenerator
 
 from core import config
+from bot_keyboards import menu
 
 
 async def start(update: Update, context: CallbackContext) -> None:
@@ -27,6 +28,7 @@ def create_bot():
     """
     bot_app = ApplicationBuilder().token(config.TOKEN).build()
     bot_app.add_handler(CommandHandler("start", start))
+    bot_app.add_handler(CommandHandler("menu", menu))
     bot_app.job_queue.run_repeating(test, config.TEST_PERIOD)
     return bot_app
 
