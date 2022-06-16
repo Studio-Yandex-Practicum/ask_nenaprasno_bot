@@ -1,14 +1,34 @@
 from contextlib import asynccontextmanager
 from starlette.applications import Starlette
 from telegram import Update
-from telegram.ext import Application, ApplicationBuilder, CommandHandler, CallbackContext
+from telegram.ext import (
+    Application, ApplicationBuilder, CommandHandler, CallbackContext
+)
 from typing import AsyncGenerator
 
 from core import config
 
 
 async def start(update: Update, context: CallbackContext) -> None:
-    await context.bot.send_message(chat_id=update.effective_chat.id, text="Привет! Я постараюсь помочь вам.")
+    await context.bot.send_message(
+        chat_id=update.effective_chat.id,
+        text="Привет! Я постараюсь помочь вам."
+    )
+    context.job_queue.run_daily(
+        week_stat,
+        time=config.TIME,
+        days=config.WEEK_DAYS
+    )
+    context.job_queue.run_monthly(
+        receipt_reminder,
+        when=config.TIME,
+        day=config.DAY
+    )
+    context.job_queue.run_monthly(
+        month_stat,
+        when=config.TIME,
+        day=config.DAY
+    )
 
 
 async def test(context: CallbackContext) -> None:
@@ -18,6 +38,39 @@ async def test(context: CallbackContext) -> None:
     """
     chat_id = config.CHAT_ID
     await context.bot.send_message(chat_id=chat_id, text="Bot still running.")
+
+
+async def week_stat(context: CallbackContext) -> None:
+    """
+    Send weekly statistics on the number of requests in the work
+    """
+    await context.bot.send_message(
+        chat_id=config.CHAT_ID,
+        text="За прошедшую неделю у вас было заявок..."
+    )
+
+
+async def receipt_reminder(context: CallbackContext) -> None:
+    """
+    Send monthly reminder about the receipt formation during payment
+    Only for self-employed users
+    """
+    await context.bot.send_message(
+        chat_id=config.CHAT_ID,
+        text="Пожалуйста, пришлите чек на @mail.ru"
+    )
+
+
+async def month_stat(context: CallbackContext) -> None:
+    """
+    Send monthly statistics on the number of successfully
+    closed requests.
+    Only if the user had requests
+    """
+    await context.bot.send_message(
+        chat_id=config.CHAT_ID,
+        text="В прошедшем месяце вы ответили на ... заявок"
+    )
 
 
 def create_bot():
