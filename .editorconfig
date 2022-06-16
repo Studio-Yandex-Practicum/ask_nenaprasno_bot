@@ -8,9 +8,11 @@ charset = utf-8
 trim_trailing_whitespace = true
 insert_final_newline = true
 max_line_length = 120
+quote_type=double
 
 [*.py]
 indent_size = 4
+quote_type=auto
 
 [*.md]
 trim_trailing_whitespace = false
