@@ -3,6 +3,7 @@ Commands for bot.
 """
 HELP = "help"
 START = "start"
+STATISTIC = "stat"
 OVERDUE = "srok"
-ORDERS = "zayavka"
+ORDERS = "zayavki"
 TERMS = "pravila"
