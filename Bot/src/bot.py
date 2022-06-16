@@ -1,18 +1,17 @@
 import asyncio
-from contextlib import asynccontextmanager
-from typing import AsyncGenerator
 
-from starlette.applications import Starlette
-from telegram import Update, ReplyKeyboardMarkup
-from telegram.ext import (Application, ApplicationBuilder, CallbackContext,
-                          CommandHandler, MessageHandler)
+from telegram import Update
+from telegram.ext import (ExtBot, ApplicationBuilder, CallbackContext,
+                          CommandHandler)
 
 from constants import commands, texts
 from core import config
 from site_handler import site_requests as from_site
 
 
-async def send_message(context: CallbackContext, chat_id: int, text: str) -> None:
+async def send_message(
+    context: CallbackContext, chat_id: int, text: str
+) -> None:
     """
     Send message with handling errors.
     :param update: Update
@@ -70,7 +69,6 @@ async def overdue(update: Update, context: CallbackContext) -> None:
     user_id = update.effective_user.id
     overdue_orders = await from_site.get_overdue_orders(user_id)
     text = texts.OVERDUE_ORDERS % (len(overdue_orders), overdue_orders)
-
     await send_message(context, chat_id, text)
 
 
@@ -92,22 +90,24 @@ async def test(context: CallbackContext) -> None:
     await send_message(context, chat_id, "Bot still running.")
 
 
-def create_bot() -> Application:
+def create_bot() -> ExtBot:
     """
     Create telegram bot application
     :return: Created telegram bot application
     """
-    bot_app: Application = ApplicationBuilder().token(config.TOKEN).build()
-    bot_app.add_handler(CommandHandler(commands.HELP, help))
-    bot_app.add_handler(CommandHandler(commands.START, start))
-    bot_app.add_handler(CommandHandler(commands.ORDERS, orders))
-    bot_app.add_handler(CommandHandler(commands.OVERDUE, overdue))
-    bot_app.add_handler(CommandHandler(commands.TERMS, terms))
+    bot_app: ExtBot = ApplicationBuilder().token(config.TOKEN).build()
+    bot_app.add_handlers([
+        CommandHandler(commands.HELP, help),
+        CommandHandler(commands.START, start),
+        CommandHandler(commands.ORDERS, orders),
+        CommandHandler(commands.OVERDUE, overdue),
+        CommandHandler(commands.TERMS, terms)
+    ])
     bot_app.job_queue.run_repeating(test, config.TEST_PERIOD)
     return bot_app
 
 
-async def init_webhook() -> Application:
+async def init_webhook() -> ExtBot:
     """
     Init bot webhook
     :return: Initiated application
