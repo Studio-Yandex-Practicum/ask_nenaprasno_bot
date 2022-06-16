@@ -1,5 +1,9 @@
 # Use case
-# CallbackQueryHandler(delay_message_for_1_hour)
+#
+# Inline keyboard return some message after the push of a button.
+# For delay button return some message, for example "delay"
+# This message should be use as a pattern in CallbackQueryHandler
+# CallbackQueryHandler(delay_message_for_1_hour, pattern="delay")
 
 from datetime import timedelta
 
