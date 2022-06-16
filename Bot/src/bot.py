@@ -98,7 +98,9 @@ def create_bot() -> Application:
     bot_app: Application = ApplicationBuilder().token(config.TOKEN).build()
     bot_app.add_handler(CommandHandler(commands.HELP, help))
     bot_app.add_handler(CommandHandler(commands.START, start))
+    bot_app.add_handler(CommandHandler(commands.ORDERS, orders))
     bot_app.add_handler(CommandHandler(commands.OVERDUE, overdue))
+    bot_app.add_handler(CommandHandler(commands.TERMS, terms))
     bot_app.job_queue.run_repeating(test, config.TEST_PERIOD)
     return bot_app
 
