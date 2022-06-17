@@ -1,9 +1,20 @@
+import calendar
+import datetime
+import logging
+from logging.handlers import RotatingFileHandler
+
 from telegram import Update
 from telegram.ext import (
     Application, ApplicationBuilder, CommandHandler, CallbackContext
 )
 from typing import AsyncGenerator
 from core import config
+
+
+logger = logging.getLogger(__name__)
+logger.setLevel(logging.INFO)
+handler = RotatingFileHandler('logger.log', maxBytes=50000000, backupCount=5)
+logger.addHandler(handler)
 
 
 async def start(update: Update, context: CallbackContext) -> None:
@@ -68,16 +79,41 @@ def create_bot():
         time=config.WEEKLY_STAT_TIME,
         days=config.WEEKLY_STAT_WEEK_DAYS
     )
-    bot_app.job_queue.run_monthly(
-        receipt_reminder_job,
-        when=config.RECEIPT_REMINDER_TIME,
-        day=config.RECEIPT_REMINDER_DAY
-    )
-    bot_app.job_queue.run_monthly(
-        monthly_stat_job,
-        when=config.MONTHLY_STAT_TIME,
-        day=config.MONTHLY_STAT_DAY
-    )
+    day = calendar.monthrange(
+            datetime.datetime.now().year,
+            datetime.datetime.now().month
+        )[1]
+    try:
+        bot_app.job_queue.run_monthly(
+            receipt_reminder_job,
+            when=config.RECEIPT_REMINDER_TIME,
+            day=config.RECEIPT_REMINDER_DAY
+        )
+    except ValueError:
+        bot_app.job_queue.run_monthly(
+            receipt_reminder_job,
+            when=config.RECEIPT_REMINDER_TIME,
+            day=day
+        )
+        logger.info(
+            f'Вместо {config.RECEIPT_REMINDER_DAY} указан {day}'
+        )
+    try:
+        bot_app.job_queue.run_monthly(
+            monthly_stat_job,
+            when=config.MONTHLY_STAT_TIME,
+            day=config.MONTHLY_STAT_DAY
+        )
+    except ValueError:
+        bot_app.job_queue.run_monthly(
+            monthly_stat_job,
+            when=config.MONTHLY_STAT_TIME,
+            day=day
+        )
+        logger.info(
+            f'Вместо {config.MONTHLY_STAT_DAY} указан {day}'
+        )
+
     return bot_app
 
 
