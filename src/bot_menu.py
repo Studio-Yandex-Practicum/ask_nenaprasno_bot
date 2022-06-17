@@ -4,7 +4,7 @@ from telegram.ext import CommandHandler, ContextTypes, CallbackQueryHandler
 from constants import command_constants
 
 
-MENU_BUTTONS = [
+menu_buttons = [
     [
         InlineKeyboardButton(
             text='⌚ Настройка временной зоны',
@@ -37,13 +37,13 @@ MENU_BUTTONS = [
     ],
 ]
 
-remind_one_hour = InlineKeyboardButton(
+remind_one_hour_button = InlineKeyboardButton(
     text='🕑 Напомнить через час',
     callback_data=command_constants.COMMAND_HOUR_REMIND
 )
 
-send_check_reactions = [
-    [remind_one_hour],
+bill_replay_buttons = [
+    [remind_one_hour_button],
     [
         InlineKeyboardButton(
             text='👌 Скоро отправлю',
@@ -58,20 +58,24 @@ send_check_reactions = [
     ]
 ]
 
-request_inline_keyboard = InlineKeyboardMarkup(MENU_BUTTONS)
-reminder_inline_keyboard = InlineKeyboardMarkup(send_check_reactions)
+menu_keyboard = InlineKeyboardMarkup(menu_buttons)
+bill_keyboard = InlineKeyboardMarkup(bill_replay_buttons)
+remind_keyboard = InlineKeyboardMarkup([[remind_one_hour_button]])
 
 
 async def menu(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     await update.message.reply_text(
-        "Меню", reply_markup=request_inline_keyboard
+        "Меню", reply_markup=menu_keyboard
     )
 
 
-async def button(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
+async def handling_menu_button_click(
+        update: Update, context: ContextTypes.DEFAULT_TYPE
+) -> None:
     """Parses the CallbackQuery and updates the message text."""
     query = update.callback_query
     await query.answer()
+    await query.edit_message_text(query.data)
 
 menu_handler = CommandHandler('menu', callback=menu)
-callback_menu_handler = CallbackQueryHandler(button)
+callback_menu_handler = CallbackQueryHandler(handling_menu_button_click)
