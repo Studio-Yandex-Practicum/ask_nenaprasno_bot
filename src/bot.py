@@ -1,7 +1,11 @@
 from telegram import Update
-from telegram.ext import Application, ApplicationBuilder, CommandHandler, CallbackContext
+from telegram.ext import (
+    Application, ApplicationBuilder, CommandHandler,
+    CallbackContext
+)
 
 from core import config
+from bot_menu import menu_handler, callback_menu_handler
 
 
 async def start(update: Update, context: CallbackContext) -> None:
@@ -24,6 +28,7 @@ def create_bot():
     """
     bot_app = ApplicationBuilder().token(config.TOKEN).build()
     bot_app.add_handler(CommandHandler("start", start))
+    bot_app.add_handlers([menu_handler, callback_menu_handler])
     bot_app.job_queue.run_repeating(test, config.TEST_PERIOD)
     return bot_app
 
