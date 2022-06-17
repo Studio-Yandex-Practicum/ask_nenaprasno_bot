@@ -1,11 +1,8 @@
-from contextlib import asynccontextmanager
-from starlette.applications import Starlette
 from telegram import Update
 from telegram.ext import (
     Application, ApplicationBuilder, CommandHandler, CallbackContext
 )
 from typing import AsyncGenerator
-
 from core import config
 
 
@@ -13,21 +10,6 @@ async def start(update: Update, context: CallbackContext) -> None:
     await context.bot.send_message(
         chat_id=update.effective_chat.id,
         text="Привет! Я постараюсь помочь вам."
-    )
-    context.job_queue.run_daily(
-        week_stat,
-        time=config.TIME,
-        days=config.WEEK_DAYS
-    )
-    context.job_queue.run_monthly(
-        receipt_reminder,
-        when=config.TIME,
-        day=config.DAY
-    )
-    context.job_queue.run_monthly(
-        month_stat,
-        when=config.TIME,
-        day=config.DAY
     )
 
 
@@ -40,7 +22,7 @@ async def test(context: CallbackContext) -> None:
     await context.bot.send_message(chat_id=chat_id, text="Bot still running.")
 
 
-async def week_stat(context: CallbackContext) -> None:
+async def weekly_stat_job(context: CallbackContext) -> None:
     """
     Send weekly statistics on the number of requests in the work
     """
@@ -50,7 +32,7 @@ async def week_stat(context: CallbackContext) -> None:
     )
 
 
-async def receipt_reminder(context: CallbackContext) -> None:
+async def receipt_reminder_job(context: CallbackContext) -> None:
     """
     Send monthly reminder about the receipt formation during payment
     Only for self-employed users
@@ -61,7 +43,7 @@ async def receipt_reminder(context: CallbackContext) -> None:
     )
 
 
-async def month_stat(context: CallbackContext) -> None:
+async def monthly_stat_job(context: CallbackContext) -> None:
     """
     Send monthly statistics on the number of successfully
     closed requests.
@@ -81,6 +63,21 @@ def create_bot():
     bot_app = ApplicationBuilder().token(config.TOKEN).build()
     bot_app.add_handler(CommandHandler("start", start))
     bot_app.job_queue.run_repeating(test, config.TEST_PERIOD)
+    bot_app.job_queue.run_daily(
+        weekly_stat_job,
+        time=config.WEEKLY_STAT_TIME,
+        days=config.WEEKLY_STAT_WEEK_DAYS
+    )
+    bot_app.job_queue.run_monthly(
+        receipt_reminder_job,
+        when=config.RECEIPT_REMINDER_TIME,
+        day=config.RECEIPT_REMINDER_DAY
+    )
+    bot_app.job_queue.run_monthly(
+        monthly_stat_job,
+        when=config.MONTHLY_STAT_TIME,
+        day=config.MONTHLY_STAT_DAY
+    )
     return bot_app
 
 
@@ -95,9 +92,9 @@ async def init_webhook() -> Application:
     return bot_app
 
 
-async def init_polling() -> None:
+def init_polling() -> None:
     """
-    Init bot pooling
+    Init bot polling
     :return: Initiated application
     """
     bot_app = create_bot()
