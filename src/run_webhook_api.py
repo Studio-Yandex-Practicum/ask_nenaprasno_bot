@@ -5,10 +5,15 @@ from starlette.responses import PlainTextResponse, Response
 from starlette.routing import Route
 from telegram import Update
 
-from core import config
 from bot import init_webhook
+from core import config
+from core.logger import webhook_logger
+from decorators.logger import async_error_logger
+
+logger = webhook_logger
 
 
+@async_error_logger(name='start_bot', logger=logger)
 async def start_bot() -> None:
     bot_app = await init_webhook()
     await bot_app.initialize()
@@ -19,22 +24,28 @@ async def start_bot() -> None:
     api.state.bot_app = bot_app
 
 
+@async_error_logger(name='stop_bot', logger=logger)
 async def stop_bot() -> None:
     await api.state.bot_app.stop()
     await api.state.bot_app.shutdown()
 
 
+@async_error_logger(name='health', logger=logger)
 async def health(request: Request) -> PlainTextResponse:
-    message = f"Бот запущен и работает. Сообщение получено по запросу на Api сервера {config.WEBHOOK_URL}"
+    message = (f"Бот запущен и работает. Сообщение получено по запросу на Api "
+               f"сервера {config.WEBHOOK_URL}")
     chat_id = config.CHAT_ID
-    await request.app.state.bot_app.bot.send_message(chat_id=chat_id, text=message)
+    await request.app.state.bot_app.bot.send_message(chat_id=chat_id,
+                                                     text=message)
 
     return PlainTextResponse(content=f"Message send to bot: {message}")
 
 
+@async_error_logger(name='telegram', logger=logger)
 async def telegram(request: Request) -> Response:
     bot_app = request.app.state.bot_app
-    await bot_app.update_queue.put(Update.de_json(data=await request.json(), bot=bot_app.bot))
+    await bot_app.update_queue.put(Update.de_json(data=await request.json(),
+                                                  bot=bot_app.bot))
     return Response()
 
 
@@ -46,4 +57,4 @@ routes = [
 api = Starlette(routes=routes, on_startup=[start_bot], on_shutdown=[stop_bot])
 
 if __name__ == '__main__':
-    uvicorn.run(app=api, debug=True, host=config.HOST, port=config.PORT)
+    uvicorn.run(app=api, debug=True, host=config.HOST, port=config.PORT)  # noqa
