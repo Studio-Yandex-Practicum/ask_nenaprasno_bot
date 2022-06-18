@@ -1,7 +1,4 @@
-import calendar
 import datetime
-import logging
-from logging.handlers import RotatingFileHandler
 
 from telegram import Update
 from telegram.ext import (
@@ -9,12 +6,6 @@ from telegram.ext import (
 )
 from typing import AsyncGenerator
 from core import config
-
-
-logger = logging.getLogger(__name__)
-logger.setLevel(logging.INFO)
-handler = RotatingFileHandler('logger.log', maxBytes=50000000, backupCount=5)
-logger.addHandler(handler)
 
 
 async def start(update: Update, context: CallbackContext) -> None:
@@ -76,44 +67,31 @@ def create_bot():
     bot_app.job_queue.run_repeating(test, config.TEST_PERIOD)
     bot_app.job_queue.run_daily(
         weekly_stat_job,
-        time=config.WEEKLY_STAT_TIME,
+        time=datetime.time(
+            hour=config.WEEKLY_STAT_HOUR,
+            minute=config.WEEKLY_STAT_MINUTE,
+            second=config.WEEKLY_STAT_SECOND
+        ),
         days=config.WEEKLY_STAT_WEEK_DAYS
     )
-    day = calendar.monthrange(
-            datetime.datetime.now().year,
-            datetime.datetime.now().month
-        )[1]
-    try:
-        bot_app.job_queue.run_monthly(
-            receipt_reminder_job,
-            when=config.RECEIPT_REMINDER_TIME,
-            day=config.RECEIPT_REMINDER_DAY
-        )
-    except ValueError:
-        bot_app.job_queue.run_monthly(
-            receipt_reminder_job,
-            when=config.RECEIPT_REMINDER_TIME,
-            day=day
-        )
-        logger.info(
-            f'Вместо {config.RECEIPT_REMINDER_DAY} указан {day}'
-        )
-    try:
-        bot_app.job_queue.run_monthly(
-            monthly_stat_job,
-            when=config.MONTHLY_STAT_TIME,
-            day=config.MONTHLY_STAT_DAY
-        )
-    except ValueError:
-        bot_app.job_queue.run_monthly(
-            monthly_stat_job,
-            when=config.MONTHLY_STAT_TIME,
-            day=day
-        )
-        logger.info(
-            f'Вместо {config.MONTHLY_STAT_DAY} указан {day}'
-        )
-
+    bot_app.job_queue.run_monthly(
+        receipt_reminder_job,
+        when=datetime.time(
+            hour=config.RECEIPT_REMINDER_HOUR,
+            minute=config.RECEIPT_REMINDER_MINUTE,
+            second=config.RECEIPT_REMINDER_SECOND
+        ),
+        day=config.RECEIPT_REMINDER_DAY
+    )
+    bot_app.job_queue.run_monthly(
+        monthly_stat_job,
+        when=datetime.time(
+            hour=config.MONTHLY_STAT_HOUR,
+            minute=config.MONTHLY_STAT_MINUTE,
+            second=config.MONTHLY_STAT_SECOND
+        ),
+        day=config.MONTHLY_STAT_DAY
+    )
     return bot_app
 
 
