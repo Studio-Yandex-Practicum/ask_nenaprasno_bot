@@ -11,7 +11,7 @@ from telegram import Update
 from telegram.ext import ContextTypes, CallbackContext
 
 
-async def delay_message_for_1_hour(
+async def delay_message_for_1_hour_сallback(
         update: Update,
         context: ContextTypes.DEFAULT_TYPE
 ) -> None:
