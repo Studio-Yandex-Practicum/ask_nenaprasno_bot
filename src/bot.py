@@ -1,5 +1,3 @@
-import datetime
-
 from telegram import Update
 from telegram.ext import (
     Application, ApplicationBuilder, CommandHandler, CallbackContext
@@ -15,34 +13,19 @@ async def start(update: Update, context: CallbackContext) -> None:
     )
 
 
-async def test(context: CallbackContext) -> None:
-    """
-    Send test message after running
-    :param context: CallbackContext
-    """
-    chat_id = config.CHAT_ID
-    await context.bot.send_message(chat_id=chat_id, text="Bot still running.")
-
-
 async def weekly_stat_job(context: CallbackContext) -> None:
     """
     Send weekly statistics on the number of requests in the work
     """
-    await context.bot.send_message(
-        chat_id=config.CHAT_ID,
-        text="За прошедшую неделю у вас было заявок..."
-    )
+    pass
 
 
-async def receipt_reminder_job(context: CallbackContext) -> None:
+async def monthly_receipt_reminder_job(context: CallbackContext) -> None:
     """
     Send monthly reminder about the receipt formation during payment
     Only for self-employed users
     """
-    await context.bot.send_message(
-        chat_id=config.CHAT_ID,
-        text="Пожалуйста, пришлите чек на @mail.ru"
-    )
+    pass
 
 
 async def monthly_stat_job(context: CallbackContext) -> None:
@@ -51,10 +34,7 @@ async def monthly_stat_job(context: CallbackContext) -> None:
     closed requests.
     Only if the user had requests
     """
-    await context.bot.send_message(
-        chat_id=config.CHAT_ID,
-        text="В прошедшем месяце вы ответили на ... заявок"
-    )
+    pass
 
 
 def create_bot():
@@ -64,32 +44,19 @@ def create_bot():
     """
     bot_app = ApplicationBuilder().token(config.TOKEN).build()
     bot_app.add_handler(CommandHandler("start", start))
-    bot_app.job_queue.run_repeating(test, config.TEST_PERIOD)
     bot_app.job_queue.run_daily(
         weekly_stat_job,
-        time=datetime.time(
-            hour=config.WEEKLY_STAT_HOUR,
-            minute=config.WEEKLY_STAT_MINUTE,
-            second=config.WEEKLY_STAT_SECOND
-        ),
+        time=config.WEEKLY_STAT_TIME,
         days=config.WEEKLY_STAT_WEEK_DAYS
     )
     bot_app.job_queue.run_monthly(
-        receipt_reminder_job,
-        when=datetime.time(
-            hour=config.RECEIPT_REMINDER_HOUR,
-            minute=config.RECEIPT_REMINDER_MINUTE,
-            second=config.RECEIPT_REMINDER_SECOND
-        ),
-        day=config.RECEIPT_REMINDER_DAY
+        monthly_receipt_reminder_job,
+        when=config.MONTHLY_RECEIPT_REMINDER_TIME,
+        day=config.MONTHLY_RECEIPT_REMINDER_DAY
     )
     bot_app.job_queue.run_monthly(
         monthly_stat_job,
-        when=datetime.time(
-            hour=config.MONTHLY_STAT_HOUR,
-            minute=config.MONTHLY_STAT_MINUTE,
-            second=config.MONTHLY_STAT_SECOND
-        ),
+        when=config.MONTHLY_STAT_TIME,
         day=config.MONTHLY_STAT_DAY
     )
     return bot_app
