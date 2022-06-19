@@ -1,43 +1,33 @@
-import re
 from core import config
 from api_client_functions import (
-    get_stat, authenticate_user,
-    set_user_timezone
+    SiteService, APICallService,
+    APICallServiceDUMB
 )
 
+API_SERVICE_DUBM = APICallServiceDUMB(config.SITE_URL)
+API_SERVICE = APICallService(config.SITE_URL)
+SITE_SERVICE = SiteService(API_SERVICE_DUBM)
+
 CLIENT_METHODS = {
-    'tgbot/stat': get_stat,
-    'tgbot/bill': get_stat,
-    'tgbot/auth': authenticate_user,
-    'tgbot/user': set_user_timezone
+    'tgbot/stat': SITE_SERVICE.get_stat,
+    'tgbot/bill': SITE_SERVICE.get_stat,
+    'tgbot/auth': SITE_SERVICE.authenticate_user,
+    'tgbot/user': SITE_SERVICE.set_user_timezone
 }
 
 
-def main(url, **kwargs):
-    endpoint = url.replace(config.WEBHOOK_URL, '')
-    for i in CLIENT_METHODS:
-        search_result = re.search(i, endpoint)
-        if search_result is not None:
-            function = CLIENT_METHODS[search_result.group()]
-            if not kwargs:
-                data = function(endpoint)
-                return data
-            else:
-                try:
-                    telegram_id = kwargs['telegram_id']
-                except:
-                    raise Exception(
-                        'Unvalid Argument!'
-                    )
-                if len(kwargs.keys()) == 1:
-                    data = function(endpoint, telegram_id)
-                    return data
-                else:
-                    try:
-                        user_timizone = kwargs['user_timizone']
-                    except:
-                        raise Exception(
-                            'Unvalid Argument!'
-                        )
-                    data = function(endpoint, telegram_id, user_timizone)
-                    return data
+async def main(url, **kwargs):
+    endpoint = url.replace(config.SITE_URL, '')
+    service_called = '/'.join(endpoint.split('/')[0:2])
+    if service_called in CLIENT_METHODS:
+        function = CLIENT_METHODS[service_called]
+        if function.__name__ == 'get_stat':
+            data = await function(endpoint)
+        elif function.__name__ == 'authenticate_user':
+            telegram_id = kwargs['telegram_id']
+            data = await function(endpoint, telegram_id)
+        else:
+            telegram_id = kwargs['telegram_id']
+            user_timizone = kwargs['user_timezone']
+            data = await function(endpoint, telegram_id, user_timizone)
+        return data
