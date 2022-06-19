@@ -1,9 +1,8 @@
 from telegram import InlineKeyboardButton, InlineKeyboardMarkup, Update
-from telegram.ext import (Application, CallbackQueryHandler, CommandHandler,
-                          ContextTypes)
+from telegram.ext import Application, CallbackQueryHandler, CommandHandler, ContextTypes
 
 from src.core.config import TOKEN
-from src.service.delay import delay_message_for_1_hour
+from src.service.delay import delay_message_for_1_hour_callback
 
 
 async def start(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
@@ -14,10 +13,7 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
 
     reply_markup = InlineKeyboardMarkup(keyboard)
 
-    await update.message.reply_text(
-        "are you want to repeat after minute?",
-        reply_markup=reply_markup
-    )
+    await update.message.reply_text("are you want to repeat after minute?", reply_markup=reply_markup)
 
 
 def main() -> None:
@@ -25,9 +21,7 @@ def main() -> None:
     application = Application.builder().token(TOKEN).build()
 
     application.add_handler(CommandHandler("start", start))
-    application.add_handler(
-        CallbackQueryHandler(delay_message_for_1_hour, pattern="delay")
-    )
+    application.add_handler(CallbackQueryHandler(delay_message_for_1_hour_callback, pattern="delay"))
     application.run_polling()
 
 

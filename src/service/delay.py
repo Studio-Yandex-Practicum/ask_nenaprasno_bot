@@ -8,30 +8,21 @@
 from datetime import timedelta
 
 from telegram import Update
-from telegram.ext import ContextTypes, CallbackContext
+from telegram.ext import CallbackContext, ContextTypes
 
 
-async def delay_message_for_1_hour_сallback(
-        update: Update,
-        context: ContextTypes.DEFAULT_TYPE
-) -> None:
+async def delay_message_for_1_hour_callback(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     """
     Add a repeat message task to the queue.
     """
     query = update.callback_query
     data = query.message
-    context.job_queue.run_once(
-        callback=repeat_message_job,
-        when=timedelta(hours=1),
-        data=data
-    )
+    context.job_queue.run_once(callback=repeat_message_job, when=timedelta(hours=1), data=data)
     await query.edit_message_text(text=data.text_markdown_v2_urled)
     await query.answer()  # close progress bar in chat
 
 
-async def repeat_message_job(
-        context: CallbackContext
-) -> None:
+async def repeat_message_job(context: CallbackContext) -> None:
     """
     Repeat delayed message.
     Instead this function should use 'send message' function from Slava
@@ -39,7 +30,5 @@ async def repeat_message_job(
     """
     data = context.job.data
     await context.bot.send_message(
-        chat_id=data.chat_id,
-        text=data.text_markdown_v2_urled,
-        reply_markup=data.reply_markup
+        chat_id=data.chat_id, text=data.text_markdown_v2_urled, reply_markup=data.reply_markup
     )
