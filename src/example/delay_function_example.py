@@ -1,15 +1,15 @@
-from telegram import InlineKeyboardButton, InlineKeyboardMarkup, Update
+from telegram import InlineKeyboardMarkup, Update
 from telegram.ext import Application, CallbackQueryHandler, CommandHandler, ContextTypes
 
-from src.constants.command_constants import COMMAND_HOUR_REMIND
+from src.constants.command_constants import COMMAND_REMIND
 from src.core.config import TOKEN
-from src.service.delay import delay_message_for_1_hour_callback, delay_one_hour_button
+from src.service.delay import repeat_after_one_hour_button, repeat_message_after_1_hour_callback
 
 
 async def start(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     """Sends a message with inline buttons attached."""
     keyboard = [
-        [delay_one_hour_button],
+        [repeat_after_one_hour_button],
     ]
 
     reply_markup = InlineKeyboardMarkup(keyboard)
@@ -22,7 +22,7 @@ def main() -> None:
     application = Application.builder().token(TOKEN).build()
 
     application.add_handler(CommandHandler("start", start))
-    application.add_handler(CallbackQueryHandler(delay_message_for_1_hour_callback, pattern=COMMAND_HOUR_REMIND))
+    application.add_handler(CallbackQueryHandler(repeat_message_after_1_hour_callback, pattern=COMMAND_REMIND))
     application.run_polling()
 
 

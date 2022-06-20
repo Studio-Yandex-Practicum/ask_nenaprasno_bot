@@ -1,1 +1,1 @@
-COMMAND_HOUR_REMIND = "one_hour_remind"
+COMMAND_REMIND = "repeat_after_one_hour"

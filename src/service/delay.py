@@ -10,10 +10,10 @@ from datetime import timedelta
 from telegram import InlineKeyboardButton, Update
 from telegram.ext import CallbackContext, ContextTypes
 
-from src.constants.command_constants import COMMAND_HOUR_REMIND
+from src.constants.command_constants import COMMAND_REMIND
 
 
-async def delay_message_for_1_hour_callback(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
+async def repeat_message_after_1_hour_callback(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     """
     Add a repeat message task to the queue.
     """
@@ -36,4 +36,4 @@ async def repeat_message_job(context: CallbackContext) -> None:
     )
 
 
-delay_one_hour_button = InlineKeyboardButton(text="🕑 Напомнить через час", callback_data=COMMAND_HOUR_REMIND)
+repeat_after_one_hour_button = InlineKeyboardButton(text="🕑 Напомнить через час", callback_data=COMMAND_REMIND)
