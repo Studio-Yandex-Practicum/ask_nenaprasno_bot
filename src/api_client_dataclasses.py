@@ -1,0 +1,46 @@
+from dataclasses import dataclass
+from datetime import time
+
+
+@dataclass
+class UserData:
+    user_name: str
+    user_time_zone: str
+    user_id_in_trello: int
+
+
+@dataclass
+class UserWeekStat:
+    telegram_id: int
+    user_timezone: str
+    user_id_in_trello: int
+    week_num: int
+    last_week_user_tikets_in_work: int
+    last_week_user_tickets_closed: int
+    last_week_user_tickets_expiring: int
+    last_week_user_tickets_expired: int
+
+
+@dataclass
+class UserMonthStat:
+    telegram_id: int
+    user_timezone: str
+    month: int
+    user_tickets_closed: int
+    user_rating: float
+    user_ticket_resolve_avg_time: time
+
+
+@dataclass
+class WeekStat:
+    week_stat: list[UserWeekStat]
+
+
+@dataclass
+class MonthStat:
+    month_stat: list[UserMonthStat]
+
+
+@dataclass
+class BillStat:
+    telegram_id: list[int]
