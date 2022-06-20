@@ -49,7 +49,7 @@ async def menu(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     )
 
 
-async def handling_menu_button_click(
+async def handling_menu_button_click_callback(
         update: Update, context: ContextTypes.DEFAULT_TYPE
 ) -> None:
     query = update.callback_query
@@ -58,4 +58,6 @@ async def handling_menu_button_click(
 
 
 menu_command_handler = CommandHandler('menu', callback=menu)
-callback_menu_handler = CallbackQueryHandler(handling_menu_button_click)
+callback_menu_handler = CallbackQueryHandler(
+    handling_menu_button_click_callback
+)
