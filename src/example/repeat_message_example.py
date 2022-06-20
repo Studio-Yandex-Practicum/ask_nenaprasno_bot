@@ -3,7 +3,7 @@ from telegram.ext import Application, CallbackQueryHandler, CommandHandler, Cont
 
 from src.constants.command_constants import COMMAND_REMIND
 from src.core.config import TOKEN
-from src.service.delay import repeat_after_one_hour_button, repeat_message_after_1_hour_callback
+from src.service.repeat_message import repeat_after_one_hour_button, repeat_message_after_1_hour_callback
 
 
 async def start(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
