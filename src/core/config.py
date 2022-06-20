@@ -1,9 +1,10 @@
 from datetime import datetime
+
 from dotenv import dotenv_values
 
-# --------------------------------------------------------------------------------- #
-# Getting variables from .env                                                       #
-# --------------------------------------------------------------------------------- #
+# ----------------------------------------------------------------------------------------------------- #
+# Getting variables from .env                                                                           #
+# ----------------------------------------------------------------------------------------------------- #
 env = dotenv_values()
 
 HOST = env.get("HOST")
@@ -19,4 +20,4 @@ MONTHLY_STAT_DAY = int(env.get("MONTHLY_STAT_DAY"))
 
 MONTHLY_RECEIPT_REMINDER_TIME = datetime.strptime(env.get("MONTHLY_RECEIPT_REMINDER_TIME"), '%H:%M')
 MONTHLY_RECEIPT_REMINDER_DAY = int(env.get("MONTHLY_RECEIPT_REMINDER_DAY"))
-# --------------------------------------------------------------------------------- #
+# -------------------------------------------------------------------------------------------------- #
