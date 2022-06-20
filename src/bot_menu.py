@@ -4,28 +4,6 @@ from telegram.ext import CommandHandler, ContextTypes, CallbackQueryHandler
 from constants import command_constants
 
 
-remind_one_hour_button = InlineKeyboardButton(
-    text='🕑 Напомнить через час',
-    callback_data=command_constants.COMMAND_HOUR_REMIND
-)
-bill_keyboard = InlineKeyboardMarkup([
-    [remind_one_hour_button],
-    [
-        InlineKeyboardButton(
-            text='👌 Скоро отправлю',
-            callback_data=command_constants.COMMAND_SEND_SOON
-        )
-    ],
-    [
-        InlineKeyboardButton(
-            text='✅ Уже отправил(а)',
-            callback_data=command_constants.COMMAND_ALREADY_SEND
-        )
-    ]
-])
-remind_keyboard = InlineKeyboardMarkup([[remind_one_hour_button]])
-
-
 async def menu(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     menu_buttons = [
         [
