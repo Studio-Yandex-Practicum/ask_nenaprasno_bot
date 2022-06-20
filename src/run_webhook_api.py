@@ -7,13 +7,8 @@ from telegram import Update
 
 from bot import init_webhook
 from core import config
-from core.logger import webhook_logger
-from decorators.logger import async_error_logger
-
-logger = webhook_logger
 
 
-@async_error_logger(name='start_bot', logger=logger)
 async def start_bot() -> None:
     bot_app = await init_webhook()
     await bot_app.initialize()
@@ -24,13 +19,11 @@ async def start_bot() -> None:
     api.state.bot_app = bot_app
 
 
-@async_error_logger(name='stop_bot', logger=logger)
 async def stop_bot() -> None:
     await api.state.bot_app.stop()
     await api.state.bot_app.shutdown()
 
 
-@async_error_logger(name='health', logger=logger)
 async def health(request: Request) -> PlainTextResponse:
     message = (f"Бот запущен и работает. Сообщение получено по запросу на Api "
                f"сервера {config.WEBHOOK_URL}")
@@ -41,7 +34,6 @@ async def health(request: Request) -> PlainTextResponse:
     return PlainTextResponse(content=f"Message send to bot: {message}")
 
 
-@async_error_logger(name='telegram', logger=logger)
 async def telegram(request: Request) -> Response:
     bot_app = request.app.state.bot_app
     await bot_app.update_queue.put(Update.de_json(data=await request.json(),

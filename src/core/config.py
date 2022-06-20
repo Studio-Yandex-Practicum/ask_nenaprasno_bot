@@ -1,4 +1,3 @@
-import os
 from pathlib import Path
 
 from dotenv import dotenv_values
@@ -20,5 +19,4 @@ TEST_PERIOD = int(env.get("TEST_PERIOD"))
 
 # -----------------------
 # Logging settings
-LOG_DIR = 'logs'
-LOG_PATH = BASE_DIR / LOG_DIR
+LOG_PATH = BASE_DIR / 'logs'
