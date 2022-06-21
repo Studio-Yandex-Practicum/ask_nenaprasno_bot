@@ -1,11 +1,15 @@
 from telegram import Update
-from telegram.ext import Application, ApplicationBuilder, CommandHandler, CallbackContext
+from telegram.ext import (Application, ApplicationBuilder,
+                          CommandHandler, CallbackContext)
 
 from core import config
 
 
 async def start(update: Update, context: CallbackContext) -> None:
-    await context.bot.send_message(chat_id=update.effective_chat.id, text="Привет! Я постараюсь помочь вам.")
+    await context.bot.send_message(
+        chat_id=update.effective_chat.id,
+        text="Привет! Я постараюсь помочь вам."
+    )
 
 
 async def test(context: CallbackContext) -> None:

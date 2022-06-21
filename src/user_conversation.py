@@ -1,37 +1,65 @@
-from telegram import Update
-from telegram.ext import (ApplicationBuilder, CommandHandler,
-                          ContextTypes,CallbackContext, ConversationHandler,
-                          MessageHandler, filters)
-from constants import CHOOSING, MENU, START_COMMAND_HANDLER
+from telegram import InlineKeyboardButton, InlineKeyboardMarkup, Update
+from telegram.ext import (CallbackQueryHandler, ConversationHandler,
+                          CallbackContext)
+from src.constans import (command_constans as cmd_const,
+                          constans as const, states)
 
 
-async def user_is_expert_confirm(update: Update, context: CallbackContext):
-    """После старта пользователь указывает является ли экспертом."""
-    pass
-
-async def user_is_not_expert(update: Update, context: CallbackContext):
-    """Пользователь не является экспертом, предлагаем им стать."""
-    pass
-
-async def new_request_confirm(update: Update, context: CallbackContext):
-    """Присылает сообщение о новых заявках."""
-    return open_menu
-
-async def open_menu(update: Update, context: CallbackContext):
-    """Выводит меню."""
-    return MENU
+async def start(update: Update, context: CallbackContext):
+    keyboard = [
+        [
+            InlineKeyboardButton("1", callback_data='user_expert'),
+            InlineKeyboardButton("2", callback_data='not_expert'),
+        ]
+    ]
+    reply_markup = InlineKeyboardMarkup(keyboard)
+    await update.message.reply_text(
+        const.GREETING_MESSAGE,
+        reply_markup=reply_markup)
+    return states.USER_IS_EXPERT
 
 
-conv_handler = ConversationHandler(
-    allow_reentry=True,
-    entry_points=[START_COMMAND_HANDLER],
-    states={
-        CHOOSING: [
-            CallbackQueryHandler(user_is_expert_confirm),
-            CallbackQueryHandler(user_is_not_expert),
-            CallbackQueryHandler(new_request_confirm),
-            CallbackQueryHandler(menu)
-        ],
-    },
-    fallbacks=[START_COMMAND_HANDLER],
-)
+async def user_is_expert(update: Update, context: CallbackContext):
+    return states.TIMEZONE
+
+
+async def timezone(update: Update, context: CallbackContext):
+    return states.MENU
+
+
+async def skip_timezone(update: Update, context: CallbackContext):
+    return states.MENU
+
+
+def main() -> None:
+    conv_handler = ConversationHandler(  # noqa
+        allow_reentry=True,
+        persistent=True,
+        name='user_states_handler',
+        entry_points=[cmd_const.START_COMMAND_HANDLER],
+        states={
+            states.USER_IS_EXPERT: [
+                CallbackQueryHandler(
+                    user_is_expert,
+                    pattern=cmd_const.COMMAND_USER_IS_EXPERT
+                ),
+            ],
+            states.TIMEZONE: [
+                CallbackQueryHandler(
+                    timezone,
+                    pattern=cmd_const.COMMAND_TIMEZONE
+                ),
+                CallbackQueryHandler(
+                    skip_timezone,
+                    pattern=cmd_const.COMMAND_SKIP_TIMEZONE
+                )
+            ],
+        },
+        fallbacks=[
+            cmd_const.START_COMMAND_HANDLER,
+            cmd_const.MENU_COMMAND_HANDLER],
+    )
+
+
+if __name__ == "__main__":
+    main()
