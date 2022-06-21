@@ -1,42 +1,20 @@
 from telegram import Update
-from telegram.ext import (
-    Application, ApplicationBuilder, CallbackContext, CommandHandler
-)
+from telegram.ext import Application, ApplicationBuilder, CommandHandler, CallbackContext
 
 from core import config
-from core.send_message import send_message
 
 
 async def start(update: Update, context: CallbackContext) -> None:
-    await send_message(
-        context=context,
-        chat_id=update.effective_chat.id,
-        text="Привет! Я постараюсь помочь вам."
-    )
+    await context.bot.send_message(chat_id=update.effective_chat.id, text="Привет! Я постараюсь помочь вам.")
 
 
-async def weekly_stat_job(context: CallbackContext) -> None:
+async def test(context: CallbackContext) -> None:
     """
-    Send weekly statistics on the number of requests in the work
+    Send test message after running
+    :param context: CallbackContext
     """
-    pass
-
-
-async def monthly_receipt_reminder_job(context: CallbackContext) -> None:
-    """
-    Send monthly reminder about the receipt formation during payment
-    Only for self-employed users
-    """
-    pass
-
-
-async def monthly_stat_job(context: CallbackContext) -> None:
-    """
-    Send monthly statistics on the number of successfully
-    closed requests.
-    Only if the user had requests
-    """
-    pass
+    chat_id = config.CHAT_ID
+    await context.bot.send_message(chat_id=chat_id, text="Bot still running.")
 
 
 def create_bot():
@@ -46,21 +24,7 @@ def create_bot():
     """
     bot_app = ApplicationBuilder().token(config.TOKEN).build()
     bot_app.add_handler(CommandHandler("start", start))
-    bot_app.job_queue.run_daily(
-        weekly_stat_job,
-        time=config.WEEKLY_STAT_TIME,
-        days=config.WEEKLY_STAT_WEEK_DAYS
-    )
-    bot_app.job_queue.run_monthly(
-        monthly_receipt_reminder_job,
-        when=config.MONTHLY_RECEIPT_REMINDER_TIME,
-        day=config.MONTHLY_RECEIPT_REMINDER_DAY
-    )
-    bot_app.job_queue.run_monthly(
-        monthly_stat_job,
-        when=config.MONTHLY_STAT_TIME,
-        day=config.MONTHLY_STAT_DAY
-    )
+    bot_app.job_queue.run_repeating(test, config.TEST_PERIOD)
     return bot_app
 
 

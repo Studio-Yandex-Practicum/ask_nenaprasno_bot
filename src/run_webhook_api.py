@@ -5,8 +5,8 @@ from starlette.responses import PlainTextResponse, Response
 from starlette.routing import Route
 from telegram import Update
 
-from bot import init_webhook
 from core import config
+from bot import init_webhook
 
 
 async def start_bot() -> None:
@@ -27,9 +27,7 @@ async def stop_bot() -> None:
 async def health(request: Request) -> PlainTextResponse:
     message = f"Бот запущен и работает. Сообщение получено по запросу на Api сервера {config.WEBHOOK_URL}"
     chat_id = config.CHAT_ID
-    await request.app.state.bot_app.bot.send_message(
-        chat_id=chat_id, text=message
-    )
+    await request.app.state.bot_app.bot.send_message(chat_id=chat_id, text=message)
 
     return PlainTextResponse(content=f"Message send to bot: {message}")
 
