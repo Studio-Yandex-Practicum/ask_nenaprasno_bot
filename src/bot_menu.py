@@ -1,5 +1,5 @@
 from telegram import InlineKeyboardButton, InlineKeyboardMarkup, Update
-from telegram.ext import CommandHandler, ContextTypes, CallbackQueryHandler
+from telegram.ext import CallbackQueryHandler, CommandHandler, ContextTypes
 
 from constants import command_constants
 from core.config import URL_SERVICE_RULES
@@ -39,7 +39,7 @@ async def menu(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
         ],
         [
             InlineKeyboardButton(
-                text='📌 Правила сервиса',
+                text='📜 Правила сервиса',
                 url=URL_SERVICE_RULES,
             )
         ],
@@ -57,7 +57,9 @@ async def handling_menu_button_click_callback(
     await query.edit_message_text(query.data)
 
 
-menu_command_handler = CommandHandler('menu', callback=menu)
+menu_command_handler = CommandHandler(
+    command_constants.COMMAND_MENU, callback=menu
+)
 callback_menu_handler = CallbackQueryHandler(
     handling_menu_button_click_callback
 )
