@@ -22,7 +22,7 @@
 
 ## Настройка pre-commit:
 
-> pip3 install -r Bot/requirements.txt
+> pip3 install -r requirements.txt
 >
 > pre-commit install
 
