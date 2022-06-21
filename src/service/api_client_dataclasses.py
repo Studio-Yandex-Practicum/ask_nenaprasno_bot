@@ -1,19 +1,18 @@
 from dataclasses import dataclass
-from datetime import time
 
 
 @dataclass
 class UserData:
     user_name: str
     user_time_zone: str
-    user_id_in_trello: int
+    user_id_in_trello: str
 
 
 @dataclass
 class UserWeekStat:
     telegram_id: int
     user_timezone: str
-    user_id_in_trello: int
+    user_id_in_trello: str
     week_num: int
     last_week_user_tikets_in_work: int
     last_week_user_tickets_closed: int
@@ -28,7 +27,7 @@ class UserMonthStat:
     month: int
     user_tickets_closed: int
     user_rating: float
-    user_ticket_resolve_avg_time: time
+    user_ticket_resolve_avg_time: float
 
 
 @dataclass
