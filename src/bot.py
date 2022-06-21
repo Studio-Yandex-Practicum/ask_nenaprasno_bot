@@ -1,5 +1,5 @@
 from telegram import Update
-from telegram.ext import Application, ApplicationBuilder, CallbackContext, CommandHandler
+from telegram.ext import Application, ApplicationBuilder, CallbackContext, CommandHandler, PicklePersistence
 
 from core import config
 from core.send_message import send_message
@@ -35,7 +35,8 @@ def create_bot():
     Create telegram bot application
     :return: Created telegram bot application
     """
-    bot_app = ApplicationBuilder().token(config.TOKEN).build()
+    bot_persistence = PicklePersistence(filepath=config.BOT_PERSISTENCE_FILE)
+    bot_app = ApplicationBuilder().token(config.TOKEN).persistence(persistence=bot_persistence).build()
     bot_app.add_handler(CommandHandler("start", start))
     bot_app.job_queue.run_daily(weekly_stat_job, time=config.WEEKLY_STAT_TIME, days=config.WEEKLY_STAT_WEEK_DAYS)
     bot_app.job_queue.run_monthly(

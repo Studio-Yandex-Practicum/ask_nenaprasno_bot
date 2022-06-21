@@ -138,3 +138,6 @@ dmypy.json
 # Media && static
 media_value
 static_value
+
+# Persistence file
+bot_persistence_file
