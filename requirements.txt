@@ -39,3 +39,4 @@ tzlocal==4.2
 uvicorn==0.17.6
 virtualenv==20.14.1
 wrapt==1.14.1
+httpx==0.23.0
