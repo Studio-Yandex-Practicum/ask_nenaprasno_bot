@@ -25,7 +25,7 @@ jobs:
       run: |
         python -m pip install --upgrade pip
         pip install flake8 pep8-naming flake8-broken-line flake8-return
-        pip install black
+        pip install black==22.3.0
         pip install -r requirements.txt
     -
       name: Test with flake8
