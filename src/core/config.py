@@ -11,6 +11,7 @@ HOST = env.get("HOST")
 WEBHOOK_URL = env.get("WEBHOOK_URL")
 PORT = int(env.get("BOT_PORT"))
 TOKEN = env.get("TELEGRAM_TOKEN")
+CHAT_ID = env.get("CHAT_ID")
 
 WEEKLY_STAT_TIME = datetime.strptime(env.get("WEEKLY_STAT_TIME"), "%H:%M")
 WEEKLY_STAT_WEEK_DAYS = tuple(map(int, list(filter(None, env.get("WEEKLY_STAT_WEEK_DAYS").split(",")))))
