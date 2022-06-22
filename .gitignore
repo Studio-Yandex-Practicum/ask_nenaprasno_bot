@@ -1,3 +1,6 @@
+.DS_Store
+.vscode/
+Bot/.DS_Store
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]
@@ -103,7 +106,6 @@ celerybeat.pid
 *.sage.py
 
 # Environments
-Bot/.env
 .env
 .venv
 env/
@@ -136,3 +138,6 @@ dmypy.json
 # Media && static
 media_value
 static_value
+
+# Persistence file
+bot_persistence_file
