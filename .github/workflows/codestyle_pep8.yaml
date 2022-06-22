@@ -4,6 +4,7 @@ on:
    pull_request:
     branches:
       - develop
+      - master
 
 
 jobs:
@@ -29,3 +30,6 @@ jobs:
       name: Test with flake8
       run: |
         python -m flake8
+    -
+      name: Codestyle by black
+      run: black --check .
