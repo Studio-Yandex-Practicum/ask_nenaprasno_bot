@@ -24,3 +24,4 @@ MONTHLY_RECEIPT_REMINDER_DAY = int(env.get("MONTHLY_RECEIPT_REMINDER_DAY"))
 URL_SERVICE_RULES = "https://docs.google.com/document/d/1hW2HUv9aWQMnUBuIE_YQEtmIDDbk8KhpychckbyaIEQ/edit"
 # -------------------------------------------------------------------------------------------------- #
 BOT_PERSISTENCE_FILE = env.get("BOT_PERSISTENCE_FILE")
+FAKE_API = env.get("FAKE_API")
