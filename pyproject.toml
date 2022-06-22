@@ -57,6 +57,7 @@ wrapt = "1.14.1"
 isort = ">=5.10.1"
 virtualenv = ">=20.14.1"
 pylint = ">=2.14.2"
+pre-commit = "^2.19.0"
 
 [build-system]
 requires = ["poetry-core>=1.0.0"]
