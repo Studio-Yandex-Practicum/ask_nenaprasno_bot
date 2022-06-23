@@ -1,7 +1,7 @@
 import logging
 from logging.handlers import TimedRotatingFileHandler
 
-from src.core.config import LOG_PATH
+from src.core.config import LOG_PATH, LOG_FILE
 
 
 FORMATTER = '%(asctime)s %(levelname)s %(name)s:\t%(message)s'
@@ -9,7 +9,7 @@ FORMATTER = '%(asctime)s %(levelname)s %(name)s:\t%(message)s'
 
 def get_file_handler():
     file_handler = TimedRotatingFileHandler(
-        f'{LOG_PATH}/bot-log.txt',
+        LOG_FILE,
         when='midnight',
         interval=1,
         encoding='utf-8',

@@ -1,9 +1,11 @@
+import os
 from pathlib import Path
-
+from datetime import datetime
 from dotenv import dotenv_values
 
 BASE_DIR = Path(__file__).parent.parent.parent
 LOG_PATH = BASE_DIR / 'logs'
+LOG_FILE = os.path.join(LOG_PATH, 'bot-log.txt')
 
 # --------------------------------------------------------------------------------- #
 # Getting variables from .env                                                       #
