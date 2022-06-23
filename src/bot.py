@@ -1,4 +1,4 @@
-from telegram import Update
+from telegram import BotCommand, Update
 from telegram.ext import Application, ApplicationBuilder, CallbackContext, CommandHandler, PicklePersistence
 
 from core import config
@@ -7,6 +7,11 @@ from core.send_message import send_message
 
 async def start(update: Update, context: CallbackContext) -> None:
     await send_message(context=context, chat_id=update.effective_chat.id, text="Привет! Я постараюсь помочь вам.")
+    command = [
+        BotCommand("menu", "Показать список возможных запросов к боту"),
+        BotCommand("get_timezone", "⌚ Настроить часовой пояс"),
+    ]
+    await context.bot.set_my_commands(command)
 
 
 async def weekly_stat_job(context: CallbackContext) -> None:
