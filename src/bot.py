@@ -1,15 +1,8 @@
-from telegram import Update
 from telegram.ext import (Application, ApplicationBuilder,
-                          CommandHandler, CallbackContext)
+                          CallbackContext)
 
 from core import config
-
-
-async def start(update: Update, context: CallbackContext) -> None:
-    await context.bot.send_message(
-        chat_id=update.effective_chat.id,
-        text="Привет! Я постараюсь помочь вам."
-    )
+from start_conversation import start_conversation
 
 
 async def test(context: CallbackContext) -> None:
@@ -27,7 +20,7 @@ def create_bot():
     :return: Created telegram bot application
     """
     bot_app = ApplicationBuilder().token(config.TOKEN).build()
-    bot_app.add_handler(CommandHandler("start", start))
+    bot_app.add_handler(start_conversation)
     bot_app.job_queue.run_repeating(test, config.TEST_PERIOD)
     return bot_app
 

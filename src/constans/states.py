@@ -1,2 +1,5 @@
-USER_IS_EXPERT = 'user_is_expert'
-TIMEZONE = 'timezone'
+UNAUTHORIZED_STATE = "unauthorized"
+REGISTRATION_STATE = "registration"
+NEW_EXPERT_STATE = "new_expert"
+TIMEZONE_STATE = "timezone"
+MENU_STATE = "menu"
