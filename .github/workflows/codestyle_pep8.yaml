@@ -33,4 +33,4 @@ jobs:
         python -m flake8
     -
       name: Codestyle by black
-      run: black --check .
+      run: black  . --diff
