@@ -19,7 +19,6 @@ lazy-object-proxy==1.7.1; python_version >= "3.6"
 mccabe==0.7.0; python_version >= "3.6"
 nodeenv==1.6.0
 platformdirs==2.5.2; python_version >= "3.7"
-pre-commit==2.19.0; python_version >= "3.7"
 python-dotenv==0.19.2; python_version >= "3.5"
 python-telegram-bot==20.0a1; python_version >= "3.7"
 pytz-deprecation-shim==0.1.0.post0; (python_version >= "2.7" and python_full_version < "3.0.0") or (python_full_version >= "3.6.0")
@@ -36,5 +35,4 @@ tornado==6.1; python_version >= "3.5"
 tzdata==2022.1; python_version >= "2"
 tzlocal==4.2; python_version >= "3.6"
 uvicorn==0.17.6; python_version >= "3.7"
-virtualenv==20.14.1; (python_version >= "2.7" and python_full_version < "3.0.0") or (python_full_version >= "3.5.0")
 wrapt==1.14.1; (python_version >= "2.7" and python_full_version < "3.0.0") or (python_full_version >= "3.5.0")
