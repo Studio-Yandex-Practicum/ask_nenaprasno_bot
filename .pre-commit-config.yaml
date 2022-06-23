@@ -6,7 +6,6 @@ repos:
     - id: end-of-file-fixer
     - id: check-yaml
     - id: check-merge-conflict
-    - id: requirements-txt-fixer
     - id: mixed-line-ending
       args: [ --fix=crlf ]
     - id: no-commit-to-branch
@@ -33,4 +32,19 @@ repos:
       entry: pylint
       language: system
       types: [python]
-      args: [-j=0, --max-line-length=120, --disable=W0613, --disable=W0611]
+      args: [-j=0, --max-line-length=120, --disable=W0613, --disable=W0611, --disable=E0401]
+
+- repo: local
+  hooks:
+    - id: export-dev-requirements
+      name: Export DEVELOPMENT requirements.txt
+      language: system
+      pass_filenames: false
+      entry: poetry export --without-hashes --dev --output requirements-dev.txt
+      files: ^(pyproject.toml|poetry.lock)$
+    - id: export-prod-requirements
+      name: Export PRODUCTION requirements.txt
+      language: system
+      pass_filenames: false
+      entry: poetry export --without-hashes --output requirements.txt
+      files: ^(pyproject.toml|poetry.lock)$
