@@ -3,24 +3,20 @@ from telegram import (InlineKeyboardButton, InlineKeyboardMarkup,
 from telegram.ext import (CallbackQueryHandler, ConversationHandler,
                           CommandHandler, ContextTypes, CallbackContext)
 
-from constans import command_constans as cmd_const, states
-
-COMMAND_USER_IS_EXPERT = "user_is_expert"
-COMMAND_TIMEZONE = "timezone"
-COMMAND_SKIP_TIMEZONE = "skip_timezone"
-
-UNAUTHORIZED_STATE = "unauthorized"
-REGISTRATION_STATE = "registration"
-NEW_EXPERT_STATE = "new_expert"
-TIMEZONE_STATE = "timezone"
-MENU_STATE = "menu"
+from constants import command_constans as cmd_const, states
 
 
 async def start(update: Update, context: CallbackContext):
     keyboard = [
         [
-            InlineKeyboardButton("Да", callback_data="is_expert_callback"),
-            InlineKeyboardButton("Нет", callback_data="not_expert_callback"),
+            InlineKeyboardButton(
+                "Да",
+                callback_data=cmd_const.COMMAND_IS_EXPERT
+            ),
+            InlineKeyboardButton(
+                "Нет",
+                callback_data=cmd_const.COMMAND_NOT_EXPERT
+            ),
         ]
     ]
     reply_markup = InlineKeyboardMarkup(keyboard)
@@ -37,11 +33,11 @@ async def not_expert_callback(update: Update, context: CallbackContext):
         [
             InlineKeyboardButton(
                 "Да",
-                callback_data="registr_as_expert_callback"
+                callback_data=cmd_const.COMMAND_REGISTR_EXPERT
             ),
             InlineKeyboardButton(
                 "Нет",
-                callback_data="support_or_consult_callback"
+                callback_data=cmd_const.COMMAND_SUPPORT_OR_CONSULT
             ),
         ]
     ]
@@ -135,12 +131,24 @@ start_conversation = ConversationHandler(
     entry_points=[start_command_handler],
     states={
         states.UNAUTHORIZED_STATE: [
-            CallbackQueryHandler(is_expert_callback),
-            CallbackQueryHandler(not_expert_callback)
+            CallbackQueryHandler(
+                is_expert_callback,
+                pattern=cmd_const.COMMAND_IS_EXPERT
+            ),
+            CallbackQueryHandler(
+                not_expert_callback,
+                pattern=cmd_const.COMMAND_NOT_EXPERT
+            )
         ],
         states.REGISTRATION_STATE: [
-            CallbackQueryHandler(registr_as_expert_callback),
-            CallbackQueryHandler(support_or_consult_callback)
+            CallbackQueryHandler(
+                registr_as_expert_callback,
+                pattern=cmd_const.COMMAND_REGISTR_EXPERT
+            ),
+            CallbackQueryHandler(
+                support_or_consult_callback,
+                pattern=cmd_const.COMMAND_SUPPORT_OR_CONSULT
+            )
         ],
         states.NEW_EXPERT_STATE: [
             CallbackQueryHandler(after_registr_message_callback)
@@ -152,7 +160,7 @@ start_conversation = ConversationHandler(
             ),
             CallbackQueryHandler(
                 skip_timezone_callback,
-                pattern=cmd_const.COMMAND_TIMEZONE
+                pattern=cmd_const.COMMAND_SKIP_TIMEZONE
             ),
             CallbackQueryHandler(timezone_message_callback)
         ],

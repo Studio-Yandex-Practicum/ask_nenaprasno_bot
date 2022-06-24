@@ -4,14 +4,12 @@ from telegram.ext import (Application, ApplicationBuilder,
 from core import config
 from start_conversation import start_conversation
 from telegram import Update
-from telegram.ext import Application, ApplicationBuilder, CallbackContext, CommandHandler, PicklePersistence
+from telegram.ext import (Application, ApplicationBuilder,
+                          CallbackContext, CommandHandler,
+                          PicklePersistence)
 
 from core import config
 from core.send_message import send_message
-
-
-async def start(update: Update, context: CallbackContext) -> None:
-    await send_message(context=context, chat_id=update.effective_chat.id, text="Привет! Я постараюсь помочь вам.")
 
 
 async def weekly_stat_job(context: CallbackContext) -> None:
@@ -40,12 +38,9 @@ def create_bot():
     Create telegram bot application
     :return: Created telegram bot application
     """
-    bot_app = ApplicationBuilder().token(config.TOKEN).build()
-    bot_app.add_handler(start_conversation)
-    bot_app.job_queue.run_repeating(test, config.TEST_PERIOD)
     bot_persistence = PicklePersistence(filepath=config.BOT_PERSISTENCE_FILE)
     bot_app = ApplicationBuilder().token(config.TOKEN).persistence(persistence=bot_persistence).build()
-    bot_app.add_handler(CommandHandler("start", start))
+    bot_app.add_handler(start_conversation)
     bot_app.job_queue.run_daily(weekly_stat_job, time=config.WEEKLY_STAT_TIME, days=config.WEEKLY_STAT_WEEK_DAYS)
     bot_app.job_queue.run_monthly(
         monthly_receipt_reminder_job, when=config.MONTHLY_RECEIPT_REMINDER_TIME, day=config.MONTHLY_RECEIPT_REMINDER_DAY
