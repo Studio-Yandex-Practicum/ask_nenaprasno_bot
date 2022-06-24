@@ -7,7 +7,7 @@
 ### В режиме polling'а:
 > python3 src/run_bot.py
 
-### В режиме webhook'а:
+### В режиме webhook'а (также в этом режиме будет запущена точка доступа для webhook'а trello):
 > python3 src/run_webhook_api.py
 ## Проверка API сервера с использованием ngrok на локальном компьютере:
 - Установить ngrok с [сайта](https://ngrok.com/download)
