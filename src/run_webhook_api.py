@@ -38,9 +38,24 @@ async def telegram(request: Request) -> Response:
     return Response()
 
 
+async def trello_call_back(request: Request) -> Response:
+    """
+    Plug func catching trello post request
+    :param request: Trello request
+    :return: Response "ok"
+    """
+    if request.method == "HEAD":
+        return Response()
+    elif request.method == "POST":
+        headers = request.headers
+        body = await request.json()
+        return Response("Message received")
+
+
 routes = [
     Route("/telegram", telegram, methods=["POST"]),
     Route("/health", health, methods=["GET"]),
+    Route("/trelloCallback/{token}/{model_id}", trello_call_back, methods=["POST", "HEAD"]),
 ]
 
 api = Starlette(routes=routes, on_startup=[start_bot], on_shutdown=[stop_bot])
