@@ -1,18 +1,21 @@
-import zoneinfo
+import datetime
 
+import pytz
 from telegram import KeyboardButton, ReplyKeyboardMarkup, ReplyKeyboardRemove, Update
 from telegram.ext import CallbackContext, CommandHandler, MessageHandler, filters
 from timezonefinder import TimezoneFinder
 
-from service.api_client_real import RealAPIService
-
-RHETORICAL_TEXT = ("Напишу свою таймзону сам", "Отправить свою геолокацию для автоматической настройки часового пояса")
+from service.api_client_fake import FakeAPIService
 
 
-async def get_timezone(update: Update, context: CallbackContext):
+async def get_timezone(update: Update, context: CallbackContext) -> None:
     keyboard = [
-        [KeyboardButton(RHETORICAL_TEXT[1], request_location=True)],
-        [KeyboardButton(RHETORICAL_TEXT[0])],
+        [
+            KeyboardButton(
+                "Отправить свою геолокацию для автоматической настройки часового пояса", request_location=True
+            )
+        ],
+        [KeyboardButton("Напишу свою таймзону сам")],
     ]
     markup = ReplyKeyboardMarkup(keyboard, resize_keyboard=True, one_time_keyboard=True)
 
@@ -23,40 +26,56 @@ async def get_timezone(update: Update, context: CallbackContext):
     )
 
 
-async def get_timezone_from_location(update: Update, context: CallbackContext):
-    if update.message.location is not None:
-        user_timezone = TimezoneFinder().timezone_at(
-            lng=update.message.location.longitude, lat=update.message.location.latitude
-        )
+async def set_timezone(telegram_id: int, utc: int, context: CallbackContext):
+    await context.bot.send_message(
+        chat_id=telegram_id,
+        text=f"Установлен часовой пояс для UTC {utc}",
+        reply_markup=ReplyKeyboardRemove(),
+    )
+    api = FakeAPIService()
+    await api.set_user_timezone(telegram_id=telegram_id, user_timezone=utc)
+
+
+async def get_timezone_from_location(update: Update, context: CallbackContext) -> None:
+    user_timezone = TimezoneFinder().timezone_at(
+        lng=update.message.location.longitude, lat=update.message.location.latitude
+    )
+    if user_timezone is None:
         await context.bot.send_message(
             chat_id=update.effective_chat.id,
-            text=f'Установлен часовой пояс "{user_timezone}"',
-            reply_markup=ReplyKeyboardRemove(),
+            text=("Не удалось определить часовой пояс. Пожалуйста, введите его вручную. Например: UTC+3"),
         )
-        api = RealAPIService()
-        await api.set_user_timezone(telegram_id=update.effective_chat.id, user_timezone=user_timezone)
-    elif update.message.text:
-        text = str(update.message.text)
+    else:
+        time_zone = pytz.timezone(user_timezone)
+        utc_time = datetime.datetime.utcnow()
+        utc = int(time_zone.utcoffset(utc_time).total_seconds() // 3600)
+        await set_timezone(update.effective_chat.id, utc, context)
+
+
+async def get_timezone_from_text_message(update: Update, context: CallbackContext) -> None:
+    text = str(update.message.text)
+    if text == "Напишу свою таймзону сам":
+        await context.bot.send_message(
+            chat_id=update.effective_chat.id,
+            text="Введите таймзону. Например: UTC+3",
+        )
+    else:
+        text = text.replace(" ", "")
         try:
-            zoneinfo.ZoneInfo(text)
-            await context.bot.send_message(
-                chat_id=update.effective_chat.id,
-                text=f"Установлен часовой пояс {update.message.text}",
-                reply_markup=ReplyKeyboardRemove(),
-            )
-            api = RealAPIService()
-            await api.set_user_timezone(telegram_id=update.effective_chat.id, user_timezone=user_timezone)
-        except zoneinfo.ZoneInfoNotFoundError:
-            if text not in RHETORICAL_TEXT and set("/").isdisjoint(text):
+            utc = int(list(filter(None, text.split("UTC")))[0])
+            await set_timezone(update.effective_chat.id, utc, context)
+        except ValueError:
+            if set("/").isdisjoint(text):
                 await context.bot.send_message(
                     chat_id=update.effective_chat.id,
                     text=(
-                        f'Часового пояса "{text}" нет. Попробуйте'
-                        " написать другой или передайте геолокацию для его автоматического"
+                        f'Не смогли установить часовой пояс для "{text}". Попробуйте'
+                        " написать ещё раз. Например: : UTC+3\nИли передайте геолокацию для его автоматического"
                         " определения."
                     ),
                 )
 
 
 get_timezone_command_handler = CommandHandler("get_timezone", get_timezone)
-get_timezone_from_location_handler = MessageHandler(filters.TEXT | filters.LOCATION, get_timezone_from_location)
+get_timezone_from_location_handler = MessageHandler(filters.LOCATION, get_timezone_from_location)
+get_timezone_from_text_handler = MessageHandler(filters.TEXT, get_timezone_from_text_message)
