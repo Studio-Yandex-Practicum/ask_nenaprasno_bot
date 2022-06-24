@@ -1,15 +1,8 @@
 from telegram.ext import (Application, ApplicationBuilder,
-                          CallbackContext)
+                          CallbackContext, PicklePersistence)
 
 from core import config
 from start_conversation import start_conversation
-from telegram import Update
-from telegram.ext import (Application, ApplicationBuilder,
-                          CallbackContext, CommandHandler,
-                          PicklePersistence)
-
-from core import config
-from core.send_message import send_message
 
 
 async def weekly_stat_job(context: CallbackContext) -> None:
