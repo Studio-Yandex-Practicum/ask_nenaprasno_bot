@@ -3,27 +3,25 @@ from telegram import (InlineKeyboardButton, InlineKeyboardMarkup,
 from telegram.ext import (CallbackQueryHandler, ConversationHandler,
                           CommandHandler, ContextTypes, CallbackContext)
 
-from constants import command_constans as cmd_const, states
+from constants import commands, states, texts
 
 
 async def start(update: Update, context: CallbackContext):
     keyboard = [
         [
             InlineKeyboardButton(
-                "Да",
-                callback_data=cmd_const.COMMAND_IS_EXPERT
+                text=texts.YES,
+                callback_data=commands.COMMAND_IS_EXPERT
             ),
             InlineKeyboardButton(
-                "Нет",
-                callback_data=cmd_const.COMMAND_NOT_EXPERT
+                text=texts.NO,
+                callback_data=commands.COMMAND_NOT_EXPERT
             ),
         ]
     ]
     reply_markup = InlineKeyboardMarkup(keyboard)
     await update.message.reply_text(
-        text="Привет! Этот бот предназаначен только для"
-             "экспертов справочной службы Просто спросить."
-             "Вы являетесь экспертом?",
+        text=texts.GREETING,
         reply_markup=reply_markup)
     return states.UNAUTHORIZED_STATE
 
@@ -32,21 +30,18 @@ async def not_expert_callback(update: Update, context: CallbackContext):
     keyboard = [
         [
             InlineKeyboardButton(
-                "Да",
-                callback_data=cmd_const.COMMAND_REGISTR_EXPERT
+                text=texts.YES,
+                callback_data=commands.COMMAND_REGISTR_EXPERT
             ),
             InlineKeyboardButton(
-                "Нет",
-                callback_data=cmd_const.COMMAND_SUPPORT_OR_CONSULT
+                text=texts.NO,
+                callback_data=commands.COMMAND_SUPPORT_OR_CONSULT
             ),
         ]
     ]
     reply_markup = InlineKeyboardMarkup(keyboard)
     await update.message.reply_text(
-        text="Этот бот предназаначен только для"
-             "экспертов справочной службы 'Просто спросить'."
-             "Хотите стать нашим экспертом и отвечать на заявки"
-             "от пациентов и их близких?",
+        text=texts.WANT_TO_BECOME_AN_EXPERT,
         reply_markup=reply_markup)
     return states.REGISTRATION_STATE
 
@@ -60,13 +55,7 @@ async def support_or_consult_callback(
 
 async def registr_as_expert_callback(update: Update, context: CallbackContext):
     await update.message.reply_text(
-        text="Мы всегда рады подключать к проекту новых специалистов!"
-             "Здорово, что вы хотите работать с нами. Заполните,"
-             "пожалуйста, эту анкету (нужно 15 минут). Команда сервиса"
-             "подробно изучит вашу заявку и свяжется с вами в течение недели,"
-             "чтобы договориться о видеоинтервью."
-             "Перед интервью мы можем попросить вас ответить на тестовый кейс,"
-             "чтобы обсудить его на встрече. Желаем удачи :)"
+        text=texts.WE_EXITED_TO_ADD_YOU
     )
     return states.NEW_EXPERT_STATE
 
@@ -76,14 +65,7 @@ async def after_registr_message_callback(
     context: ContextTypes.DEFAULT_TYPE
 ):
     await update.message.reply_text(
-        text="Вы успешно начали работу с ботом. Меня зовут Женя Краб,"
-             "я telegram-bot для экспертов справочной службы"
-             "'Просто спросить'. Я буду сообщать вам о новых заявках,"
-             "присылать уведомления о новых сообщениях в чате от пациентов"
-             "и их близких и напоминать о просроченных заявках."
-             "Нам нравится, что вы с нами. Не терпится увидеть вас в деле!"
-             "Для начала, давайте настроим часовой пояс, чтобы вы получали"
-             "уведомления в удобное время."
+        text=texts.AFTER_REGISTER
     )
     return states.TIMEZONE_STATE
 
@@ -105,9 +87,7 @@ async def timezone_message_callback(
     context: ContextTypes.DEFAULT_TYPE
 ):
     await update.message.reply_text(
-        text="Вы настроили часовой пояс,"
-             "теперь уведомления будут приходить"
-             "в удобное время",
+        text=texts.TIMEZONE_HAS_BEEN_SET,
         reply_markup=ReplyKeyboardRemove()
     )
     return ConversationHandler.END
@@ -115,7 +95,7 @@ async def timezone_message_callback(
 
 async def cancel(update: Update, context: ContextTypes.DEFAULT_TYPE):
     await update.message.reply_text(
-        text="Хьюстон, у нас проблемы. Что-то пошло не так",
+        text=texts.HOUSTON,
         reply_markup=ReplyKeyboardRemove()
     )
     ConversationHandler.END
@@ -133,21 +113,21 @@ start_conversation = ConversationHandler(
         states.UNAUTHORIZED_STATE: [
             CallbackQueryHandler(
                 is_expert_callback,
-                pattern=cmd_const.COMMAND_IS_EXPERT
+                pattern=commands.COMMAND_IS_EXPERT
             ),
             CallbackQueryHandler(
                 not_expert_callback,
-                pattern=cmd_const.COMMAND_NOT_EXPERT
+                pattern=commands.COMMAND_NOT_EXPERT
             )
         ],
         states.REGISTRATION_STATE: [
             CallbackQueryHandler(
                 registr_as_expert_callback,
-                pattern=cmd_const.COMMAND_REGISTR_EXPERT
+                pattern=commands.COMMAND_REGISTR_EXPERT
             ),
             CallbackQueryHandler(
                 support_or_consult_callback,
-                pattern=cmd_const.COMMAND_SUPPORT_OR_CONSULT
+                pattern=commands.COMMAND_SUPPORT_OR_CONSULT
             )
         ],
         states.NEW_EXPERT_STATE: [
@@ -156,11 +136,11 @@ start_conversation = ConversationHandler(
         states.TIMEZONE_STATE: [
             CallbackQueryHandler(
                 timezone_callback,
-                pattern=cmd_const.COMMAND_TIMEZONE
+                pattern=commands.COMMAND_TIMEZONE
             ),
             CallbackQueryHandler(
                 skip_timezone_callback,
-                pattern=cmd_const.COMMAND_SKIP_TIMEZONE
+                pattern=commands.COMMAND_SKIP_TIMEZONE
             ),
             CallbackQueryHandler(timezone_message_callback)
         ],
