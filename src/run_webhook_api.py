@@ -51,6 +51,7 @@ async def trello_call_back(request: Request) -> Response:
         #     message = "Информация с сайта Trello успешно получена и обработана."
         #     await request.app.state.bot_app.bot.send_message(chat_id=config.CHAT_ID, text=message)
         return Response("Message received")
+    return Response("Something wrong", status_code=405)
 
 
 routes = [
