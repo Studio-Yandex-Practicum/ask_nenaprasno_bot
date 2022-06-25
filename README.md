@@ -9,7 +9,7 @@
 
 ### В режиме webhook'а (также в этом режиме будет запущена точка доступа для webhook'а trello):
 > python3 src/run_webhook_api.py
-#### Запросы от trello ожидаются на /trelloCallback, приходят в формате .json, пример в /src/example/trello_request.json
+#### Запросы от trello ожидаются на /trelloCallback, приходят в формате .json, [пример](src/example/trello_request.json)
 #### Пример создания curl-запроса для отправки данных на другой endpoint:
 ```
 import requests
