@@ -47,15 +47,16 @@ async def trello_call_back(request: Request) -> Response:
     if request.method == "HEAD":
         return Response()
     elif request.method == "POST":
-        headers = request.headers
-        body = await request.json()
+        if request.headers and await request.json():
+            message = "Информация с сайта Trello успешно получена и обработана."
+            await request.app.state.bot_app.bot.send_message(chat_id=config.CHAT_ID, text=message)
         return Response("Message received")
 
 
 routes = [
     Route("/telegram", telegram, methods=["POST"]),
     Route("/health", health, methods=["GET"]),
-    Route("/trelloCallback/{token}/{model_id}", trello_call_back, methods=["POST", "HEAD"]),
+    Route("/trelloCallback", trello_call_back, methods=["POST", "HEAD"]),
 ]
 
 api = Starlette(routes=routes, on_startup=[start_bot], on_shutdown=[stop_bot])
