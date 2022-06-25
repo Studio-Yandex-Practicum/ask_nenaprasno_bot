@@ -19,6 +19,6 @@ async def send_message(
         await context.bot.send_message(chat_id=chat_id, text=text, reply_markup=reply_markup)
         return True
 
-    except TelegramError:
-        # logging.exception("The error sending the message to the chat: %d " % chat_id, error)
+    except TelegramError as error:
+        logging.exception("The error sending the message to the chat: %d, %s", chat_id, error)
         return False

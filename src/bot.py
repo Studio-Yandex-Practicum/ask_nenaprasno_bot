@@ -1,8 +1,8 @@
 from telegram import Update
 from telegram.ext import Application, ApplicationBuilder, CallbackContext, CommandHandler, PicklePersistence
 
-from core import config
-from core.send_message import send_message
+from .core import config
+from .core.send_message import send_message
 
 
 async def start(update: Update, context: CallbackContext) -> None:
