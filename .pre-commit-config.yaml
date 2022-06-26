@@ -6,6 +6,7 @@ repos:
     - id: end-of-file-fixer
     - id: check-yaml
     - id: check-merge-conflict
+    - id: requirements-txt-fixer
     - id: mixed-line-ending
       args: [ --fix=crlf ]
     - id: no-commit-to-branch
