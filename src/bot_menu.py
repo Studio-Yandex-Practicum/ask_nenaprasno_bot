@@ -9,15 +9,15 @@ async def menu(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     menu_buttons = [
         [
             InlineKeyboardButton(
-                text="⌚ Настроить часовой пояс", callback_data=command_constants.COMMAND_TIMEZONE_CONFIGURATE
+                text="⌚ Настроить часовой пояс", callback_data=command_constants.TIMEZONE_CONFIGURATE_COMMAND
             )
         ],
         [
-            InlineKeyboardButton(text="📊 Статистика за месяц", callback_data=command_constants.COMMAND_STATISTIC_MONTH),
+            InlineKeyboardButton(text="📊 Статистика за месяц", callback_data=command_constants.STATISTIC_MONTH_COMMAND),
         ],
-        [InlineKeyboardButton(text="📈 Статистика за неделю", callback_data=command_constants.COMMAND_STATISTIC_WEEK)],
-        [InlineKeyboardButton(text="📌 В работе", callback_data=command_constants.COMMAND_ACTUAL_REQUESTS)],
-        [InlineKeyboardButton(text="🔥 сроки горят", callback_data=command_constants.COMMAND_OVERDUE_REQUESTS)],
+        [InlineKeyboardButton(text="📈 Статистика за неделю", callback_data=command_constants.STATISTIC_WEEK_COMMAND)],
+        [InlineKeyboardButton(text="📌 В работе", callback_data=command_constants.ACTUAL_REQUESTS_COMMAND)],
+        [InlineKeyboardButton(text="🔥 сроки горят", callback_data=command_constants.OVERDUE_REQUESTS_COMMAND)],
         [
             InlineKeyboardButton(
                 text="📜 Правила сервиса",
@@ -34,5 +34,5 @@ async def handling_menu_button_click_callback(update: Update, context: ContextTy
     await query.edit_message_text(query.data)
 
 
-menu_command_handler = CommandHandler(command_constants.COMMAND_MENU, callback=menu)
+menu_command_handler = CommandHandler(command_constants.MENU_COMMAND, callback=menu)
 callback_menu_handler = CallbackQueryHandler(handling_menu_button_click_callback)
