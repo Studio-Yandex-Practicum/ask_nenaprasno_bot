@@ -8,7 +8,7 @@ from core import config
 
 class AbstractAPIService(ABC):
     def __init__(self):
-        self.site_url = config.SITE_URL
+        self.site_url = config.SITE_API_URL
 
     @abstractmethod
     async def get_bill(self) -> BillStat:

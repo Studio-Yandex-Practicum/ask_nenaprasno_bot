@@ -30,8 +30,10 @@ class MockShemasAPIService(AbstractAPIService):
     async def get_my_month_stat(self, telegram_id: int) -> MyMonthStat:
         return MY_MONT_STAT_RETURN
 
-    async def authenticate_user(self, telegram_id: int) -> UserData:
+    async def authenticate_user(self, telegram_id: int) -> UserData | None:  # если неавторизированный пользователь:
+        """TODO: consider the case if the user is not registered in site"""
         return AUTH_RETURN
+        # return None
 
     async def set_user_timezone(self, telegram_id: int, user_timezone: str) -> HTTPStatus:
         return HTTPStatus.OK
