@@ -1,10 +1,12 @@
 from telegram import InlineKeyboardButton, InlineKeyboardMarkup, ReplyKeyboardRemove, Update
 from telegram.ext import CallbackContext, CallbackQueryHandler, CommandHandler, ContextTypes, ConversationHandler
 
-from constants import commands as cmd_const
-from constants import messages as msg
-from constants import states
-from core.config import URL_SERVICE_RULES
+from src.constants import commands as cmd_const
+from src.constants import messages as msg
+from src.constants import states
+from src.core.config import URL_SERVICE_RULES
+from src.core.send_message import send_message
+from src.service import ConreateAPIService
 
 
 async def start(update: Update, context: CallbackContext):
@@ -46,6 +48,22 @@ async def after_registr_message_callback(update: Update, context: ContextTypes.D
 
 
 async def is_expert_callback(update: Update, context: CallbackContext):
+    """
+    try to authenticate telegram user on site API and write trello_id to persistence file
+    """
+    api_service = ConreateAPIService()
+    telegram_id = update.effective_user.id
+    user_data = await api_service.authenticate_user(telegram_id=telegram_id)
+    if user_data is None:
+        await update.callback_query.edit_message_text(text="Ошибка авторизации")
+        return states.UNAUTHORIZED_STATE
+    context.user_data["user_name"] = user_data.user_name
+    context.user_data["user_id_in_trello"] = user_data.user_id_in_trello
+    context.user_data["user_time_zone"] = user_data.user_time_zone
+    await update.callback_query.edit_message_text(
+        text=f"Авторизация прошла успешно\n" f"Добро пожаловать {user_data.user_name}"
+    )
+    await update.callback_query.answer()
     return states.TIMEZONE_STATE
 
 
@@ -58,10 +76,9 @@ async def skip_timezone_callback(update: Update, context: CallbackContext):
 
 
 async def timezone_message_callback(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    await update.callback_query.message.reply_text(
-        text=msg.TIMEZONE_SETUP_FINISH_MESSAGE, reply_markup=ReplyKeyboardRemove()
-    )
+    await send_message(context=context, chat_id=update.effective_user.id, text=msg.TIMEZONE_SETUP_FINISH_MESSAGE)
     return ConversationHandler.END
+
 
 
 async def cancel(update: Update, context: ContextTypes.DEFAULT_TYPE):
