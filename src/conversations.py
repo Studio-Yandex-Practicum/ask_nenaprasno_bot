@@ -80,7 +80,6 @@ async def timezone_message_callback(update: Update, context: ContextTypes.DEFAUL
     return ConversationHandler.END
 
 
-
 async def cancel(update: Update, context: ContextTypes.DEFAULT_TYPE):
     await update.callback_query.message.reply_text(
         text=msg.HOUSTON_WE_HAVE_A_PROBLEM_MESSAGE, reply_markup=ReplyKeyboardRemove()
