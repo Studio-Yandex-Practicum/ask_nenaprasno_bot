@@ -1,7 +1,7 @@
 from http import HTTPStatus
 
-from api_client_base import APIService
-from api_client_dataclasses import BillStat, MonthStat, UserData, UserMonthStat, UserWeekStat, WeekStat
+from service.api_client_base import APIService
+from service.api_client_dataclasses import BillStat, MonthStat, UserData, UserMonthStat, UserWeekStat, WeekStat
 
 
 class FakeAPIService(APIService):
@@ -18,8 +18,10 @@ class FakeAPIService(APIService):
             [UserMonthStat(147890, "UTC+3", 6, 8, 9.4, 4.3), UserMonthStat(147895, "UTC+4", 6, 3, 6.4, 7.3)]
         )
 
-    async def authenticate_user(self, telegram_id: int) -> UserData:
+    async def authenticate_user(self, telegram_id: int) -> UserData | None:  # если неавторизированный пользователь
+        """TODO: consider the case if the user is not registered in site"""
         return UserData("Bob", "UTC+3", "24")
+        # return None
 
     async def set_user_timezone(self, telegram_id: int, user_timezone: str) -> HTTPStatus:
         return HTTPStatus.OK
