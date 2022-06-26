@@ -17,7 +17,7 @@ repos:
   rev: 22.3.0
   hooks:
     - id: black
-      args: [--line-length=120]
+      args: [--line-length=120, --diff]
 
 - repo: https://github.com/pycqa/isort
   rev: 5.10.1
@@ -32,7 +32,14 @@ repos:
       entry: pylint
       language: system
       types: [python]
-      args: [-j=0, --max-line-length=120, --disable=W0613, --disable=W0611, --disable=E0401]
+      args: [
+          -j=0,
+          --max-line-length=120,
+          --disable=W0613,
+          --disable=W0611,
+          --disable=E0401,
+          --disable=R0902  # Слишком много атрибутов у dataclass UserWeekStat - Надо подумать о рефакторинге, игнор пока
+      ]
 
 - repo: local
   hooks:

@@ -21,5 +21,5 @@ class FakeAPIService(APIService):
     async def authenticate_user(self, telegram_id: int) -> UserData:
         return UserData("Bob", "UTC+3", "24")
 
-    async def set_user_timezone(self, telegram_id: int, user_timezone: str) -> HTTPStatus:
+    async def set_user_timezone(self, telegram_id: int, user_timezone: str) -> int:
         return HTTPStatus.OK

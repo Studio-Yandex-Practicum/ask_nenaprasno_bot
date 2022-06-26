@@ -5,8 +5,9 @@ from starlette.responses import PlainTextResponse, Response
 from starlette.routing import Route
 from telegram import Update
 
-from core import config
 from bot import init_webhook
+from constants import messages as msg
+from core import config
 
 
 async def start_bot() -> None:
@@ -25,11 +26,11 @@ async def stop_bot() -> None:
 
 
 async def health(request: Request) -> PlainTextResponse:
-    message = f"Бот запущен и работает. Сообщение получено по запросу на Api сервера {config.WEBHOOK_URL}"
+    message = msg.BOT_STARTED_AND_WORKED_WEBHOOK_MESSAGE, config.WEBHOOK_URL
     chat_id = config.CHAT_ID
     await request.app.state.bot_app.bot.send_message(chat_id=chat_id, text=message)
 
-    return PlainTextResponse(content=f"Message send to bot: {message}")
+    return PlainTextResponse(content=(msg.SEND_TO_BOT_MESSAGE, message))
 
 
 async def telegram(request: Request) -> Response:
@@ -45,5 +46,5 @@ routes = [
 
 api = Starlette(routes=routes, on_startup=[start_bot], on_shutdown=[stop_bot])
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     uvicorn.run(app=api, debug=True, host=config.HOST, port=config.PORT)

@@ -1,15 +1,14 @@
 from abc import ABC, abstractmethod
 from http import HTTPStatus
 
-from core import config
-
 from api_client_dataclasses import BillStat, MonthStat, UserData, WeekStat
+
+from src.core import config
 
 
 class APIService(ABC):
-
     def __init__(self):
-        self.SITE_URL = config.SITE_URL
+        self.site_url = config.SITE_URL
 
     @abstractmethod
     async def get_bill(self) -> BillStat:
@@ -28,9 +27,5 @@ class APIService(ABC):
         pass
 
     @abstractmethod
-    async def set_user_timezone(
-        self,
-        telegram_id: int,
-        user_timezone: str
-    ) -> HTTPStatus:
+    async def set_user_timezone(self, telegram_id: int, user_timezone: str) -> HTTPStatus:
         pass
