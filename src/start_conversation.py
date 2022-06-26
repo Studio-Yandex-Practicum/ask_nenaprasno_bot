@@ -3,6 +3,7 @@ from telegram.ext import CallbackContext, CallbackQueryHandler, CommandHandler, 
 
 from constants import command_constants as cmd_const
 from constants import states
+from core.config import URL_SERVICE_RULES
 from core.send_message import send_message
 from service import ConreateAPIService
 
@@ -117,8 +118,34 @@ async def cancel(update: Update, context: ContextTypes.DEFAULT_TYPE):
     return ConversationHandler.END
 
 
-start_command_handler = CommandHandler("start", start)
+async def menu(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
+    menu_buttons = [
+        [InlineKeyboardButton(text="⌚ Настроить часовой пояс", callback_data=cmd_const.TIMEZONE_CONFIGURATE_COMMAND)],
+        [
+            InlineKeyboardButton(text="📊 Статистика за месяц", callback_data=cmd_const.STATISTIC_MONTH_COMMAND),
+        ],
+        [InlineKeyboardButton(text="📈 Статистика за неделю", callback_data=cmd_const.STATISTIC_WEEK_COMMAND)],
+        [InlineKeyboardButton(text="📌 В работе", callback_data=cmd_const.ACTUAL_REQUESTS_COMMAND)],
+        [InlineKeyboardButton(text="🔥 сроки горят", callback_data=cmd_const.OVERDUE_REQUESTS_COMMAND)],
+        [
+            InlineKeyboardButton(
+                text="📜 Правила сервиса",
+                url=URL_SERVICE_RULES,
+            )
+        ],
+    ]
+    await update.message.reply_text("Меню", reply_markup=InlineKeyboardMarkup(menu_buttons))
+
+
+async def handling_menu_button_click_callback(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
+    query = update.callback_query
+    await query.answer()
+    await query.edit_message_text(query.data)
+
+
+start_command_handler = CommandHandler(cmd_const.START_COMMAND, start)
 cancel_command_handler = CommandHandler("cancel", cancel)
+menu_command_handler = CommandHandler(cmd_const.MENU_COMMAND, callback=menu)
 
 start_conversation = ConversationHandler(
     allow_reentry=True,
@@ -144,3 +171,5 @@ start_conversation = ConversationHandler(
     },
     fallbacks=[cancel_command_handler],
 )
+
+callback_menu_handler = CallbackQueryHandler(handling_menu_button_click_callback)
