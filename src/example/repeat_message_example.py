@@ -1,7 +1,7 @@
 from telegram import InlineKeyboardMarkup, Update
 from telegram.ext import Application, CallbackQueryHandler, CommandHandler, ContextTypes
 
-from src.constants.command_constants import REPEAT_COMMAND
+from constants.command_constants import REPEAT_COMMAND
 from src.core.config import TOKEN
 from src.service.repeat_message import repeat_after_one_hour_button, repeat_message_after_1_hour_callback
 
