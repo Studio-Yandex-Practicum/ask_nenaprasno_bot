@@ -74,6 +74,9 @@ async def after_registr_message_callback(update: Update, context: ContextTypes.D
 
 
 async def is_expert_callback(update: Update, context: CallbackContext):
+    """
+    try to authenticate telegram user on site API and write trello_id to persistence file
+    """
     api_service = ConreateAPIService()
     telegram_id = update.effective_user.id
     user_data = await api_service.authenticate_user(telegram_id=telegram_id)
