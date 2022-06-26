@@ -103,7 +103,7 @@ Poetry - это инструмент для управления зависим�
 
 ## Настройка pre-commit:
 
-> pip3 install -r Bot/requirements.txt
+> poetry install
 >
 > pre-commit install
 
