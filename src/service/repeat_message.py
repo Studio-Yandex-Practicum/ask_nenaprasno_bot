@@ -10,7 +10,7 @@ from datetime import timedelta
 from telegram import InlineKeyboardButton, Update
 from telegram.ext import CallbackContext, ContextTypes
 
-from constants.callback_data import REPEAT_CALLBACK
+from src.constants.callback_data import REPEAT_CALLBACK
 
 
 async def repeat_message_after_1_hour_callback(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
