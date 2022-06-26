@@ -112,13 +112,6 @@ async def timezone_message_callback(update: Update, context: ContextTypes.DEFAUL
     return ConversationHandler.END
 
 
-async def cancel(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    await update.message.reply_text(
-        text="Хьюстон, у нас проблемы. Что-то пошло не так", reply_markup=ReplyKeyboardRemove()
-    )
-    return ConversationHandler.END
-
-
 async def menu(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     menu_buttons = [
         [InlineKeyboardButton(text="⌚ Настроить часовой пояс", callback_data=callback.TIMEZONE_CONFIGURATE_CALLBACK)],
@@ -145,7 +138,6 @@ async def handling_menu_button_click_callback(update: Update, context: ContextTy
 
 
 start_command_handler = CommandHandler(cmd_const.START_COMMAND, start)
-cancel_command_handler = CommandHandler(cmd_const.CANSEL_COMMAND, cancel)
 menu_command_handler = CommandHandler(cmd_const.MENU_COMMAND, callback=menu)
 
 start_conversation = ConversationHandler(
@@ -170,7 +162,7 @@ start_conversation = ConversationHandler(
         ],
         states.MENU_STATE: [],
     },
-    fallbacks=[cancel_command_handler],
+    fallbacks=[],
 )
 
 callback_menu_handler = CallbackQueryHandler(handling_menu_button_click_callback)
