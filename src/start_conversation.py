@@ -145,7 +145,7 @@ async def handling_menu_button_click_callback(update: Update, context: ContextTy
 
 
 start_command_handler = CommandHandler(cmd_const.START_COMMAND, start)
-cancel_command_handler = CommandHandler("cancel", cancel)
+cancel_command_handler = CommandHandler(cmd_const.CANSEL_COMMAND, cancel)
 menu_command_handler = CommandHandler(cmd_const.MENU_COMMAND, callback=menu)
 
 start_conversation = ConversationHandler(
