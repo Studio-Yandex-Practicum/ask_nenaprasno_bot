@@ -10,8 +10,8 @@ from service import ConreateAPIService
 async def start(update: Update, context: CallbackContext):
     keyboard = [
         [
-            InlineKeyboardButton("Да", callback_data=cmd_const.COMMAND_IS_EXPERT),
-            InlineKeyboardButton("Нет", callback_data=cmd_const.COMMAND_NOT_EXPERT),
+            InlineKeyboardButton("Да", callback_data=cmd_const.IS_EXPERT_COMMAND),
+            InlineKeyboardButton("Нет", callback_data=cmd_const.NOT_EXPERT_COMMAND),
         ]
     ]
     reply_markup = InlineKeyboardMarkup(keyboard)
@@ -27,13 +27,13 @@ async def start(update: Update, context: CallbackContext):
 async def not_expert_callback(update: Update, context: CallbackContext):
     keyboard = [
         [
-            InlineKeyboardButton("Да", callback_data=cmd_const.COMMAND_REGISTR_EXPERT),
-            InlineKeyboardButton("Нет", callback_data=cmd_const.COMMAND_SUPPORT_OR_CONSULT),
+            InlineKeyboardButton("Да", callback_data=cmd_const.REGISTR_AS_EXPERT_COMMAND),
+            InlineKeyboardButton("Нет", callback_data=cmd_const.SUPPORT_OR_CONSULT_COMMAND),
         ]
     ]
     reply_markup = InlineKeyboardMarkup(keyboard)
     await update.message.reply_text(
-        text="Этот бот предназаначен только для "
+        text="Этот бот предназначен только для "
         "экспертов справочной службы 'Просто спросить'. "
         "Хотите стать нашим экспертом и отвечать на заявки "
         "от пациентов и их близких?",
@@ -105,7 +105,7 @@ async def timezone_message_callback(update: Update, context: ContextTypes.DEFAUL
     await send_message(  # reply_message не работает
         context=context,
         chat_id=update.effective_user.id,
-        text="Вы настроили часовой пояс, " "теперь уведомления будут приходить " "в удобное время",
+        text="Вы настроили часовой пояс, теперь уведомления будут приходить в удобное время",
     )
     return ConversationHandler.END
 
@@ -127,17 +127,17 @@ start_conversation = ConversationHandler(
     entry_points=[start_command_handler],
     states={
         states.UNAUTHORIZED_STATE: [
-            CallbackQueryHandler(is_expert_callback, pattern=cmd_const.COMMAND_IS_EXPERT),
-            CallbackQueryHandler(not_expert_callback, pattern=cmd_const.COMMAND_NOT_EXPERT),
+            CallbackQueryHandler(is_expert_callback, pattern=cmd_const.IS_EXPERT_COMMAND),
+            CallbackQueryHandler(not_expert_callback, pattern=cmd_const.NOT_EXPERT_COMMAND),
         ],
         states.REGISTRATION_STATE: [
-            CallbackQueryHandler(registr_as_expert_callback, pattern=cmd_const.COMMAND_REGISTR_EXPERT),
-            CallbackQueryHandler(support_or_consult_callback, pattern=cmd_const.COMMAND_SUPPORT_OR_CONSULT),
+            CallbackQueryHandler(registr_as_expert_callback, pattern=cmd_const.REGISTR_AS_EXPERT_COMMAND),
+            CallbackQueryHandler(support_or_consult_callback, pattern=cmd_const.SUPPORT_OR_CONSULT_COMMAND),
         ],
         states.NEW_EXPERT_STATE: [CallbackQueryHandler(after_registr_message_callback)],
         states.TIMEZONE_STATE: [
-            CallbackQueryHandler(timezone_callback, pattern=cmd_const.COMMAND_TIMEZONE),
-            CallbackQueryHandler(skip_timezone_callback, pattern=cmd_const.COMMAND_SKIP_TIMEZONE),
+            CallbackQueryHandler(timezone_callback, pattern=cmd_const.TIMEZONE_COMMAND),
+            CallbackQueryHandler(skip_timezone_callback, pattern=cmd_const.SKIP_TIMEZONE_COMMAND),
             CallbackQueryHandler(timezone_message_callback),
         ],
         states.MENU_STATE: [],
