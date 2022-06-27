@@ -26,9 +26,11 @@ MONTHLY_RECEIPT_REMINDER_TIME = datetime.strptime(
 MONTHLY_RECEIPT_REMINDER_DAY = int(
     env.get("MONTHLY_RECEIPT_REMINDER_DAY")
 )  # день для даты ежемесячного напоминания о чеке
-# -------------------------------------------------------------------------------------------------- #
-URL_SERVICE_RULES = "https://docs.google.com/document/d/1hW2HUv9aWQMnUBuIE_YQEtmIDDbk8KhpychckbyaIEQ/edit"
-# -------------------------------------------------------------------------------------------------- #
+
+URL_SERVICE_RULES = env.get(
+    "URL_SERVICE_RULES", "https://docs.google.com/document/d/1hW2HUv9aWQMnUBuIE_YQEtmIDDbk8KhpychckbyaIEQ/edit"
+)
+
 BOT_PERSISTENCE_FILE = env.get("BOT_PERSISTENCE_FILE")  # имя файла persistence бота
 IS_FAKE_API = env.get("IS_FAKE_API")  # флаг, определяющий какой АПИ клиент используется - боевой или "заглушка"
 SITE_API_URL = env.get("SITE_API_URL")  # адрес сервера, к которому будет отправлять запросы АПИ клиент
