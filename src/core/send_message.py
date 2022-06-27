@@ -1,3 +1,4 @@
+from typing import Any, Optional
 import logging
 
 from telegram.error import TelegramError
@@ -9,20 +10,23 @@ async def send_message(
     context: CallbackContext,
     chat_id: int,
     text: str,
-    reply_markup: ReplyKeyboardMarkup | None = None
+    parse_mode: Any = None,
+    reply_markup: Optional[ReplyKeyboardMarkup] = None
 ) -> bool:
     """
     Send simple text message.
     :param context: CallbackContext
     :param chat_id: int
+    :param parse_mode: Any
     :param text: str
-    :param reply_mark_up: ReplyKeyboardMarkup | None
+    :param reply_markup: ReplyKeyboardMarkup | None
     """
     try:
         await context.bot.send_message(
             chat_id=chat_id,
             text=text,
-            reply_markup=reply_markup
+            parse_mode=parse_mode,
+            reply_markup=reply_markup,
         )
         return True
 
