@@ -1,6 +1,6 @@
 FROM python:3.10-slim
 WORKDIR /code
 COPY requirements.txt .
-RUN pip3 install -r /code/requirements.txt --no-cache-dir
-COPY . /code
-CMD gunicorn -b 0.0.0.0:8000 -k uvicorn.workers.UvicornWorker src.run_webhook_api:api
+RUN pip3 install -r requirements.txt --no-cache-dir
+COPY . .
+CMD uvicorn src.run_webhook_api:api --host 0.0.0.0 --port 8000 --reload
