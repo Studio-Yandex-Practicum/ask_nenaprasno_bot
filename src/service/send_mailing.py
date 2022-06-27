@@ -11,7 +11,8 @@ from src.service import ConreateAPIService
 
 
 async def send_month_statistic(
-    context: CallbackContext, reply_markup: Optional[ReplyKeyboardMarkup]
+    context: CallbackContext,
+    reply_markup: Optional[ReplyKeyboardMarkup] = None,
 ):
     try:
         mont_statistic_obj = await ConreateAPIService().get_month_stat()
@@ -41,7 +42,8 @@ async def send_month_statistic(
 
 
 async def send_week_statistic(
-    context: CallbackContext, reply_markup: Optional[ReplyKeyboardMarkup]
+    context: CallbackContext,
+    reply_markup: Optional[ReplyKeyboardMarkup] = None,
 ):
     try:
         week_statistic_obj = await ConreateAPIService().get_week_stat()
@@ -76,7 +78,7 @@ async def start_mailing_statistic(
     template_message: Template,
     statistic: List[Union[UserMonthStat, UserWeekStat]],
     parse_mode: Any = None,
-    reply_markup: Optional[ReplyKeyboardMarkup] = None
+    reply_markup: Optional[ReplyKeyboardMarkup] = None,
 ):
     for user_statistic in statistic:
         await send_message(
