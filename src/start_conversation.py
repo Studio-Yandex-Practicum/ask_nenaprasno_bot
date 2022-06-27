@@ -11,8 +11,8 @@ from src.constants import states
 async def start(update: Update, context: CallbackContext):
     keyboard = [
         [
-            InlineKeyboardButton("Да", callback_data=callback.IS_EXPERT_COMMAND),
-            InlineKeyboardButton("Нет", callback_data=callback.NOT_EXPERT_COMMAND),
+            InlineKeyboardButton("Да", callback_data=callback.CALLBACK_IS_EXPERT_COMMAND),
+            InlineKeyboardButton("Нет", callback_data=callback.CALLBACK_NOT_EXPERT_COMMAND),
         ]
     ]
     reply_markup = InlineKeyboardMarkup(keyboard)
@@ -28,8 +28,8 @@ async def start(update: Update, context: CallbackContext):
 async def not_expert_callback(update: Update, context: CallbackContext):
     keyboard = [
         [
-            InlineKeyboardButton("Да", callback_data=callback.REGISTR_AS_EXPERT_COMMAND),
-            InlineKeyboardButton("Нет", callback_data=callback.SUPPORT_OR_CONSULT_COMMAND),
+            InlineKeyboardButton("Да", callback_data=callback.CALLBACK_REGISTR_AS_EXPERT_COMMAND),
+            InlineKeyboardButton("Нет", callback_data=callback.CALLBACK_SUPPORT_OR_CONSULT_COMMAND),
         ]
     ]
     reply_markup = InlineKeyboardMarkup(keyboard)
@@ -113,13 +113,17 @@ async def timezone_message_callback(update: Update, context: ContextTypes.DEFAUL
 
 async def menu(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     menu_buttons = [
-        [InlineKeyboardButton(text="⌚ Настроить часовой пояс", callback_data=callback.TIMEZONE_CONFIGURATE_COMMAND)],
         [
-            InlineKeyboardButton(text="📊 Статистика за месяц", callback_data=callback.STATISTIC_MONTH_COMMAND),
+            InlineKeyboardButton(
+                text="⌚ Настроить часовой пояс", callback_data=callback.CALLBACK_CONFIGURATE_TIMEZONE_COMMAND
+            )
         ],
-        [InlineKeyboardButton(text="📈 Статистика за неделю", callback_data=callback.STATISTIC_WEEK_COMMAND)],
-        [InlineKeyboardButton(text="📌 В работе", callback_data=callback.ACTUAL_REQUESTS_COMMAND)],
-        [InlineKeyboardButton(text="🔥 сроки горят", callback_data=callback.OVERDUE_REQUESTS_COMMAND)],
+        [
+            InlineKeyboardButton(text="📊 Статистика за месяц", callback_data=callback.CALLBACK_STATISTIC_MONTH_COMMAND),
+        ],
+        [InlineKeyboardButton(text="📈 Статистика за неделю", callback_data=callback.CALLBACK_STATISTIC_WEEK_COMMAND)],
+        [InlineKeyboardButton(text="📌 В работе", callback_data=callback.CALLBACK_ACTUAL_REQUESTS_COMMAND)],
+        [InlineKeyboardButton(text="🔥 сроки горят", callback_data=callback.CALLBACK_OVERDUE_REQUESTS_COMMAND)],
         [
             InlineKeyboardButton(
                 text="📜 Правила сервиса",
@@ -143,25 +147,23 @@ start_conversation = ConversationHandler(
     allow_reentry=True,
     persistent=True,
     name="start_conversation",
-    entry_points=[start_command_handler],
+    entry_points=[start_command_handler, menu_command_handler],
     states={
         states.UNAUTHORIZED_STATE: [
-            CallbackQueryHandler(is_expert_callback, pattern=callback.IS_EXPERT_COMMAND),
-            CallbackQueryHandler(not_expert_callback, pattern=callback.NOT_EXPERT_COMMAND),
+            CallbackQueryHandler(is_expert_callback, pattern=callback.CALLBACK_IS_EXPERT_COMMAND),
+            CallbackQueryHandler(not_expert_callback, pattern=callback.CALLBACK_NOT_EXPERT_COMMAND),
         ],
         states.REGISTRATION_STATE: [
-            CallbackQueryHandler(registr_as_expert_callback, pattern=callback.REGISTR_AS_EXPERT_COMMAND),
-            CallbackQueryHandler(support_or_consult_callback, pattern=callback.SUPPORT_OR_CONSULT_COMMAND),
+            CallbackQueryHandler(registr_as_expert_callback, pattern=callback.CALLBACK_REGISTR_AS_EXPERT_COMMAND),
+            CallbackQueryHandler(support_or_consult_callback, pattern=callback.CALLBACK_SUPPORT_OR_CONSULT_COMMAND),
         ],
         states.NEW_EXPERT_STATE: [CallbackQueryHandler(after_registr_message_callback)],
         states.TIMEZONE_STATE: [
-            CallbackQueryHandler(timezone_callback, pattern=callback.TIMEZONE_COMMAND),
-            CallbackQueryHandler(skip_timezone_callback, pattern=callback.SKIP_TIMEZONE_COMMAND),
+            CallbackQueryHandler(timezone_callback, pattern=callback.CALLBACK_TIMEZONE_COMMAND),
+            CallbackQueryHandler(skip_timezone_callback, pattern=callback.CALLBACK_SKIP_TIMEZONE_COMMAND),
             CallbackQueryHandler(timezone_message_callback),
         ],
-        states.MENU_STATE: [],
+        states.MENU_STATE: [CallbackQueryHandler(handling_menu_button_click_callback)],
     },
     fallbacks=[],
 )
-
-callback_menu_handler = CallbackQueryHandler(handling_menu_button_click_callback)
