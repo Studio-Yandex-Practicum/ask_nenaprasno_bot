@@ -13,7 +13,14 @@ from src.service import ConreateAPIService
 async def send_month_statistic(
     context: CallbackContext, reply_markup: Optional[ReplyKeyboardMarkup]
 ):
-    mont_statistic_obj = await ConreateAPIService().get_month_stat()
+    try:
+        mont_statistic_obj = await ConreateAPIService().get_month_stat()
+    except Exception as error:
+        logging.exception(
+            f'Error when trying to request month statistics',
+            error
+        )
+        return False
     message = Template(
         'Это был отличный месяц!\n'
         'Посмотрите, как он прошел в *""Просто спросить""* 🔥\n\n'
@@ -30,12 +37,20 @@ async def send_month_statistic(
         parse_mode='Markdown',
         reply_markup=reply_markup
     )
+    return True
 
 
 async def send_week_statistic(
     context: CallbackContext, reply_markup: Optional[ReplyKeyboardMarkup]
 ):
-    week_statistic_obj = await ConreateAPIService().get_week_stat()
+    try:
+        week_statistic_obj = await ConreateAPIService().get_week_stat()
+    except Exception as error:
+        logging.exception(
+            f'Error when trying to request weekly statistics',
+            error
+        )
+        return False
     message = Template(
         'Вы делали добрые дела 7 дней!\n'
         'Посмотрите, как прошла ваша неделя  в *""Просто спросить""*\n'
@@ -53,6 +68,7 @@ async def send_week_statistic(
         parse_mode='Markdown',
         reply_markup=reply_markup
     )
+    return True
 
 
 async def start_mailing_statistic(
