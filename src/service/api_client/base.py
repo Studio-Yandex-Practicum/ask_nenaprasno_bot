@@ -2,12 +2,11 @@ from abc import ABC, abstractmethod
 from http import HTTPStatus
 
 from core import config
-from service.api_client.models import BillStat, MonthStat, MyMonthStat, MyWeekStat, UserData, WeekStat
+from service.api_client.models import BillStat, MonthStat, UserData, UserMonthStat, UserWeekStat, WeekStat
 
 
 class AbstractAPIService(ABC):
-    def __init__(self):
-        self.site_url = config.SITE_API_URL
+    site_url: str = config.SITE_API_URL
 
     @abstractmethod
     async def get_bill(self) -> BillStat:
@@ -22,17 +21,17 @@ class AbstractAPIService(ABC):
         pass
 
     @abstractmethod
-    async def get_my_week_stat(self, telegram_id: int) -> MyWeekStat:
+    async def get_user_week_stat(self, telegram_name: str) -> UserWeekStat:
         pass
 
     @abstractmethod
-    async def get_my_month_stat(self, telegram_id: int) -> MyMonthStat:
+    async def get_user_month_stat(self, telegram_name: str) -> UserMonthStat:
         pass
 
     @abstractmethod
-    async def authenticate_user(self, telegram_id: int) -> UserData:
+    async def authenticate_user(self, telegram_name: str) -> UserData:
         pass
 
     @abstractmethod
-    async def set_user_timezone(self, telegram_id: int, user_timezone: str) -> HTTPStatus:
+    async def set_user_timezone(self, telegram_name: str, user_timezone: str) -> HTTPStatus:
         pass

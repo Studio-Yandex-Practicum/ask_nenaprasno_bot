@@ -1,8 +1,8 @@
 from core.config import IS_FAKE_API
-from service.api_client.mock_shemas import MockShemasAPIService
-from service.api_client.shemas import ShemasAPIService
+from service.api_client.mock_api_service import MockAPIService
+from service.api_client.site_api_service import SiteAPIService
 
 if IS_FAKE_API:
-    ConreateAPIService = MockShemasAPIService
+    ConreateAPIService = MockAPIService
 else:
-    ConreateAPIService = ShemasAPIService
+    ConreateAPIService = SiteAPIService
