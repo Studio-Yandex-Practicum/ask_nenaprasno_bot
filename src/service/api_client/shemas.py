@@ -1,8 +1,9 @@
 from http import HTTPStatus
 
 import httpx
-from base import AbstractAPIService
-from models import BillStat, MonthStat, MyMonthStat, MyWeekStat, UserData, WeekStat
+
+from service.api_client.base import AbstractAPIService
+from service.api_client.models import BillStat, MonthStat, MyMonthStat, MyWeekStat, UserData, WeekStat
 
 
 class ShemasAPIService(AbstractAPIService):

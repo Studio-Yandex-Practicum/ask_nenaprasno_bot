@@ -1,7 +1,16 @@
 from http import HTTPStatus
 
-from base import AbstractAPIService
-from models import BillStat, MonthStat, MyMonthStat, MyWeekStat, UserData, UserMonthStat, UserWeekStat, WeekStat
+from service.api_client.base import AbstractAPIService
+from service.api_client.models import (
+    BillStat,
+    MonthStat,
+    MyMonthStat,
+    MyWeekStat,
+    UserData,
+    UserMonthStat,
+    UserWeekStat,
+    WeekStat,
+)
 
 GET_BILL_RETURN = ["user1@telegram", "user1@telegram", "user1@telegram"]
 WEEK_STAT_RETURN = [
@@ -9,7 +18,7 @@ WEEK_STAT_RETURN = [
     UserWeekStat("user1@telegram", "UTC+3", "user2@trello", "2", "3", "2", "1"),
 ]
 MONT_STAT_RETURN = [UserMonthStat("UTC+4", "6", "8", "9.4"), UserMonthStat("UTC+4", "6", "8", "9.4")]
-MY_WEEK_STAT_RETURN = MyWeekStat("user2@trello", "3", "2", "1")
+MY_WEEK_STAT_RETURN = MyWeekStat("user2@trello", "3", "2", "1", "1")
 MY_MONT_STAT_RETURN = MyMonthStat("6", "8", "9.4")
 AUTH_RETURN = UserData("Bob", "UTC+3", "24")
 

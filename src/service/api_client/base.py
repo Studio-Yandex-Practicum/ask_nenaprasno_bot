@@ -1,9 +1,8 @@
 from abc import ABC, abstractmethod
 from http import HTTPStatus
 
-from models import BillStat, MonthStat, MyMonthStat, MyWeekStat, UserData, WeekStat
-
 from core import config
+from service.api_client.models import BillStat, MonthStat, MyMonthStat, MyWeekStat, UserData, WeekStat
 
 
 class AbstractAPIService(ABC):

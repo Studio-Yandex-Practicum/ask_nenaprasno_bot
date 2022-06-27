@@ -4,7 +4,7 @@ from telegram.ext import CallbackContext, CallbackQueryHandler, CommandHandler, 
 from constants import command_constants as cmd_const
 from constants import states
 from core.send_message import send_message
-from service import ConreateAPIService
+from service.api_client import ConreateAPIService
 
 
 async def start(update: Update, context: CallbackContext):
