@@ -143,6 +143,8 @@ async def handling_menu_button_click_callback(update: Update, context: ContextTy
 start_command_handler = CommandHandler("start", start)
 menu_command_handler = CommandHandler("menu", menu)
 
+callback_menu_handler = CallbackQueryHandler(handling_menu_button_click_callback)
+
 start_conversation = ConversationHandler(
     allow_reentry=True,
     persistent=True,
@@ -163,7 +165,7 @@ start_conversation = ConversationHandler(
             CallbackQueryHandler(skip_timezone_callback, pattern=callback.CALLBACK_SKIP_TIMEZONE_COMMAND),
             CallbackQueryHandler(timezone_message_callback),
         ],
-        states.MENU_STATE: [CallbackQueryHandler(handling_menu_button_click_callback)],
+        states.MENU_STATE: [callback_menu_handler],
     },
     fallbacks=[],
 )
