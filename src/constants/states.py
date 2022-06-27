@@ -1,0 +1,5 @@
+UNAUTHORIZED_STATE = "unauthorized_state"
+REGISTRATION_STATE = "registration_state"
+NEW_EXPERT_STATE = "new_expert_state"
+TIMEZONE_STATE = "timezone_state"
+MENU_STATE = "menu_state"
