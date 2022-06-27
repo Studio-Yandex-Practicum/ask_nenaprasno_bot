@@ -1,5 +1,4 @@
-from telegram.ext import (Application, ApplicationBuilder,
-                          CallbackContext, PicklePersistence)
+from telegram.ext import Application, ApplicationBuilder, CallbackContext, PicklePersistence
 
 from core import config
 from start_conversation import start_conversation
