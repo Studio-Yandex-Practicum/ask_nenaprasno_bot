@@ -52,9 +52,9 @@ async def trello_webhook_api(request: Request) -> Response:
         trello_model_id: int = response_json["model"]["id"]
         logging.info(f"Got trello request, model id: {trello_model_id}.")
     except KeyError:
-        logging.info(f"Got not trello or empty request.")
+        logging.info("Got not trello or empty request.")
     except json.decoder.JSONDecodeError:
-        logging.info(f"Got data is not json.")
+        logging.info("Got data is not json.")
     finally:
         return Response("Message received.", status_code=httpx.codes.OK)
 
