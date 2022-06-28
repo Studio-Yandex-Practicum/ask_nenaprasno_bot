@@ -5,7 +5,6 @@ from src.jobs import monthly_receipt_reminder_job, monthly_stat_job, weekly_stat
 from src.start_conversation import start_conversation
 
 
-
 def create_bot():
     """
     Create telegram bot application
