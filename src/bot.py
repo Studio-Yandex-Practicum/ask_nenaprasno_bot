@@ -1,8 +1,8 @@
 from telegram.ext import Application, ApplicationBuilder, PicklePersistence
 
-from core import config
-from jobs import monthly_receipt_reminder_job, monthly_stat_job, weekly_stat_job
-from start_conversation import start_conversation
+from src.core import config
+from src.jobs import monthly_receipt_reminder_job, monthly_stat_job, weekly_stat_job
+from src.start_conversation import start_conversation
 
 
 def create_bot():

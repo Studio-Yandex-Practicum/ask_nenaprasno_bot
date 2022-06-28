@@ -1,11 +1,11 @@
 from telegram import InlineKeyboardButton, InlineKeyboardMarkup, Update
 from telegram.ext import CallbackContext, CallbackQueryHandler, CommandHandler, ContextTypes, ConversationHandler
 
-from core.config import URL_SERVICE_RULES
-from core.send_message import send_message
-from service import ConreateAPIService
 from src.constants import callback_data as callback
 from src.constants import states
+from src.core.config import URL_SERVICE_RULES
+from src.core.send_message import send_message
+from src.service import ConreateAPIService
 
 
 async def start(update: Update, context: CallbackContext):

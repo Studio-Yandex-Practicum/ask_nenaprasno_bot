@@ -2,8 +2,8 @@ from http import HTTPStatus
 
 import httpx
 
-from service.api_client_base import APIService
-from service.api_client_dataclasses import BillStat, MonthStat, UserData, WeekStat
+from src.service.api_client_base import APIService
+from src.service.api_client_dataclasses import BillStat, MonthStat, UserData, WeekStat
 
 
 class RealAPIService(APIService):

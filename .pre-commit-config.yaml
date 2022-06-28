@@ -33,7 +33,7 @@ repos:
       entry: pylint
       language: system
       types: [python]
-      args: [-j=0, --max-line-length=120, --disable=W0613, --disable=W0611, --disable=E0401, --disable=R0902]
+      args: [-j=0, --max-line-length=120, --disable=W0613, --disable=R0902]
 
 - repo: local
   hooks:
