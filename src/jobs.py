@@ -7,10 +7,8 @@ async def weekly_stat_job(context: CallbackContext) -> None:
     """
     Send weekly statistics on the number of requests in the work
     """
-    success = await send_week_statistic(context=context)
-    if not success:
-        # TODO add Logic when send mailing statistic Failed
-        pass
+    await send_week_statistic(context=context)
+
 
 
 async def monthly_receipt_reminder_job(context: CallbackContext) -> None:
@@ -26,7 +24,5 @@ async def monthly_stat_job(context: CallbackContext) -> None:
     closed requests.
     Only if the user had requests
     """
-    success = await send_month_statistic(context=context)
-    if not success:
-        # TODO add Logic when send mailing statistic Failed
-        pass
+    await send_month_statistic(context=context)
+
