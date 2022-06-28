@@ -11,6 +11,7 @@ HOST = env.get("HOST")  # host для доступа к uvicorn серверу, 
 WEBHOOK_URL = env.get("WEBHOOK_URL")  # адрес сервера, где будет запущен бот
 PORT = int(env.get("BOT_PORT"))  # port для доступа к uvicorn серверу, по умолчанию 8000
 TOKEN = env.get("TELEGRAM_TOKEN")  # Токен телеграм бота
+CHAT_ID = env.get("CHAT_ID")  # ID Чата пользователя телеграмм бота, применяется для webhook.
 
 WEEKLY_STAT_TIME = datetime.strptime(env.get("WEEKLY_STAT_TIME"), "%H:%M")  # время еженельной статистики
 WEEKLY_STAT_WEEK_DAYS = tuple(
