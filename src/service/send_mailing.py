@@ -1,13 +1,12 @@
 from string import Template
-from typing import Any, Optional, Union, List
-import logging
+from typing import Optional
 
 from telegram.ext import CallbackContext
 from telegram import ReplyKeyboardMarkup
+from telegram.constants import ParseMode
 
-from src.core.send_message import send_message
-from src.service.api_client_dataclasses import UserMonthStat, UserWeekStat
 from src.service import ConreateAPIService
+from src.core.send_message import sending_statistics
 
 
 async def send_month_statistic(
@@ -19,14 +18,7 @@ async def send_month_statistic(
     :param context: CallbackContext
     :param reply_markup: ReplyKeyboardMarkup | None
     """
-    try:
-        mont_statistic_obj = await ConreateAPIService().get_month_stat()
-    except Exception as error:
-        logging.exception(
-            'Error when trying to request month statistics',
-            error
-        )
-        return False
+    mont_statistic_obj = await ConreateAPIService().get_month_stat()
     message = Template(
         'Это был отличный месяц!\n'
         'Посмотрите, как он прошел в *""Просто спросить""* 🔥\n\n'
@@ -37,10 +29,10 @@ async def send_month_statistic(
         'Мы рады работать в одной команде :)\n'
         '*Так держать!*'
     )
-    await start_mailing_statistic(
+    await sending_statistics(
         context=context, template_message=message,
         statistic=mont_statistic_obj.month_stat,
-        parse_mode='Markdown',
+        parse_mode=ParseMode.MARKDOWN,
         reply_markup=reply_markup
     )
     return True
@@ -55,14 +47,7 @@ async def send_week_statistic(
     :param context: CallbackContext
     :param reply_markup: ReplyKeyboardMarkup | None
     """
-    try:
-        week_statistic_obj = await ConreateAPIService().get_week_stat()
-    except Exception as error:
-        logging.exception(
-            'Error when trying to request weekly statistics',
-            error
-        )
-        return False
+    week_statistic_obj = await ConreateAPIService().get_week_stat()
     message = Template(
         'Вы делали добрые дела 7 дней!\n'
         'Посмотрите, как прошла ваша неделя  в *""Просто спросить""*\n'
@@ -74,35 +59,10 @@ async def send_week_statistic(
         'Мы рады работать в одной команде :)\n'
         '*Так держать!*'
     )
-    await start_mailing_statistic(
+    await sending_statistics(
         context=context, template_message=message,
         statistic=week_statistic_obj.week_stat,
-        parse_mode='Markdown',
+        parse_mode=ParseMode.MARKDOWN,
         reply_markup=reply_markup
     )
     return True
-
-
-async def start_mailing_statistic(
-    context: CallbackContext,
-    template_message: Template,
-    statistic: List[Union[UserMonthStat, UserWeekStat]],
-    parse_mode: Any = None,
-    reply_markup: Optional[ReplyKeyboardMarkup] = None,
-):
-    """
-    Start mailing message with statistics.
-    :param context: CallbackContext
-    :param template_message: Template
-    :param statistic: List[Union[UserMonthStat, UserWeekStat]]
-    :param parse_mode: Any = None
-    :param reply_markup: ReplyKeyboardMarkup | None
-    """
-    for user_statistic in statistic:
-        await send_message(
-            context=context,
-            chat_id=user_statistic.telegram_id,
-            text=template_message.substitute(**user_statistic.__dict__),
-            parse_mode=parse_mode,
-            reply_markup=reply_markup
-        )
