@@ -5,8 +5,8 @@ from starlette.responses import PlainTextResponse, Response
 from starlette.routing import Route
 from telegram import Update
 
-from src.bot import init_webhook
-from src.core import config
+from bot import init_webhook
+from core import config
 
 
 async def start_bot() -> None:

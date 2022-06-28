@@ -1,7 +1,7 @@
 from http import HTTPStatus
 
-from src.service.api_client_base import APIService
-from src.service.api_client_dataclasses import BillStat, MonthStat, UserData, UserMonthStat, UserWeekStat, WeekStat
+from service.api_client_base import APIService
+from service.api_client_dataclasses import BillStat, MonthStat, UserData, UserMonthStat, UserWeekStat, WeekStat
 
 
 class FakeAPIService(APIService):

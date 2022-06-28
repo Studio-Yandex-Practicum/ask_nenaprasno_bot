@@ -1,8 +1,8 @@
 from abc import ABC, abstractmethod
 from http import HTTPStatus
 
-from src.core import config
-from src.service.api_client_dataclasses import BillStat, MonthStat, UserData, WeekStat
+from core import config
+from service.api_client_dataclasses import BillStat, MonthStat, UserData, WeekStat
 
 
 class APIService(ABC):
