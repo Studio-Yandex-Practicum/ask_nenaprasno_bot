@@ -1,11 +1,9 @@
-import logging
 from string import Template
 
 from telegram.constants import ParseMode
 from telegram.ext import CallbackContext
 
 from src.core.send_message import send_statistics
-from src.service.send_mailing import send_month_statistic, send_week_statistic
 from src.service import ConreateAPIService
 
 
@@ -61,4 +59,3 @@ async def monthly_stat_job(context: CallbackContext) -> None:
         statistic=mont_statistic_obj.month_stat,
         parse_mode=ParseMode.MARKDOWN,
     )
-
