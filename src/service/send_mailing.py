@@ -23,7 +23,7 @@ async def send_month_statistic(
         mont_statistic_obj = await ConreateAPIService().get_month_stat()
     except Exception as error:
         logging.exception(
-            f'Error when trying to request month statistics',
+            'Error when trying to request month statistics',
             error
         )
         return False
@@ -59,7 +59,7 @@ async def send_week_statistic(
         week_statistic_obj = await ConreateAPIService().get_week_stat()
     except Exception as error:
         logging.exception(
-            f'Error when trying to request weekly statistics',
+            'Error when trying to request weekly statistics',
             error
         )
         return False
