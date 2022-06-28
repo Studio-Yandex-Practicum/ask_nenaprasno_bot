@@ -41,7 +41,7 @@ async def send_message(
         return False
 
 
-async def sending_statistics(
+async def send_statistics(
     context: CallbackContext,
     template_message: Template,
     statistic: List[Union[UserMonthStat, UserWeekStat]],
