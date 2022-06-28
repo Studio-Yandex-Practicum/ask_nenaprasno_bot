@@ -1,3 +1,5 @@
+import httpx
+import json
 import uvicorn
 from starlette.applications import Starlette
 from starlette.requests import Request
@@ -26,11 +28,11 @@ async def stop_bot() -> None:
 
 
 async def healthcheck_api(request: Request) -> PlainTextResponse:
-    message = f"Бот запущен и работает. Сообщение получено по запросу на Api сервера {config.WEBHOOK_URL}"
-    chat_id = config.CHAT_ID
-    await request.app.state.bot_app.bot.send_message(chat_id=chat_id, text=message)
+    message: str = f"Бот запущен и работает. Сообщение получено по запросу на Api сервера {config.WEBHOOK_URL}"
 
-    return PlainTextResponse(content=f"Message send to bot: {message}")
+    logging.info(message)
+
+    return PlainTextResponse(content=f'Request has been received and logged: "{message}"')
 
 
 async def telegram_webhook_api(request: Request) -> Response:
@@ -45,11 +47,16 @@ async def trello_webhook_api(request: Request) -> Response:
     :param request: Trello request
     :return: Response "ok"
     """
-    if request.method == "POST":
-        trello_model_id: int = dict(await request.json()).get("model", {}).get("id", 0)
-        logging.info(f"Got trello request, model id: {trello_model_id}" if trello_model_id else "Got empty request")
-        return Response("Message received", status_code=200)
-    return Response("ok", status_code=200)
+    response_json: dict = dict(await request.json())
+    try:
+        trello_model_id: int = response_json["model"]["id"]
+        logging.info(f"Got trello request, model id: {trello_model_id}.")
+    except KeyError:
+        logging.info(f"Got not trello or empty request.")
+    except json.decoder.JSONDecodeError:
+        logging.info(f"Got data is not json.")
+    finally:
+        return Response("Message received.", status_code=httpx.codes.OK)
 
 
 routes = [
