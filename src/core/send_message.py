@@ -1,6 +1,7 @@
 from typing import Optional
 import logging
 
+
 from telegram.constants import ParseMode
 from telegram.error import TelegramError
 from telegram.ext import CallbackContext
@@ -32,8 +33,5 @@ async def send_message(
         return True
 
     except TelegramError as error:
-        logging.exception(
-            f'The error sending the message to the chat: {chat_id}',
-            error
-        )
+        logging.exception(("The error sending the message to the chat: %s", chat_id), error)
         return False

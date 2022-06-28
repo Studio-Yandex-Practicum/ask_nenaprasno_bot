@@ -7,8 +7,13 @@
 ### В режиме polling'а:
 > python3 src/run_bot.py
 
-### В режиме webhook'а:
+### В режиме webhook'а (также в этом режиме будет запущена точка доступа для webhook'а trello):
 > python3 src/run_webhook_api.py
+#### Запросы от trello ожидаются на /trelloCallback, приходят в формате .json, [пример](src/example/trello_request.json). Принимает POST-запросы (с телом данных) и HEAD-запросы (для проверки доступности ресурса).
+#### Пример curl-запроса для отправки данных на trello endpoint:
+```
+curl -X POST -d '@src/example/trello_request.json' -H "Content-Type: application/json" localhost:8000/trelloWebhookApi # (localhost). - адрес сайта. (:8000). - порт, на который будет стучаться запрос или не указывать, если 80.
+```
 ## Проверка API сервера с использованием ngrok на локальном компьютере:
 - Установить ngrok с [сайта](https://ngrok.com/download)
 - [Зарегистрироваться](https://dashboard.ngrok.com/) и получить [токен](https://dashboard.ngrok.com/get-started/your-authtoken)
