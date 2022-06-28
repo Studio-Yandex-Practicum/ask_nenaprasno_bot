@@ -14,6 +14,11 @@ async def send_month_statistic(
     context: CallbackContext,
     reply_markup: Optional[ReplyKeyboardMarkup] = None,
 ):
+    """
+    Sends monthly statistics to users using a template message.
+    :param context: CallbackContext
+    :param reply_markup: ReplyKeyboardMarkup | None
+    """
     try:
         mont_statistic_obj = await ConreateAPIService().get_month_stat()
     except Exception as error:
@@ -45,6 +50,11 @@ async def send_week_statistic(
     context: CallbackContext,
     reply_markup: Optional[ReplyKeyboardMarkup] = None,
 ):
+    """
+    Sends weekly statistics to users using a template message.
+    :param context: CallbackContext
+    :param reply_markup: ReplyKeyboardMarkup | None
+    """
     try:
         week_statistic_obj = await ConreateAPIService().get_week_stat()
     except Exception as error:
@@ -80,6 +90,14 @@ async def start_mailing_statistic(
     parse_mode: Any = None,
     reply_markup: Optional[ReplyKeyboardMarkup] = None,
 ):
+    """
+    Start mailing message with statistics.
+    :param context: CallbackContext
+    :param template_message: Template
+    :param statistic: List[Union[UserMonthStat, UserWeekStat]]
+    :param parse_mode: Any = None
+    :param reply_markup: ReplyKeyboardMarkup | None
+    """
     for user_statistic in statistic:
         await send_message(
             context=context,
