@@ -8,8 +8,8 @@ class UserData:
     user_id_in_trello: str
 
 
-@dataclass
 # pylint: disable=R0902
+@dataclass
 class UserWeekStat:
     telegram_id: int
     user_timezone: str
