@@ -1,8 +1,7 @@
 from telegram import InlineKeyboardButton, InlineKeyboardMarkup, Update
 from telegram.ext import CallbackContext, CallbackQueryHandler, CommandHandler, ContextTypes, ConversationHandler
 
-from constants import callback_data as callback
-from constants import states
+from constants import callback_data, states
 from core.config import URL_SERVICE_RULES
 from core.send_message import send_message
 from service import ConreateAPIService
@@ -11,8 +10,8 @@ from service import ConreateAPIService
 async def start(update: Update, context: CallbackContext):
     keyboard = [
         [
-            InlineKeyboardButton("Да", callback_data=callback.CALLBACK_IS_EXPERT_COMMAND),
-            InlineKeyboardButton("Нет", callback_data=callback.CALLBACK_NOT_EXPERT_COMMAND),
+            InlineKeyboardButton("Да", callback_data=callback_data.CALLBACK_IS_EXPERT_COMMAND),
+            InlineKeyboardButton("Нет", callback_data=callback_data.CALLBACK_NOT_EXPERT_COMMAND),
         ]
     ]
     reply_markup = InlineKeyboardMarkup(keyboard)
@@ -28,8 +27,8 @@ async def start(update: Update, context: CallbackContext):
 async def not_expert_callback(update: Update, context: CallbackContext):
     keyboard = [
         [
-            InlineKeyboardButton("Да", callback_data=callback.CALLBACK_REGISTR_AS_EXPERT_COMMAND),
-            InlineKeyboardButton("Нет", callback_data=callback.CALLBACK_SUPPORT_OR_CONSULT_COMMAND),
+            InlineKeyboardButton("Да", callback_data=callback_data.CALLBACK_REGISTR_AS_EXPERT_COMMAND),
+            InlineKeyboardButton("Нет", callback_data=callback_data.CALLBACK_SUPPORT_OR_CONSULT_COMMAND),
         ]
     ]
     reply_markup = InlineKeyboardMarkup(keyboard)
@@ -115,15 +114,21 @@ async def menu(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     menu_buttons = [
         [
             InlineKeyboardButton(
-                text="⌚ Настроить часовой пояс", callback_data=callback.CALLBACK_CONFIGURATE_TIMEZONE_COMMAND
+                text="⌚ Настроить часовой пояс", callback_data=callback_data.CALLBACK_CONFIGURATE_TIMEZONE_COMMAND
             )
         ],
         [
-            InlineKeyboardButton(text="📊 Статистика за месяц", callback_data=callback.CALLBACK_STATISTIC_MONTH_COMMAND),
+            InlineKeyboardButton(
+                text="📊 Статистика за месяц", callback_data=callback_data.CALLBACK_STATISTIC_MONTH_COMMAND
+            ),
         ],
-        [InlineKeyboardButton(text="📈 Статистика за неделю", callback_data=callback.CALLBACK_STATISTIC_WEEK_COMMAND)],
-        [InlineKeyboardButton(text="📌 В работе", callback_data=callback.CALLBACK_ACTUAL_REQUESTS_COMMAND)],
-        [InlineKeyboardButton(text="🔥 сроки горят", callback_data=callback.CALLBACK_OVERDUE_REQUESTS_COMMAND)],
+        [
+            InlineKeyboardButton(
+                text="📈 Статистика за неделю", callback_data=callback_data.CALLBACK_STATISTIC_WEEK_COMMAND
+            )
+        ],
+        [InlineKeyboardButton(text="📌 В работе", callback_data=callback_data.CALLBACK_ACTUAL_REQUESTS_COMMAND)],
+        [InlineKeyboardButton(text="🔥 сроки горят", callback_data=callback_data.CALLBACK_OVERDUE_REQUESTS_COMMAND)],
         [
             InlineKeyboardButton(
                 text="📜 Правила сервиса",
@@ -152,17 +157,19 @@ start_conversation = ConversationHandler(
     entry_points=[start_command_handler, menu_command_handler],
     states={
         states.UNAUTHORIZED_STATE: [
-            CallbackQueryHandler(is_expert_callback, pattern=callback.CALLBACK_IS_EXPERT_COMMAND),
-            CallbackQueryHandler(not_expert_callback, pattern=callback.CALLBACK_NOT_EXPERT_COMMAND),
+            CallbackQueryHandler(is_expert_callback, pattern=callback_data.CALLBACK_IS_EXPERT_COMMAND),
+            CallbackQueryHandler(not_expert_callback, pattern=callback_data.CALLBACK_NOT_EXPERT_COMMAND),
         ],
         states.REGISTRATION_STATE: [
-            CallbackQueryHandler(registr_as_expert_callback, pattern=callback.CALLBACK_REGISTR_AS_EXPERT_COMMAND),
-            CallbackQueryHandler(support_or_consult_callback, pattern=callback.CALLBACK_SUPPORT_OR_CONSULT_COMMAND),
+            CallbackQueryHandler(registr_as_expert_callback, pattern=callback_data.CALLBACK_REGISTR_AS_EXPERT_COMMAND),
+            CallbackQueryHandler(
+                support_or_consult_callback, pattern=callback_data.CALLBACK_SUPPORT_OR_CONSULT_COMMAND
+            ),
         ],
         states.NEW_EXPERT_STATE: [CallbackQueryHandler(after_registr_message_callback)],
         states.TIMEZONE_STATE: [
-            CallbackQueryHandler(timezone_callback, pattern=callback.CALLBACK_TIMEZONE_COMMAND),
-            CallbackQueryHandler(skip_timezone_callback, pattern=callback.CALLBACK_SKIP_TIMEZONE_COMMAND),
+            CallbackQueryHandler(timezone_callback, pattern=callback_data.CALLBACK_TIMEZONE_COMMAND),
+            CallbackQueryHandler(skip_timezone_callback, pattern=callback_data.CALLBACK_SKIP_TIMEZONE_COMMAND),
             CallbackQueryHandler(timezone_message_callback),
         ],
         states.MENU_STATE: [callback_menu_handler],
