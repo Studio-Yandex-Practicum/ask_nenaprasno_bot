@@ -8,6 +8,7 @@ class UserData:
     user_id_in_trello: str
 
 
+# pylint: disable=R0902
 @dataclass
 class UserWeekStat:
     telegram_id: int
