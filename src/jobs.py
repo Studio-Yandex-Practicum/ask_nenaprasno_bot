@@ -1,4 +1,5 @@
 from string import Template
+import logging
 
 from telegram.ext import CallbackContext
 
@@ -23,6 +24,13 @@ async def weekly_stat_job(context: CallbackContext) -> None:
         '*Так держать!*'
     )
     for user_statistic in week_statistic_obj.week_stat:
+        if user_statistic.username not in context.bot_data['username_to_id']:
+            logging.warning(
+                f'User with username {user_statistic.username} '
+                f'not found in bot data. Maybe user not run bot '
+                f'or not authenticated in bot')
+            continue
+        chat_id = context.bot_data['username_to_id'][user_statistic.username]
         message = pre_message.substitute(
             tickets_closed=user_statistic.last_week_user_tickets_closed,
             tikets_in_work=user_statistic.last_week_user_tikets_in_work,
@@ -31,7 +39,7 @@ async def weekly_stat_job(context: CallbackContext) -> None:
         )
         await send_message(
             context=context,
-            chat_id=user_statistic.telegram_id,
+            chat_id=chat_id,
             text=message,
         )
 
@@ -61,6 +69,13 @@ async def monthly_stat_job(context: CallbackContext) -> None:
         '*Так держать!*'
     )
     for user_statistic in mont_statistic_obj.month_stat:
+        if user_statistic.username not in context.bot_data['username_to_id']:
+            logging.warning(
+                f'User with username {user_statistic.username} '
+                f'not found in bot data. Maybe user not run bot '
+                f'or not authenticated in bot')
+            continue
+        chat_id = context.bot_data['username_to_id'][user_statistic.username]
         message = pre_message.substitute(
             tickets_closed=user_statistic.user_tickets_closed,
             rating=user_statistic.user_rating,
@@ -68,6 +83,6 @@ async def monthly_stat_job(context: CallbackContext) -> None:
         )
         await send_message(
             context=context,
-            chat_id=user_statistic.telegram_id,
+            chat_id=chat_id,
             text=message,
         )
