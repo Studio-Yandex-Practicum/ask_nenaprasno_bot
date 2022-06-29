@@ -7,6 +7,8 @@ from timezonefinder import TimezoneFinder
 
 from service.api_client_fake import FakeAPIService
 
+TIME_ZONE = "UTC"
+
 
 async def get_timezone(update: Update, context: CallbackContext) -> None:
     keyboard = [
@@ -26,14 +28,14 @@ async def get_timezone(update: Update, context: CallbackContext) -> None:
     )
 
 
-async def set_timezone(telegram_id: int, utc: int, context: CallbackContext):
+async def set_timezone(telegram_id: int, text_utc: str, context: CallbackContext):
     await context.bot.send_message(
         chat_id=telegram_id,
-        text=f"Установлен часовой пояс для UTC {utc}",
+        text=f"Установлен часовой пояс для {text_utc}",
         reply_markup=ReplyKeyboardRemove(),
     )
     api = FakeAPIService()
-    await api.set_user_timezone(telegram_id=telegram_id, user_timezone=utc)
+    await api.set_user_timezone(telegram_id=telegram_id, user_timezone=text_utc)
 
 
 async def get_timezone_from_location(update: Update, context: CallbackContext) -> None:
@@ -43,13 +45,16 @@ async def get_timezone_from_location(update: Update, context: CallbackContext) -
     if user_timezone is None:
         await context.bot.send_message(
             chat_id=update.effective_chat.id,
-            text=("Не удалось определить часовой пояс. Пожалуйста, введите его вручную. Например: UTC+3"),
+            text=("Не удалось определить часовой пояс. Пожалуйста, введите его вручную. Например: UTC+03:00"),
         )
     else:
         time_zone = pytz.timezone(user_timezone)
         utc_time = datetime.datetime.utcnow()
-        utc = int(time_zone.utcoffset(utc_time).total_seconds() // 3600)
-        await set_timezone(update.effective_chat.id, utc, context)
+        utc = float(time_zone.utcoffset(utc_time).total_seconds() / 3600)
+        hours, minutes = divmod(utc * 60, 60)
+        utc = f"{hours:+03.0f}:{minutes:02.0f}"
+        text_utc = TIME_ZONE + utc
+        await set_timezone(update.effective_chat.id, text_utc, context)
 
 
 async def get_timezone_from_text_message(update: Update, context: CallbackContext) -> None:
@@ -57,23 +62,10 @@ async def get_timezone_from_text_message(update: Update, context: CallbackContex
     if text == "Напишу свою таймзону сам":
         await context.bot.send_message(
             chat_id=update.effective_chat.id,
-            text="Введите таймзону. Например: UTC+3",
+            text="Введите таймзону UTC. Например: UTC+03:00",
         )
     else:
-        text = text.replace(" ", "")
-        try:
-            utc = int(list(filter(None, text.split("UTC")))[0])
-            await set_timezone(update.effective_chat.id, utc, context)
-        except ValueError:
-            if set("/").isdisjoint(text):
-                await context.bot.send_message(
-                    chat_id=update.effective_chat.id,
-                    text=(
-                        f'Не смогли установить часовой пояс для "{text}". Попробуйте'
-                        " написать ещё раз. Например: : UTC+3\nИли передайте геолокацию для его автоматического"
-                        " определения."
-                    ),
-                )
+        pass
 
 
 get_timezone_command_handler = CommandHandler("get_timezone", get_timezone)
