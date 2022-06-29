@@ -1,4 +1,5 @@
 import logging
+
 from logging.handlers import TimedRotatingFileHandler
 
 from src.core.config import LOG_PATH

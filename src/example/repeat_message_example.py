@@ -1,9 +1,9 @@
 from telegram import InlineKeyboardMarkup, Update
 from telegram.ext import Application, CallbackQueryHandler, CommandHandler, ContextTypes
 
-from src.constants.command_constants import COMMAND_REPEAT
-from src.core.config import TOKEN
-from src.service.repeat_message import repeat_after_one_hour_button, repeat_message_after_1_hour_callback
+from constants.callback_data import CALLBACK_REPEAT_COMMAND
+from core.config import TOKEN
+from service.repeat_message import repeat_after_one_hour_button, repeat_message_after_1_hour_callback
 
 
 async def start(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
@@ -22,7 +22,7 @@ def main() -> None:
     application = Application.builder().token(TOKEN).build()
 
     application.add_handler(CommandHandler("start", start))
-    application.add_handler(CallbackQueryHandler(repeat_message_after_1_hour_callback, pattern=COMMAND_REPEAT))
+    application.add_handler(CallbackQueryHandler(repeat_message_after_1_hour_callback, pattern=CALLBACK_REPEAT_COMMAND))
     application.run_polling()
 
 

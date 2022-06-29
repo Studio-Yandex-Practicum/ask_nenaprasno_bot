@@ -1,8 +1,8 @@
-from telegram import InlineKeyboardButton, InlineKeyboardMarkup, ReplyKeyboardRemove, Update
+from telegram import InlineKeyboardButton, InlineKeyboardMarkup, Update
 from telegram.ext import CallbackContext, CallbackQueryHandler, CommandHandler, ContextTypes, ConversationHandler
 
-from constants import command_constants as cmd_const
-from constants import states
+from constants import callback_data, states
+from core.config import URL_SERVICE_RULES
 from core.send_message import send_message
 from service import ConreateAPIService
 
@@ -10,8 +10,8 @@ from service import ConreateAPIService
 async def start(update: Update, context: CallbackContext):
     keyboard = [
         [
-            InlineKeyboardButton("Да", callback_data=cmd_const.IS_EXPERT_COMMAND),
-            InlineKeyboardButton("Нет", callback_data=cmd_const.NOT_EXPERT_COMMAND),
+            InlineKeyboardButton("Да", callback_data=callback_data.CALLBACK_IS_EXPERT_COMMAND),
+            InlineKeyboardButton("Нет", callback_data=callback_data.CALLBACK_NOT_EXPERT_COMMAND),
         ]
     ]
     reply_markup = InlineKeyboardMarkup(keyboard)
@@ -27,8 +27,8 @@ async def start(update: Update, context: CallbackContext):
 async def not_expert_callback(update: Update, context: CallbackContext):
     keyboard = [
         [
-            InlineKeyboardButton("Да", callback_data=cmd_const.REGISTR_AS_EXPERT_COMMAND),
-            InlineKeyboardButton("Нет", callback_data=cmd_const.SUPPORT_OR_CONSULT_COMMAND),
+            InlineKeyboardButton("Да", callback_data=callback_data.CALLBACK_REGISTR_AS_EXPERT_COMMAND),
+            InlineKeyboardButton("Нет", callback_data=callback_data.CALLBACK_SUPPORT_OR_CONSULT_COMMAND),
         ]
     ]
     reply_markup = InlineKeyboardMarkup(keyboard)
@@ -110,37 +110,69 @@ async def timezone_message_callback(update: Update, context: ContextTypes.DEFAUL
     return ConversationHandler.END
 
 
-async def cancel(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    await update.message.reply_text(
-        text="Хьюстон, у нас проблемы. Что-то пошло не так", reply_markup=ReplyKeyboardRemove()
-    )
-    return ConversationHandler.END
+async def menu(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
+    menu_buttons = [
+        [
+            InlineKeyboardButton(
+                text="⌚ Настроить часовой пояс", callback_data=callback_data.CALLBACK_CONFIGURATE_TIMEZONE_COMMAND
+            )
+        ],
+        [
+            InlineKeyboardButton(
+                text="📊 Статистика за месяц", callback_data=callback_data.CALLBACK_STATISTIC_MONTH_COMMAND
+            ),
+        ],
+        [
+            InlineKeyboardButton(
+                text="📈 Статистика за неделю", callback_data=callback_data.CALLBACK_STATISTIC_WEEK_COMMAND
+            )
+        ],
+        [InlineKeyboardButton(text="📌 В работе", callback_data=callback_data.CALLBACK_ACTUAL_REQUESTS_COMMAND)],
+        [InlineKeyboardButton(text="🔥 сроки горят", callback_data=callback_data.CALLBACK_OVERDUE_REQUESTS_COMMAND)],
+        [
+            InlineKeyboardButton(
+                text="📜 Правила сервиса",
+                url=URL_SERVICE_RULES,
+            )
+        ],
+    ]
+    await update.message.reply_text("Меню", reply_markup=InlineKeyboardMarkup(menu_buttons))
+
+
+async def handling_menu_button_click_callback(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
+    query = update.callback_query
+    await query.answer()
+    await query.edit_message_text(query.data)
 
 
 start_command_handler = CommandHandler("start", start)
-cancel_command_handler = CommandHandler("cancel", cancel)
+menu_command_handler = CommandHandler("menu", menu)
+
+callback_menu_handler = CallbackQueryHandler(handling_menu_button_click_callback)
 
 start_conversation = ConversationHandler(
     allow_reentry=True,
     persistent=True,
     name="start_conversation",
-    entry_points=[start_command_handler],
+    entry_points=[start_command_handler, menu_command_handler],
     states={
         states.UNAUTHORIZED_STATE: [
-            CallbackQueryHandler(is_expert_callback, pattern=cmd_const.IS_EXPERT_COMMAND),
-            CallbackQueryHandler(not_expert_callback, pattern=cmd_const.NOT_EXPERT_COMMAND),
+            CallbackQueryHandler(is_expert_callback, pattern=callback_data.CALLBACK_IS_EXPERT_COMMAND),
+            CallbackQueryHandler(not_expert_callback, pattern=callback_data.CALLBACK_NOT_EXPERT_COMMAND),
         ],
         states.REGISTRATION_STATE: [
-            CallbackQueryHandler(registr_as_expert_callback, pattern=cmd_const.REGISTR_AS_EXPERT_COMMAND),
-            CallbackQueryHandler(support_or_consult_callback, pattern=cmd_const.SUPPORT_OR_CONSULT_COMMAND),
+            CallbackQueryHandler(registr_as_expert_callback, pattern=callback_data.CALLBACK_REGISTR_AS_EXPERT_COMMAND),
+            CallbackQueryHandler(
+                support_or_consult_callback, pattern=callback_data.CALLBACK_SUPPORT_OR_CONSULT_COMMAND
+            ),
         ],
         states.NEW_EXPERT_STATE: [CallbackQueryHandler(after_registr_message_callback)],
         states.TIMEZONE_STATE: [
-            CallbackQueryHandler(timezone_callback, pattern=cmd_const.TIMEZONE_COMMAND),
-            CallbackQueryHandler(skip_timezone_callback, pattern=cmd_const.SKIP_TIMEZONE_COMMAND),
+            CallbackQueryHandler(timezone_callback, pattern=callback_data.CALLBACK_TIMEZONE_COMMAND),
+            CallbackQueryHandler(skip_timezone_callback, pattern=callback_data.CALLBACK_SKIP_TIMEZONE_COMMAND),
             CallbackQueryHandler(timezone_message_callback),
         ],
-        states.MENU_STATE: [],
+        states.MENU_STATE: [callback_menu_handler],
     },
-    fallbacks=[cancel_command_handler],
+    fallbacks=[],
 )

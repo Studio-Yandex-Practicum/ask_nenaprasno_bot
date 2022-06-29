@@ -1,29 +1,8 @@
-from telegram.ext import (Application, ApplicationBuilder,
-                          CallbackContext, PicklePersistence)
+from telegram.ext import Application, ApplicationBuilder, PicklePersistence
 
 from core import config
+from jobs import monthly_receipt_reminder_job, monthly_stat_job, weekly_stat_job
 from start_conversation import start_conversation
-
-
-async def weekly_stat_job(context: CallbackContext) -> None:
-    """
-    Send weekly statistics on the number of requests in the work
-    """
-
-
-async def monthly_receipt_reminder_job(context: CallbackContext) -> None:
-    """
-    Send monthly reminder about the receipt formation during payment
-    Only for self-employed users
-    """
-
-
-async def monthly_stat_job(context: CallbackContext) -> None:
-    """
-    Send monthly statistics on the number of successfully
-    closed requests.
-    Only if the user had requests
-    """
 
 
 def create_bot():
@@ -49,7 +28,7 @@ async def init_webhook() -> Application:
     """
     bot_app = create_bot()
     bot_app.updater = None
-    await bot_app.bot.set_webhook(url=f"{config.WEBHOOK_URL}/telegram")
+    await bot_app.bot.set_webhook(url=f"{config.WEBHOOK_URL}")
     return bot_app
 
 
