@@ -1,5 +1,6 @@
-import httpx
 import json
+
+import httpx
 import uvicorn
 from starlette.applications import Starlette
 from starlette.requests import Request
@@ -7,9 +8,10 @@ from starlette.responses import PlainTextResponse, Response
 from starlette.routing import Route
 from telegram import Update
 
-from core import config
 from bot import init_webhook
+from core import config
 from core.logger import logging
+from service.trello_data_deserializer import TrelloData, trello_deserializer
 
 
 async def start_bot() -> None:
@@ -49,14 +51,14 @@ async def trello_webhook_api(request: Request) -> Response:
     """
     response_json: dict = dict(await request.json())
     try:
-        trello_model_id: int = response_json["model"]["id"]
-        logging.info(f"Got trello request, model id: {trello_model_id}.")
+        trello_data: TrelloData = await trello_deserializer(response_json)
+        logging.info(f"Got trello request: {trello_data}.")
     except KeyError:
         logging.info("Got not trello or empty request.")
     except json.decoder.JSONDecodeError:
         logging.info("Got data is not json.")
     finally:
-        return Response("Message received.", status_code=httpx.codes.OK)
+        Response("Message received.", status_code=httpx.codes.OK)
 
 
 routes = [
@@ -67,5 +69,5 @@ routes = [
 
 api = Starlette(routes=routes, on_startup=[start_bot], on_shutdown=[stop_bot])
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     uvicorn.run(app=api, debug=True, host=config.HOST, port=config.PORT)
