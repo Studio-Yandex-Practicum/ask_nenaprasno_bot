@@ -3,15 +3,16 @@ from pathlib import Path
 from datetime import datetime
 from dotenv import dotenv_values
 
-BASE_DIR = Path(__file__).parent.parent.parent
-LOG_PATH = BASE_DIR / 'logs'
-LOG_FILE = os.path.join(LOG_PATH, 'bot-log.txt')
+BASE_DIR = Path(__file__).resolve().parent.parent
 
 # --------------------------------------------------------------------------------- #
 # Getting variables from .env                                                       #
 # --------------------------------------------------------------------------------- #
 
 env = dotenv_values()
+
+LOG_NAME = env.get("LOG_NAME")
+LOG_PATH = BASE_DIR / LOG_NAME
 
 HOST = env.get("HOST")  # host для доступа к uvicorn серверу, по умолчанию localhost или 127.0.0.1
 WEBHOOK_URL = env.get("WEBHOOK_URL")  # адрес сервера, где будет запущен бот

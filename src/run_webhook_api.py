@@ -25,8 +25,7 @@ async def stop_bot() -> None:
 
 
 async def health(request: Request) -> PlainTextResponse:
-    message = (f"Бот запущен и работает. Сообщение получено по запросу на Api "
-               f"сервера {config.WEBHOOK_URL}")
+    message = f"Бот запущен и работает. Сообщение получено по запросу на Api сервера {config.WEBHOOK_URL}"
     chat_id = config.CHAT_ID
     await request.app.state.bot_app.bot.send_message(chat_id=chat_id,
                                                      text=message)
@@ -36,8 +35,7 @@ async def health(request: Request) -> PlainTextResponse:
 
 async def telegram(request: Request) -> Response:
     bot_app = request.app.state.bot_app
-    await bot_app.update_queue.put(Update.de_json(data=await request.json(),
-                                                  bot=bot_app.bot))
+    await bot_app.update_queue.put(Update.de_json(data=await request.json(), bot=bot_app.bot))
     return Response()
 
 
