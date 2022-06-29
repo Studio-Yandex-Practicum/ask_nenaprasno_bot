@@ -11,7 +11,7 @@ class UserData:
 @dataclass
 class WeekStat:
     telegram_name: str
-    user_timezone: str
+    user_time_zone: str
     user_name_in_trello: str
     last_week_user_tickets_closed: int
     last_week_user_tickets_not_expring: int
@@ -24,7 +24,7 @@ class WeekStat:
 @dataclass
 class MonthStat:
     telegram_name: str
-    user_timezone: str
+    user_time_zone: str
     user_tickets_closed: int
     user_rating: float
     user_ticket_resolve_avg_time: float

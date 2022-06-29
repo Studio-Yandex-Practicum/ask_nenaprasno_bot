@@ -6,13 +6,13 @@ from service.api_client.models import BillStat, MonthStat, UserData, UserMonthSt
 
 class MockAPIService(AbstractAPIService):
     async def get_bill(self) -> BillStat:
-        return BillStat(["user1@telegram", "user2@telegram", "user3@telegram"])
+        return BillStat(telegram_name=["user1@telegram", "user2@telegram", "user3@telegram"])
 
     async def get_week_stat(self) -> list[WeekStat]:
         return [
             WeekStat(
                 telegram_name="user1@telegram",
-                user_timezone="UTC+3",
+                user_time_zone="UTC+3",
                 user_name_in_trello="user1@trello",
                 last_week_user_tickets_closed=10,
                 last_week_user_tickets_not_expring=2,
@@ -23,7 +23,7 @@ class MockAPIService(AbstractAPIService):
             ),
             WeekStat(
                 telegram_name="user2@telegram",
-                user_timezone="UTC+3",
+                user_time_zone="UTC+3",
                 user_name_in_trello="user2@trello",
                 last_week_user_tickets_closed=5,
                 last_week_user_tickets_not_expring=3,
@@ -38,14 +38,14 @@ class MockAPIService(AbstractAPIService):
         return [
             MonthStat(
                 telegram_name="user1@telegram",
-                user_timezone="UTC+3",
+                user_time_zone="UTC+3",
                 user_tickets_closed=10,
                 user_rating=3.2,
                 user_ticket_resolve_avg_time=4.1,
             ),
             MonthStat(
                 telegram_name="user2@telegram",
-                user_timezone="UTC+3",
+                user_time_zone="UTC+3",
                 user_tickets_closed=5,
                 user_rating=2.2,
                 user_ticket_resolve_avg_time=5.1,
@@ -77,5 +77,5 @@ class MockAPIService(AbstractAPIService):
             user_name_in_trello="user1@telegram",
         )
 
-    async def set_user_timezone(self, telegram_name: str, user_timezone: str) -> HTTPStatus:
+    async def set_user_timezone(self, telegram_name: str, user_time_zone: str) -> HTTPStatus:
         return HTTPStatus.OK

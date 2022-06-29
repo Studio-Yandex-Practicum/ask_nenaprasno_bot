@@ -6,6 +6,10 @@ from service.api_client.models import BillStat, MonthStat, UserData, UserMonthSt
 
 
 class SiteAPIService(AbstractAPIService):
+    """
+    TODO: development after Frontend API creation
+    """
+
     def __init__(self):
         self.site_url: str = config.SITE_API_URL
 
@@ -15,7 +19,7 @@ class SiteAPIService(AbstractAPIService):
         async with httpx.AsyncClient() as client:
             response = await client.get(url)
             response = await response.json()
-            return response["telegrame_name"]
+            return response["telegram_name"]
         """
 
     async def get_week_stat(self) -> list[WeekStat]:
@@ -26,7 +30,7 @@ class SiteAPIService(AbstractAPIService):
             return [
                 WeekStat(
                     telegram_name=week_stat["telegram_name"],
-                    user_timezone=week_stat["user_timezone"],
+                    user_time_zone=week_stat["user_timezone"],
                     user_name_in_trello=week_stat["user_name_in_trello"],
                     last_week_user_tickets_closed=week_stat["last_week_user_tickets_closed"],
                     last_week_user_tickets_not_expring=week_stat["last_week_user_tickets_not_expring"],
@@ -47,7 +51,7 @@ class SiteAPIService(AbstractAPIService):
             return [
                 MonthStat(
                     telegram_name=month_stat["telegram_name"],
-                    user_timezone=month_stat["user_timezone"],
+                    user_time_zone=month_stat["user_timezone"],
                     user_tickets_closed=month_stat["user_tickets_closed"],
                     user_rating=month_stat["user_rating"],
                     user_ticket_resolve_avg_time=month_stat["user_ticket_resolve_avg_time"],
@@ -79,7 +83,6 @@ class SiteAPIService(AbstractAPIService):
         async with httpx.AsyncClient() as client:
             response = await client.get(url)
             response = await response.json()
-
             return UserMonthStat(
                 user_tickets_closed=response["user_tickets_closed"],
                 user_rating=response["user_rating"],
@@ -94,16 +97,16 @@ class SiteAPIService(AbstractAPIService):
             response = await client.post(url, data={"telegram_name": telegram_name})
             response = await response.json()
             return UserData(
-                user_name=response["username"],
-                user_time_zone=response["user_timezone"],
+                user_name=response["user_name"],
+                user_time_zone=response["user_time_zone"],
                 user_name_in_trello=response["user_name_in_trello"],
             )
         """
 
-    async def set_user_timezone(self, telegram_name: str, user_timezone: str) -> httpx:
+    async def set_user_timezone(self, telegram_name: str, user_time_zone: str) -> httpx:
         """
         url = f"{self.site_url}/tgbot/user"
         async with httpx.AsyncClient() as client:
-            response = await client.put(url, data={"telegram_name": telegram_name, "user_timezone": user_timezone})
+            response = await client.put(url, data={"telegram_name": telegram_name, "user_time_zone": user_time_zone})
             return response.status_code == httpx.codes.OK
         """
