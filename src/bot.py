@@ -12,6 +12,7 @@ def create_bot():
     """
     bot_persistence = PicklePersistence(filepath=config.BOT_PERSISTENCE_FILE)
     bot_app = ApplicationBuilder().token(config.TOKEN).persistence(persistence=bot_persistence).build()
+    bot_app.bot_data["username_to_id"] = {}
     bot_app.add_handler(start_conversation)
     bot_app.job_queue.run_daily(weekly_stat_job, time=config.WEEKLY_STAT_TIME, days=config.WEEKLY_STAT_WEEK_DAYS)
     bot_app.job_queue.run_monthly(

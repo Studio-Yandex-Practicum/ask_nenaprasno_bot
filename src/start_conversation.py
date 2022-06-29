@@ -86,8 +86,6 @@ async def is_expert_callback(update: Update, context: CallbackContext):
     context.user_data["user_name"] = user_data.user_name
     context.user_data["user_id_in_trello"] = user_data.user_id_in_trello
     context.user_data["user_time_zone"] = user_data.user_time_zone
-    if "username_to_id" not in context.bot_data:
-        context.bot_data["username_to_id"] = {}
     context.bot_data["username_to_id"][user_data.user_name] = telegram_id
     await update.callback_query.edit_message_text(
         text=f"Авторизация прошла успешно\n" f"Добро пожаловать {user_data.user_name}"
