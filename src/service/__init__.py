@@ -3,6 +3,6 @@ from service.api_client_fake import FakeAPIService
 from service.api_client_real import RealAPIService
 
 if IS_FAKE_API:
-    ConreateAPIService = FakeAPIService
+    ConcreateAPIService = FakeAPIService
 else:
-    ConreateAPIService = RealAPIService
+    ConcreateAPIService = RealAPIService

@@ -3,7 +3,7 @@ from telegram.ext import CallbackContext, CallbackQueryHandler, CommandHandler, 
 
 from core.config import URL_SERVICE_RULES
 from core.send_message import send_message
-from service import ConreateAPIService
+from service import ConcreateAPIService
 from src.constants import callback_data as callback
 from src.constants import states
 
@@ -78,7 +78,7 @@ async def is_expert_callback(update: Update, context: CallbackContext):
     """
     try to authenticate telegram user on site API and write trello_id to persistence file
     """
-    api_service = ConreateAPIService()
+    api_service = ConcreateAPIService()
     telegram_id = update.effective_user.id
     user_data = await api_service.authenticate_user(telegram_id=telegram_id)
     if user_data is None:
@@ -91,14 +91,17 @@ async def is_expert_callback(update: Update, context: CallbackContext):
         text=f"Авторизация прошла успешно\n" f"Добро пожаловать {user_data.user_name}"
     )
     await update.callback_query.answer()
+    print(states.TIMEZONE_STATE)
     return states.TIMEZONE_STATE
 
 
 async def timezone_callback(update: Update, context: CallbackContext):
+    print(states.MENU_STATE, "set")
     return states.MENU_STATE
 
 
 async def skip_timezone_callback(update: Update, context: CallbackContext):
+    print(states.MENU_STATE, "skip")
     return states.MENU_STATE
 
 
@@ -138,6 +141,11 @@ async def handling_menu_button_click_callback(update: Update, context: ContextTy
     query = update.callback_query
     await query.answer()
     await query.edit_message_text(query.data)
+    await send_message(
+        context=context,
+        chat_id=update.effective_user.id,
+        text="menu-click.",
+    )
 
 
 start_command_handler = CommandHandler("start", start)
@@ -145,11 +153,23 @@ menu_command_handler = CommandHandler("menu", menu)
 
 callback_menu_handler = CallbackQueryHandler(handling_menu_button_click_callback)
 
+
+async def add_menu_dialog_callback(update: Update, context: ContextTypes.DEFAULT_TYPE):
+
+    await send_message(
+        context=context,
+        chat_id=update.effective_user.id,
+        text="Меню разблокировано.",
+    )
+
+    return ConversationHandler.END
+
+
 start_conversation = ConversationHandler(
     allow_reentry=True,
     persistent=True,
     name="start_conversation",
-    entry_points=[start_command_handler, menu_command_handler],
+    entry_points=[start_command_handler],
     states={
         states.UNAUTHORIZED_STATE: [
             CallbackQueryHandler(is_expert_callback, pattern=callback.CALLBACK_IS_EXPERT_COMMAND),
@@ -161,11 +181,17 @@ start_conversation = ConversationHandler(
         ],
         states.NEW_EXPERT_STATE: [CallbackQueryHandler(after_registr_message_callback)],
         states.TIMEZONE_STATE: [
+            menu_command_handler,
+            # callback_menu_handler,
             CallbackQueryHandler(timezone_callback, pattern=callback.CALLBACK_TIMEZONE_COMMAND),
             CallbackQueryHandler(skip_timezone_callback, pattern=callback.CALLBACK_SKIP_TIMEZONE_COMMAND),
             CallbackQueryHandler(timezone_message_callback),
         ],
-        states.MENU_STATE: [callback_menu_handler],
+        states.MENU_STATE: [
+            menu_command_handler,
+            callback_menu_handler,
+            CallbackQueryHandler(add_menu_dialog_callback),
+        ],
     },
     fallbacks=[],
 )
