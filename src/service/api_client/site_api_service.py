@@ -14,13 +14,7 @@ class SiteAPIService(AbstractAPIService):
         self.site_url: str = config.SITE_API_URL
 
     async def get_bill(self) -> BillStat:
-        """
-        url = f"{self.site_url}/tgbot/bill"
-        async with httpx.AsyncClient() as client:
-            response = await client.get(url)
-            response = await response.json()
-            return response["telegram_name"]
-        """
+        pass
 
     async def get_week_stat(self) -> list[WeekStat]:
         url = f"{self.site_url}/tgbot/stat/weekly"
@@ -43,70 +37,16 @@ class SiteAPIService(AbstractAPIService):
             ]
 
     async def get_month_stat(self) -> list[MonthStat]:
-        """
-        url = f"{self.site_url}/tgbot/stat/monthly"
-        async with httpx.AsyncClient() as client:
-            response = await client.get(url)
-            response = await response.json()
-            return [
-                MonthStat(
-                    telegram_name=month_stat["telegram_name"],
-                    user_time_zone=month_stat["user_timezone"],
-                    user_tickets_closed=month_stat["user_tickets_closed"],
-                    user_rating=month_stat["user_rating"],
-                    user_ticket_resolve_avg_time=month_stat["user_ticket_resolve_avg_time"],
-                )
-                for month_stat in response
-            ]
-        """
+        pass
 
     async def get_user_week_stat(self, telegram_name: str) -> UserWeekStat:
-        """
-        url = f"{self.site_url}/tgbot/stat/weekly/user/{telegram_name}"
-        async with httpx.AsyncClient() as client:
-            response = await client.get(url)
-            response = await response.json()
-            return UserWeekStat(
-                user_name_in_trello=response["user_name_in_trello"],
-                last_week_user_tickets_closed=response["last_week_user_tickets_closed"],
-                last_week_user_tickets_not_expring=response["last_week_user_tickets_not_expring"],
-                last_week_user_tickets_expiring=response["last_week_user_tickets_expiring"],
-                last_week_user_tickets_expired=response["last_week_user_tickets_expired"],
-                last_week_user_tickets_in_work=response["last_week_user_tickets_in_work"],
-                last_week_user_tickets_all=response["last_week_user_tickets_all"],
-            )
-        """
+        pass
 
     async def get_user_month_stat(self, telegram_name: str) -> UserMonthStat:
-        """
-        url = f"{self.site_url}/tgbot/stat/monthly/user/{telegram_name}"
-        async with httpx.AsyncClient() as client:
-            response = await client.get(url)
-            response = await response.json()
-            return UserMonthStat(
-                user_tickets_closed=response["user_tickets_closed"],
-                user_rating=response["user_rating"],
-                user_ticket_resolve_avg_time=response["user_ticket_resolve_avg_time"],
-            )
-        """
+        pass
 
     async def authenticate_user(self, telegram_name: str) -> UserData | None:
-        """
-        url = f"{self.site_url}/tgbot/auth"
-        async with httpx.AsyncClient() as client:
-            response = await client.post(url, data={"telegram_name": telegram_name})
-            response = await response.json()
-            return UserData(
-                user_name=response["user_name"],
-                user_time_zone=response["user_time_zone"],
-                user_name_in_trello=response["user_name_in_trello"],
-            )
-        """
+        pass
 
     async def set_user_timezone(self, telegram_name: str, user_time_zone: str) -> httpx:
-        """
-        url = f"{self.site_url}/tgbot/user"
-        async with httpx.AsyncClient() as client:
-            response = await client.put(url, data={"telegram_name": telegram_name, "user_time_zone": user_time_zone})
-            return response.status_code == httpx.codes.OK
-        """
+        pass
