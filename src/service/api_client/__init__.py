@@ -3,6 +3,6 @@ from service.api_client.mock_api_service import MockAPIService
 from service.api_client.site_api_service import SiteAPIService
 
 if IS_FAKE_API:
-    ConreateAPIService = MockAPIService
+    APIService = MockAPIService
 else:
-    ConreateAPIService = SiteAPIService
+    APIService = SiteAPIService

@@ -1,9 +1,9 @@
 from telegram import InlineKeyboardMarkup, Update
 from telegram.ext import Application, CallbackQueryHandler, CommandHandler, ContextTypes
 
-from src.constants.callback_data import CALLBACK_REPEAT_COMMAND
-from src.core.config import TOKEN
-from src.service.repeat_message import repeat_after_one_hour_button, repeat_message_after_1_hour_callback
+from constants.callback_data import CALLBACK_REPEAT_COMMAND
+from core.config import TOKEN
+from service.repeat_message import repeat_after_one_hour_button, repeat_message_after_1_hour_callback
 
 
 async def start(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:

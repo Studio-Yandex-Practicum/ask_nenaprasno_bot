@@ -1,5 +1,4 @@
-from telegram.ext import (Application, ApplicationBuilder,
-                          CallbackContext, PicklePersistence)
+from telegram.ext import Application, ApplicationBuilder, CallbackContext, PicklePersistence
 
 from core import config
 from start_conversation import start_conversation
@@ -49,7 +48,7 @@ async def init_webhook() -> Application:
     """
     bot_app = create_bot()
     bot_app.updater = None
-    await bot_app.bot.set_webhook(url=f"{config.WEBHOOK_URL}/telegram")
+    await bot_app.bot.set_webhook(url=f"{config.WEBHOOK_URL}")
     return bot_app
 
 

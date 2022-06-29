@@ -14,7 +14,7 @@ class MockAPIService(AbstractAPIService):
                 telegram_name="user1@telegram",
                 user_timezone="UTC+3",
                 user_name_in_trello="user1@trello",
-                last_week_user_tikets_closed=10,
+                last_week_user_tickets_closed=10,
                 last_week_user_tickets_not_expring=2,
                 last_week_user_tickets_expiring=1,
                 last_week_user_tickets_expired=1,
@@ -25,7 +25,7 @@ class MockAPIService(AbstractAPIService):
                 telegram_name="user2@telegram",
                 user_timezone="UTC+3",
                 user_name_in_trello="user2@trello",
-                last_week_user_tikets_closed=5,
+                last_week_user_tickets_closed=5,
                 last_week_user_tickets_not_expring=3,
                 last_week_user_tickets_expiring=2,
                 last_week_user_tickets_expired=1,
@@ -52,10 +52,10 @@ class MockAPIService(AbstractAPIService):
             ),
         ]
 
-    async def get_use_week_stat(self, telegram_name: str) -> UserWeekStat:
+    async def get_user_week_stat(self, telegram_name: str) -> UserWeekStat:
         return UserWeekStat(
             user_name_in_trello="user1@telegram",
-            last_week_user_tikets_closed=10,
+            last_week_user_tickets_closed=10,
             last_week_user_tickets_not_expring=2,
             last_week_user_tickets_expiring=1,
             last_week_user_tickets_expired=1,

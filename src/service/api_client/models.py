@@ -13,7 +13,7 @@ class WeekStat:
     telegram_name: str
     user_timezone: str
     user_name_in_trello: str
-    last_week_user_tikets_closed: int
+    last_week_user_tickets_closed: int
     last_week_user_tickets_not_expring: int
     last_week_user_tickets_expiring: int
     last_week_user_tickets_expired: int
@@ -40,7 +40,7 @@ class UserMonthStat:
 @dataclass
 class UserWeekStat:
     user_name_in_trello: str
-    last_week_user_tikets_closed: int
+    last_week_user_tickets_closed: int
     last_week_user_tickets_not_expring: int
     last_week_user_tickets_expiring: int
     last_week_user_tickets_expired: int

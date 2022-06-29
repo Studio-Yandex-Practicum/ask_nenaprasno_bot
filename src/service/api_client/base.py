@@ -1,23 +1,20 @@
 from abc import ABC, abstractmethod
 from http import HTTPStatus
 
-from core import config
 from service.api_client.models import BillStat, MonthStat, UserData, UserMonthStat, UserWeekStat, WeekStat
 
 
 class AbstractAPIService(ABC):
-    site_url: str = config.SITE_API_URL
-
     @abstractmethod
     async def get_bill(self) -> BillStat:
         pass
 
     @abstractmethod
-    async def get_week_stat(self) -> WeekStat:
+    async def get_week_stat(self) -> list[WeekStat]:
         pass
 
     @abstractmethod
-    async def get_month_stat(self) -> MonthStat:
+    async def get_month_stat(self) -> list[MonthStat]:
         pass
 
     @abstractmethod
