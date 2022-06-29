@@ -75,4 +75,3 @@ async def send_statistics(
             text=message,
             reply_markup=reply_markup
         )
-
