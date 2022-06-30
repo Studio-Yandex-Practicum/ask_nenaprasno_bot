@@ -7,7 +7,7 @@ from telegram.error import TelegramError
 from telegram.ext import CallbackContext
 from telegram import ReplyKeyboardMarkup
 
-from src.service.api_client.models import MonthStat, WeekStat
+from service.api_client.models import MonthStat, WeekStat
 
 
 async def send_message(

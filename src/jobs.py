@@ -2,8 +2,8 @@ from string import Template
 
 from telegram.ext import CallbackContext
 
-from src.core.send_message import send_statistics
-from src.service.api_client import APIService
+from core.send_message import send_statistics
+from service.api_client import APIService
 
 
 async def weekly_stat_job(context: CallbackContext) -> None:
