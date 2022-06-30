@@ -16,7 +16,6 @@ async def start_bot() -> None:
     bot_app = await init_webhook()
     await bot_app.initialize()
     await bot_app.start()
-
     # provide bot started bot application to server via global state variable
     # https://www.starlette.io/applications/#storing-state-on-the-app-instance
     api.state.bot_app = bot_app
@@ -29,9 +28,7 @@ async def stop_bot() -> None:
 
 async def healthcheck_api(request: Request) -> PlainTextResponse:
     message: str = f"Бот запущен и работает. Сообщение получено по запросу на Api сервера {config.WEBHOOK_URL}"
-
     logging.info(message)
-
     return PlainTextResponse(content=f'Request has been received and logged: "{message}"')
 
 
