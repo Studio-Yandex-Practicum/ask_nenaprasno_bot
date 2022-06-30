@@ -9,10 +9,16 @@
 
 ### В режиме webhook'а (также в этом режиме будет запущена точка доступа для webhook'а trello):
 > python3 src/run_webhook_api.py
-#### Запросы от trello ожидаются на /trelloCallback, приходят в формате .json, [пример](src/example/trello_request.json). Принимает POST-запросы (с телом данных) и HEAD-запросы (для проверки доступности ресурса).
-#### Пример curl-запроса для отправки данных на trello endpoint:
+#### Запросы от trello ожидаются на /trelloCallback, приходят в формате .json, [пример](src/example/trello_request.json)
+#### Пример создания curl-запроса для отправки данных на другой endpoint:
 ```
-curl -X POST -d '@src/example/trello_request.json' -H "Content-Type: application/json" localhost:8000/trelloWebhookApi # (localhost). - адрес сайта. (:8000). - порт, на который будет стучаться запрос или не указывать, если 80.
+import requests
+import json
+
+payload = {'query': json.dumps({"test_key": "test_value"})}
+url = "https://www.test.com/test_endpoint"
+
+response = requests.post(url, data=payload)
 ```
 ## Проверка API сервера с использованием ngrok на локальном компьютере:
 - Установить ngrok с [сайта](https://ngrok.com/download)
