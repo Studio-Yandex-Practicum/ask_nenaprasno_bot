@@ -9,7 +9,9 @@ from telegram import Update
 
 from bot import init_webhook
 from core import config
+
 from core.logger import logging
+
 
 
 async def start_bot() -> None:
@@ -25,6 +27,7 @@ async def start_bot() -> None:
 async def stop_bot() -> None:
     await api.state.bot_app.stop()
     await api.state.bot_app.shutdown()
+
 
 
 async def healthcheck_api(request: Request) -> PlainTextResponse:
@@ -66,6 +69,7 @@ routes = [
 ]
 
 api = Starlette(routes=routes, on_startup=[start_bot], on_shutdown=[stop_bot])
+
 
 if __name__ == "__main__":
     uvicorn.run(app=api, debug=True, host=config.HOST, port=config.PORT)

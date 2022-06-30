@@ -142,3 +142,6 @@ static_value
 
 # Persistence file
 bot_persistence_file
+
+# Log file
+*.log
