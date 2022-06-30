@@ -3,14 +3,14 @@ from string import Template
 from telegram.ext import CallbackContext
 
 from src.core.send_message import send_statistics
-from src.service import ConreateAPIService
+from src.service.api_client import APIService
 
 
 async def weekly_stat_job(context: CallbackContext) -> None:
     """
     Send weekly statistics on the number of requests in the work
     """
-    week_statistic_obj = await ConreateAPIService().get_week_stat()
+    week_statistics = await APIService().get_week_stat()
     template_message = Template(
         'Вы делали добрые дела 7 дней!\n'
         'Посмотрите, как прошла ваша неделя  в *""Просто спросить""*\n'
@@ -24,13 +24,13 @@ async def weekly_stat_job(context: CallbackContext) -> None:
     )
     alias_dict = dict(
         tickets_closed='last_week_user_tickets_closed',
-        tickets_in_work='last_week_user_tikets_in_work',
+        tickets_in_work='last_week_user_tickets_in_work',
         tickets_expiring='last_week_user_tickets_expiring',
         tickets_expired='last_week_user_tickets_expired'
     )
     await send_statistics(
         context, template_message, alias_dict,
-        week_statistic_obj.week_stat,
+        week_statistics,
     )
 
 
@@ -47,7 +47,7 @@ async def monthly_stat_job(context: CallbackContext) -> None:
     closed requests.
     Only if the user had requests
     """
-    mont_statistic_obj = await ConreateAPIService().get_month_stat()
+    mont_statistics = await APIService().get_month_stat()
     template_message = Template(
         'Это был отличный месяц!\n'
         'Посмотрите, как он прошел в *""Просто спросить""* 🔥\n\n'
@@ -65,5 +65,5 @@ async def monthly_stat_job(context: CallbackContext) -> None:
     )
     await send_statistics(
         context, template_message, alias_dict,
-        mont_statistic_obj.month_stat,
+        mont_statistics,
     )

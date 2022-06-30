@@ -7,7 +7,7 @@ from telegram.error import TelegramError
 from telegram.ext import CallbackContext
 from telegram import ReplyKeyboardMarkup
 
-from src.service.api_client_dataclasses import UserMonthStat, UserWeekStat
+from src.service.api_client.models import MonthStat, WeekStat
 
 
 async def send_message(
@@ -43,7 +43,7 @@ async def send_statistics(
     context: CallbackContext,
     template_message: Template,
     template_attribute_aliases: dict,
-    statistic: List[Union[UserMonthStat, UserWeekStat]],
+    statistic: List[Union[MonthStat, WeekStat]],
     reply_markup: Optional[ReplyKeyboardMarkup] = None,
 ):
     """
@@ -58,20 +58,13 @@ async def send_statistics(
     :param reply_markup: ReplyKeyboardMarkup | None
     """
     for user_statistic in statistic:
-        if user_statistic.username not in context.bot_data['username_to_id']:
-            logging.warning(
-                f'User with username {user_statistic.username} '
-                f'not found in bot data. Maybe user not run bot '
-                f'or not authenticated in bot')
-            continue
-        chat_id = context.bot_data['username_to_id'][user_statistic.username]
         message = template_message.substitute(
             {key: getattr(user_statistic, attribute)
              for key, attribute in template_attribute_aliases.items()}
         )
         await send_message(
             context=context,
-            chat_id=chat_id,
+            chat_id=user_statistic.telegram_id,
             text=message,
             reply_markup=reply_markup
         )
