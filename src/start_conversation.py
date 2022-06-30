@@ -7,7 +7,6 @@ from core.send_message import send_message
 from service.api_client import APIService
 
 
-
 async def start(update: Update, context: CallbackContext):
     keyboard = [
         [
