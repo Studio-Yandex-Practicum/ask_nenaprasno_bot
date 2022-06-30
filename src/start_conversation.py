@@ -148,6 +148,7 @@ async def configurate_timezone_callback(update: Update, context: ContextTypes.DE
     """
     Makes the timezone setting.
     """
+    await update.callback_query.message.reply_text(text="")
     return states.TIMEZONE_STATE
 
 
@@ -155,6 +156,7 @@ async def statistic_month_callback(update: Update, context: ContextTypes.DEFAULT
     """
     Sends monthly statistics to the user.
     """
+    await update.callback_query.message.reply_text(text="")
     return states.MENU_STATE
 
 
@@ -162,6 +164,7 @@ async def statistic_week_callback(update: Update, context: ContextTypes.DEFAULT_
     """
     Sends weekly statistics to the user.
     """
+    await update.callback_query.message.reply_text(text="")
     return states.MENU_STATE
 
 
@@ -169,6 +172,7 @@ async def actual_requests_callback(update: Update, context: ContextTypes.DEFAULT
     """
     Sends a list of current requests/requests to the user.
     """
+    await update.callback_query.message.reply_text(text="")
     return states.MENU_STATE
 
 
@@ -176,6 +180,7 @@ async def overdue_requests_callback(update: Update, context: ContextTypes.DEFAUL
     """
     Sends to the user a list of overdue applications/requests or those that are running out of time.
     """
+    await update.callback_query.message.reply_text(text="")
     return states.MENU_STATE
 
 
