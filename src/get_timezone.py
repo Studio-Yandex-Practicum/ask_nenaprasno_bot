@@ -5,7 +5,7 @@ from telegram import KeyboardButton, ReplyKeyboardMarkup, ReplyKeyboardRemove, U
 from telegram.ext import CallbackContext, CommandHandler, MessageHandler, filters
 from timezonefinder import TimezoneFinder
 
-from service.api_client_fake import FakeAPIService
+from service.api_client import APIService
 
 TIME_ZONE = "UTC"
 
@@ -34,8 +34,8 @@ async def set_timezone(telegram_id: int, text_utc: str, context: CallbackContext
         text=f"Установлен часовой пояс для {text_utc}",
         reply_markup=ReplyKeyboardRemove(),
     )
-    api = FakeAPIService()
-    await api.set_user_timezone(telegram_id=telegram_id, user_timezone=text_utc)
+    api = APIService()
+    await api.set_user_timezone(telegram_id=telegram_id, user_time_zone=text_utc)
 
 
 async def get_timezone_from_location(update: Update, context: CallbackContext) -> None:
