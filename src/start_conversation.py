@@ -96,6 +96,9 @@ async def start(update: Update, context: CallbackContext):
 
 
 async def not_expert_callback(update: Update, context: CallbackContext):
+    """
+    Invites the user to become an expert.
+    """
     keyboard = [
         [
             InlineKeyboardButton("Да", callback_data=callback_data.CALLBACK_REGISTR_AS_EXPERT_COMMAND),
@@ -112,6 +115,9 @@ async def not_expert_callback(update: Update, context: CallbackContext):
 
 
 async def support_or_consult_callback(update: Update, context: CallbackContext):
+    """
+    Offers to support the project.
+    """
     await update.callback_query.message.reply_text(
         text="Наш Проект\nhttps://ask.nenaprasno.ru/\nподдержать нас можно здесь\nhttps://ask.nenaprasno.ru/#donation"
     )
@@ -119,6 +125,9 @@ async def support_or_consult_callback(update: Update, context: CallbackContext):
 
 
 async def registr_as_expert_callback(update: Update, context: CallbackContext):
+    """
+    Sends a registration form to the user.
+    """
     await update.callback_query.message.reply_text(
         text="Мы всегда рады подключать к проекту новых специалистов! Здорово, что вы хотите работать с нами. "
         "Заполните, пожалуйста, эту анкету "
@@ -161,6 +170,9 @@ async def is_expert_callback(update: Update, context: CallbackContext):
 
 
 async def menu(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    """
+    Displays the menu.
+    """
     menu_buttons = [
         [
             InlineKeyboardButton(
