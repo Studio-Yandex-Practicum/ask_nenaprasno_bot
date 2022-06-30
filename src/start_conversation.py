@@ -94,6 +94,10 @@ async def is_expert_callback(update: Update, context: CallbackContext):
 
 
 async def timezone_callback(update: Update, context: CallbackContext):
+    """
+    Sends the user a suggestion to configure the time zone. Redirects either to setting the time zone or to skipping
+    the setting.
+    """
     return states.MENU_STATE
 
 
@@ -107,7 +111,7 @@ async def timezone_message_callback(update: Update, context: ContextTypes.DEFAUL
         chat_id=update.effective_user.id,
         text="Вы настроили часовой пояс, теперь уведомления будут приходить в удобное время",
     )
-    return ConversationHandler.END
+    return states.MENU_STATE
 
 
 async def menu(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
@@ -140,10 +144,39 @@ async def menu(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     return states.MENU_STATE
 
 
-async def handling_menu_button_click_callback(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
-    query = update.callback_query
-    await query.answer()
-    await query.edit_message_text(query.data)
+async def configurate_timezone_callback(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
+    """
+    Makes the timezone setting.
+    """
+    return states.TIMEZONE_STATE
+
+
+async def statistic_month_callback(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
+    """
+    Sends monthly statistics to the user.
+    """
+    return states.MENU_STATE
+
+
+async def statistic_week_callback(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
+    """
+    Sends weekly statistics to the user.
+    """
+    return states.MENU_STATE
+
+
+async def actual_requests_callback(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
+    """
+    Sends a list of current requests/requests to the user.
+    """
+    return states.MENU_STATE
+
+
+async def overdue_requests_callback(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
+    """
+    Sends to the user a list of overdue applications/requests or those that are running out of time.
+    """
+    return states.MENU_STATE
 
 
 start_command_handler = CommandHandler("start", start)
@@ -193,7 +226,13 @@ start_conversation = ConversationHandler(
         ],
         states.MENU_STATE: [
             *authorized_user_command_handlers,
-            CallbackQueryHandler(handling_menu_button_click_callback),
+            CallbackQueryHandler(
+                configurate_timezone_callback, pattern=callback_data.CALLBACK_CONFIGURATE_TIMEZONE_COMMAND
+            ),
+            CallbackQueryHandler(statistic_month_callback, pattern=callback_data.CALLBACK_STATISTIC_MONTH_COMMAND),
+            CallbackQueryHandler(statistic_week_callback, pattern=callback_data.CALLBACK_STATISTIC_WEEK_COMMAND),
+            CallbackQueryHandler(actual_requests_callback, pattern=callback_data.CALLBACK_ACTUAL_REQUESTS_COMMAND),
+            CallbackQueryHandler(overdue_requests_callback, pattern=callback_data.CALLBACK_OVERDUE_REQUESTS_COMMAND),
         ],
     },
     fallbacks=[],
