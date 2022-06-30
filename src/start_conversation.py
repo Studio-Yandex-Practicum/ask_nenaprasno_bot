@@ -1,13 +1,85 @@
+import datetime
+
+import pytz
 from telegram import InlineKeyboardButton, InlineKeyboardMarkup, Update
-from telegram.ext import CallbackContext, CallbackQueryHandler, CommandHandler, ContextTypes, ConversationHandler
+from telegram.ext import (
+    CallbackContext,
+    CallbackQueryHandler,
+    CommandHandler,
+    ContextTypes,
+    ConversationHandler,
+    MessageHandler,
+    filters,
+)
+from timezonefinder import TimezoneFinder
 
 from constants import callback_data, states
 from core.config import URL_SERVICE_RULES
 from core.send_message import send_message
+from get_timezone import get_timezone, set_timezone
 from service.api_client import APIService
+
+TIME_ZONE = "UTC"
+
+
+async def timezone_message_callback(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    """
+    Sends a message after a successful timezone installation.
+    """
+    await send_message(
+        context=context,
+        chat_id=update.effective_user.id,
+        text="Вы настроили часовой пояс, теперь уведомления будут приходить в удобное время",
+    )
+
+
+async def get_timezone_from_location_callback(update: Update, context: CallbackContext):
+    """
+    Sets timezone by geolocation.
+    """
+    user_timezone = TimezoneFinder().timezone_at(
+        lng=update.message.location.longitude, lat=update.message.location.latitude
+    )
+    if user_timezone is None:
+        await context.bot.send_message(
+            chat_id=update.effective_chat.id,
+            text="Не удалось определить часовой пояс. Пожалуйста, введите его вручную. Например: UTC+03:00",
+        )
+        return states.TIMEZONE_STATE
+    time_zone = pytz.timezone(user_timezone)
+    utc_time = datetime.datetime.utcnow()
+    utc = float(time_zone.utcoffset(utc_time).total_seconds() / 3600)
+    hours, minutes = divmod(utc * 60, 60)
+    utc = f"{hours:+03.0f}:{minutes:02.0f}"
+    text_utc = TIME_ZONE + utc
+    await set_timezone(update.effective_chat.id, text_utc, context)
+    await timezone_message_callback(update, context)
+    return states.MENU_STATE
+
+
+async def get_timezone_from_text_message_callback(update: Update, context: CallbackContext):
+    """
+    Sets timezone based on a text message from the user.
+    """
+    text = str(update.message.text)
+    if text == "Напишу свою таймзону сам":
+        await context.bot.send_message(
+            chat_id=update.effective_chat.id,
+            text="Введите таймзону UTC. Например: UTC+03:00",
+        )
+        return states.TIMEZONE_STATE
+    await context.bot.send_message(
+        chat_id=update.effective_chat.id,
+        text="вы установили таймзону X",
+    )
+    await timezone_message_callback(update, context)
+    return states.MENU_STATE
 
 
 async def start(update: Update, context: CallbackContext):
+    """
+    Responds to the start command. The entry point to telegram bot.
+    """
     keyboard = [
         [
             InlineKeyboardButton("Да", callback_data=callback_data.CALLBACK_IS_EXPERT_COMMAND),
@@ -16,8 +88,7 @@ async def start(update: Update, context: CallbackContext):
     ]
     reply_markup = InlineKeyboardMarkup(keyboard)
     await update.message.reply_text(
-        text="Привет! Этот бот предназаначен только для "
-        "экспертов справочной службы Просто спросить. "
+        text="Привет! Этот бот предназаначен только для экспертов справочной службы Просто спросить. "
         "Вы являетесь экспертом?",
         reply_markup=reply_markup,
     )
@@ -33,44 +104,30 @@ async def not_expert_callback(update: Update, context: CallbackContext):
     ]
     reply_markup = InlineKeyboardMarkup(keyboard)
     await update.callback_query.message.reply_text(
-        text="Этот бот предназначен только для "
-        "экспертов справочной службы 'Просто спросить'. "
-        "Хотите стать нашим экспертом и отвечать на заявки "
-        "от пациентов и их близких?",
+        text="Этот бот предназначен только для экспертов справочной службы 'Просто спросить'. Хотите стать нашим "
+        "экспертом и отвечать на заявки от пациентов и их близких?",
         reply_markup=reply_markup,
     )
     return states.REGISTRATION_STATE
 
 
 async def support_or_consult_callback(update: Update, context: CallbackContext):
+    await update.callback_query.message.reply_text(
+        text="Наш Проект\nhttps://ask.nenaprasno.ru/\nподдержать нас можно здесь\nhttps://ask.nenaprasno.ru/#donation"
+    )
     return ConversationHandler.END
 
 
 async def registr_as_expert_callback(update: Update, context: CallbackContext):
     await update.callback_query.message.reply_text(
-        text="Мы всегда рады подключать к проекту новых специалистов! "
-        "Здорово, что вы хотите работать с нами. Заполните, "
-        "пожалуйста, эту анкету (нужно 15 минут). Команда сервиса "
-        "подробно изучит вашу заявку и свяжется с вами в течение недели, "
-        "чтобы договориться о видеоинтервью. "
-        "Перед интервью мы можем попросить вас ответить на тестовый кейс, "
-        "чтобы обсудить его на встрече. Желаем удачи :)"
+        text="Мы всегда рады подключать к проекту новых специалистов! Здорово, что вы хотите работать с нами. "
+        "Заполните, пожалуйста, эту анкету "
+        "https://docs.google.com/forms/d/1GvlemFyhMyVy_Wf91NPYTAfD5717W44-Ge7HQ6ealA0/edit (нужно 15 минут). "
+        "Команда сервиса подробно изучит вашу заявку и свяжется с вами в течение недели, чтобы договориться о "
+        "видеоинтервью. Перед интервью мы можем попросить вас ответить на тестовый кейс, чтобы обсудить его на "
+        "встрече. Желаем удачи :)"
     )
-    return states.NEW_EXPERT_STATE
-
-
-async def after_registr_message_callback(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    await update.callback_query.message.reply_text(
-        text="Вы успешно начали работу с ботом. Меня зовут Женя Краб, "
-        "я telegram-bot для экспертов справочной службы "
-        "'Просто спросить'. Я буду сообщать вам о новых заявках, "
-        "присылать уведомления о новых сообщениях в чате от пациентов "
-        "и их близких и напоминать о просроченных заявках. "
-        "Нам нравится, что вы с нами. Не терпится увидеть вас в деле! "
-        "Для начала, давайте настроим часовой пояс, чтобы вы получали "
-        "уведомления в удобное время."
-    )
-    return states.TIMEZONE_STATE
+    return ConversationHandler.END
 
 
 async def is_expert_callback(update: Update, context: CallbackContext):
@@ -81,39 +138,29 @@ async def is_expert_callback(update: Update, context: CallbackContext):
     telegram_id = update.effective_user.id
     user_data = await api_service.authenticate_user(telegram_id=telegram_id)
     if user_data is None:
-        await update.callback_query.callback_query.edit_message_text(text="Ошибка авторизации")
+        await update.callback_query.edit_message_text(text="Ошибка авторизации")
         return states.UNAUTHORIZED_STATE
     context.user_data["user_name"] = user_data.user_name
     context.user_data["user_time_zone"] = user_data.user_time_zone
     await update.callback_query.edit_message_text(
         text=f"Авторизация прошла успешно\n" f"Добро пожаловать {user_data.user_name}"
     )
+    await update.callback_query.message.reply_text(
+        text="Вы успешно начали работу с ботом. Меня зовут Женя Краб, "
+        "я telegram-bot для экспертов справочной службы "
+        "'Просто спросить'. Я буду сообщать вам о новых заявках, "
+        "присылать уведомления о новых сообщениях в чате от пациентов "
+        "и их близких и напоминать о просроченных заявках. "
+        "Нам нравится, что вы с нами. Не терпится увидеть вас в деле! "
+        "Для начала, давайте настроим часовой пояс, чтобы вы получали "
+        "уведомления в удобное время."
+    )
     await update.callback_query.answer()
+    await get_timezone(update, context)
     return states.TIMEZONE_STATE
 
 
-async def timezone_callback(update: Update, context: CallbackContext):
-    """
-    Sends the user a suggestion to configure the time zone. Redirects either to setting the time zone or to skipping
-    the setting.
-    """
-    return states.MENU_STATE
-
-
-async def skip_timezone_callback(update: Update, context: CallbackContext):
-    return states.MENU_STATE
-
-
-async def timezone_message_callback(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    await send_message(  # reply_message не работает
-        context=context,
-        chat_id=update.effective_user.id,
-        text="Вы настроили часовой пояс, теперь уведомления будут приходить в удобное время",
-    )
-    return states.MENU_STATE
-
-
-async def menu(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
+async def menu(update: Update, context: ContextTypes.DEFAULT_TYPE):
     menu_buttons = [
         [
             InlineKeyboardButton(
@@ -143,15 +190,15 @@ async def menu(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     return states.MENU_STATE
 
 
-async def configurate_timezone_callback(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
+async def configurate_timezone_callback(update: Update, context: ContextTypes.DEFAULT_TYPE):
     """
     Makes the timezone setting.
     """
-    await update.callback_query.message.reply_text(text="configurate_timezone_callback")
+    await get_timezone(update, context)
     return states.TIMEZONE_STATE
 
 
-async def statistic_month_callback(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
+async def statistic_month_callback(update: Update, context: ContextTypes.DEFAULT_TYPE):
     """
     Sends monthly statistics to the user.
     """
@@ -159,7 +206,7 @@ async def statistic_month_callback(update: Update, context: ContextTypes.DEFAULT
     return states.MENU_STATE
 
 
-async def statistic_week_callback(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
+async def statistic_week_callback(update: Update, context: ContextTypes.DEFAULT_TYPE):
     """
     Sends weekly statistics to the user.
     """
@@ -167,7 +214,7 @@ async def statistic_week_callback(update: Update, context: ContextTypes.DEFAULT_
     return states.MENU_STATE
 
 
-async def actual_requests_callback(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
+async def actual_requests_callback(update: Update, context: ContextTypes.DEFAULT_TYPE):
     """
     Sends a list of current requests/requests to the user.
     """
@@ -175,7 +222,7 @@ async def actual_requests_callback(update: Update, context: ContextTypes.DEFAULT
     return states.MENU_STATE
 
 
-async def overdue_requests_callback(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
+async def overdue_requests_callback(update: Update, context: ContextTypes.DEFAULT_TYPE):
     """
     Sends to the user a list of overdue applications/requests or those that are running out of time.
     """
@@ -185,10 +232,13 @@ async def overdue_requests_callback(update: Update, context: ContextTypes.DEFAUL
 
 start_command_handler = CommandHandler("start", start)
 menu_command_handler = CommandHandler("menu", menu)
+get_timezone_command_handler = CommandHandler("get_timezone", get_timezone)
 
-authorized_user_command_handlers = (menu_command_handler,)
+authorized_user_command_handlers = (
+    menu_command_handler,
+    get_timezone_command_handler,
+)
 
-unauthorized_user_command_handlers = []
 
 start_conversation = ConversationHandler(
     allow_reentry=True,
@@ -197,23 +247,19 @@ start_conversation = ConversationHandler(
     entry_points=[start_command_handler],
     states={
         states.UNAUTHORIZED_STATE: [
-            *unauthorized_user_command_handlers,
             CallbackQueryHandler(is_expert_callback, pattern=callback_data.CALLBACK_IS_EXPERT_COMMAND),
             CallbackQueryHandler(not_expert_callback, pattern=callback_data.CALLBACK_NOT_EXPERT_COMMAND),
         ],
         states.REGISTRATION_STATE: [
-            *unauthorized_user_command_handlers,
             CallbackQueryHandler(registr_as_expert_callback, pattern=callback_data.CALLBACK_REGISTR_AS_EXPERT_COMMAND),
             CallbackQueryHandler(
                 support_or_consult_callback, pattern=callback_data.CALLBACK_SUPPORT_OR_CONSULT_COMMAND
             ),
         ],
-        states.NEW_EXPERT_STATE: [CallbackQueryHandler(after_registr_message_callback)],
         states.TIMEZONE_STATE: [
             *authorized_user_command_handlers,
-            CallbackQueryHandler(timezone_callback, pattern=callback_data.CALLBACK_TIMEZONE_COMMAND),
-            CallbackQueryHandler(skip_timezone_callback, pattern=callback_data.CALLBACK_SKIP_TIMEZONE_COMMAND),
-            CallbackQueryHandler(timezone_message_callback),
+            MessageHandler(filters.LOCATION, get_timezone_from_location_callback),
+            MessageHandler(filters.TEXT, get_timezone_from_text_message_callback),
         ],
         states.MENU_STATE: [
             *authorized_user_command_handlers,
