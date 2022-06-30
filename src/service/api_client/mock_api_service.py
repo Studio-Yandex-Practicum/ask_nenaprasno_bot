@@ -78,5 +78,5 @@ class MockAPIService(AbstractAPIService):
             user_name_in_trello="user1@telegram",
         )
 
-    async def set_user_timezone(self, telegram_name: str, user_time_zone: str) -> HTTPStatus:
+    async def set_user_timezone(self, telegram_id: int, user_time_zone: str) -> HTTPStatus:
         return HTTPStatus.OK

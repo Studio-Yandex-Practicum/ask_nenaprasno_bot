@@ -46,8 +46,8 @@ class SiteAPIService(AbstractAPIService):
     async def get_user_month_stat(self, telegram_name: str) -> UserMonthStat:
         pass
 
-    async def authenticate_user(self, telegram_name: str) -> Optional[UserData]:
+    async def authenticate_user(self, telegram_id: int) -> Optional[UserData]:
         pass
 
-    async def set_user_timezone(self, telegram_name: str, user_time_zone: str) -> httpx:
+    async def set_user_timezone(self, telegram_id: int, user_time_zone: str) -> httpx:
         pass
