@@ -13,6 +13,7 @@ from core import config
 from core.logger import logging
 
 
+
 async def start_bot() -> None:
     bot_app = await init_webhook()
     await bot_app.initialize()
@@ -26,6 +27,7 @@ async def start_bot() -> None:
 async def stop_bot() -> None:
     await api.state.bot_app.stop()
     await api.state.bot_app.shutdown()
+
 
 
 async def healthcheck_api(request: Request) -> PlainTextResponse:

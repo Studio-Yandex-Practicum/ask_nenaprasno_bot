@@ -40,10 +40,10 @@ class SiteAPIService(AbstractAPIService):
     async def get_month_stat(self) -> list[MonthStat]:
         pass
 
-    async def get_user_week_stat(self, telegram_id: int) -> UserWeekStat:
+    async def get_user_week_stat(self, telegram_name: str) -> UserWeekStat:
         pass
 
-    async def get_user_month_stat(self, telegram_id: int) -> UserMonthStat:
+    async def get_user_month_stat(self, telegram_name: str) -> UserMonthStat:
         pass
 
     async def authenticate_user(self, telegram_id: int) -> Optional[UserData]:
