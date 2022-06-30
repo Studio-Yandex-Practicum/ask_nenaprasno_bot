@@ -1,4 +1,3 @@
-import os
 from pathlib import Path
 from datetime import datetime
 from dotenv import dotenv_values
