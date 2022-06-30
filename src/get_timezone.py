@@ -65,7 +65,10 @@ async def get_timezone_from_text_message(update: Update, context: CallbackContex
             text="Введите таймзону UTC. Например: UTC+03:00",
         )
     else:
-        pass
+        await context.bot.send_message(
+            chat_id=update.effective_chat.id,
+            text="вы установили таймзону X",
+        )
 
 
 get_timezone_command_handler = CommandHandler("get_timezone", get_timezone)
