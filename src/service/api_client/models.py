@@ -10,11 +10,11 @@ class UserData:
 
 @dataclass
 class WeekStat:
-    telegram_name: str
+    telegram_id: int
     user_time_zone: str
     user_name_in_trello: str
     last_week_user_tickets_closed: int
-    last_week_user_tickets_not_expring: int
+    last_week_user_tickets_not_expiring: int
     last_week_user_tickets_expiring: int
     last_week_user_tickets_expired: int
     last_week_user_tickets_in_work: int
@@ -23,7 +23,7 @@ class WeekStat:
 
 @dataclass
 class MonthStat:
-    telegram_name: str
+    telegram_id: int
     user_time_zone: str
     user_tickets_closed: int
     user_rating: float
@@ -41,7 +41,7 @@ class UserMonthStat:
 class UserWeekStat:
     user_name_in_trello: str
     last_week_user_tickets_closed: int
-    last_week_user_tickets_not_expring: int
+    last_week_user_tickets_not_expiring: int
     last_week_user_tickets_expiring: int
     last_week_user_tickets_expired: int
     last_week_user_tickets_in_work: int
@@ -50,4 +50,4 @@ class UserWeekStat:
 
 @dataclass
 class BillStat:
-    telegram_name: list[str]
+    telegram_ids: list[int]

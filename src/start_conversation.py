@@ -78,8 +78,8 @@ async def is_expert_callback(update: Update, context: CallbackContext):
     try to authenticate telegram user on site API and write trello_id to persistence file
     """
     api_service = APIService()
-    telegram_name = update.effective_user.id
-    user_data = await api_service.authenticate_user(telegram_name=telegram_name)
+    telegram_id = update.effective_user.id
+    user_data = await api_service.authenticate_user(telegram_id=telegram_id)
     if user_data is None:
         await update.callback_query.edit_message_text(text="Ошибка авторизации")
         return states.UNAUTHORIZED_STATE
