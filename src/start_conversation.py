@@ -185,23 +185,10 @@ async def overdue_requests_callback(update: Update, context: ContextTypes.DEFAUL
 
 start_command_handler = CommandHandler("start", start)
 menu_command_handler = CommandHandler("menu", menu)
-# srok_command_handler = CommandHandler("srok", srok)
-# zayavki_handler = CommandHandler("zayavki", zayavki)
-# pravila_command_handler = CommandHandler("pravila", pravila)
-# help_unauthorized_command_handler = CommandHandler("help", help_unauthorized)
-# help_authorized_command_handler = CommandHandler("help", help_authorized)
 
-authorized_user_command_handlers = (
-    menu_command_handler,
-    # srok_command_handler,
-    # zayavki_handler,
-    # pravila_command_handler,
-    # help_authorized_command_handler,
-)
+authorized_user_command_handlers = (menu_command_handler,)
 
-unauthorized_user_command_handlers = tuple(
-    # help_unauthorized_command_handler,
-)
+unauthorized_user_command_handlers = []
 
 start_conversation = ConversationHandler(
     allow_reentry=True,
