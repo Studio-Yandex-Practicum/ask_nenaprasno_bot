@@ -7,8 +7,8 @@ from starlette.responses import PlainTextResponse, Response
 from starlette.routing import Route
 from telegram import Update
 
-from core import config
 from bot import init_webhook
+from core import config
 from core.logger import logging
 
 
@@ -67,5 +67,5 @@ routes = [
 
 api = Starlette(routes=routes, on_startup=[start_bot], on_shutdown=[stop_bot])
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     uvicorn.run(app=api, debug=True, host=config.HOST, port=config.PORT)

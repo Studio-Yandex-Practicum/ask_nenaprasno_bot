@@ -4,7 +4,8 @@ from telegram.ext import CallbackContext, CallbackQueryHandler, CommandHandler, 
 from constants import callback_data, states
 from core.config import URL_SERVICE_RULES
 from core.send_message import send_message
-from service import ConcreateAPIService
+from service.api_client import APIService
+
 
 
 async def start(update: Update, context: CallbackContext):
@@ -77,7 +78,7 @@ async def is_expert_callback(update: Update, context: CallbackContext):
     """
     try to authenticate telegram user on site API and write trello_id to persistence file
     """
-    api_service = ConcreateAPIService()
+    api_service = APIService()
     telegram_id = update.effective_user.id
     user_data = await api_service.authenticate_user(telegram_id=telegram_id)
     if user_data is None:
