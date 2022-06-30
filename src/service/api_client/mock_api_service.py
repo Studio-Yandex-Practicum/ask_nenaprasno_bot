@@ -64,7 +64,7 @@ class MockAPIService(AbstractAPIService):
             last_week_user_tickets_all=14,
         )
 
-    async def get_user_month_stat(self, telegram_name: str) -> UserMonthStat:
+    async def get_user_month_stat(self, telegram_id: int) -> UserMonthStat:
         return UserMonthStat(
             user_tickets_closed=5,
             user_rating=2.2,
