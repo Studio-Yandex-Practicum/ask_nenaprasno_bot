@@ -187,7 +187,7 @@ menu_command_handler = CommandHandler("menu", menu)
 # help_unauthorized_command_handler = CommandHandler("help", help_unauthorized)
 # help_authorized_command_handler = CommandHandler("help", help_authorized)
 
-authorized_user_command_handlers = tuple(
+authorized_user_command_handlers = (
     menu_command_handler,
     # srok_command_handler,
     # zayavki_handler,
