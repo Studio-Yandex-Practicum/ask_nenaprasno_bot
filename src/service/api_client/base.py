@@ -31,6 +31,6 @@ class AbstractAPIService(ABC):
 
     @abstractmethod
     async def set_user_timezone(
-        self, telegram_id: id, user_time_zone: str
+        self, telegram_id: int, user_time_zone: str
     ) -> HTTPStatus:
         pass
