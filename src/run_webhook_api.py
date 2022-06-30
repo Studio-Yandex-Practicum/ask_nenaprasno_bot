@@ -1,5 +1,6 @@
-import httpx
 import json
+
+import httpx
 import uvicorn
 from starlette.applications import Starlette
 from starlette.requests import Request
@@ -9,9 +10,7 @@ from telegram import Update
 
 from bot import init_webhook
 from core import config
-
 from core.logger import logging
-
 
 
 async def start_bot() -> None:
@@ -27,7 +26,6 @@ async def start_bot() -> None:
 async def stop_bot() -> None:
     await api.state.bot_app.stop()
     await api.state.bot_app.shutdown()
-
 
 
 async def healthcheck_api(request: Request) -> PlainTextResponse:
@@ -58,8 +56,7 @@ async def trello_webhook_api(request: Request) -> Response:
         logging.info("Got not trello or empty request.")
     except json.decoder.JSONDecodeError:
         logging.info("Got data is not json.")
-    finally:
-        return Response("Message received.", status_code=httpx.codes.OK)
+    return Response("Message received.", status_code=httpx.codes.OK)
 
 
 routes = [

@@ -1,6 +1,6 @@
-import os
-from pathlib import Path
 from datetime import datetime
+from pathlib import Path
+
 from dotenv import dotenv_values
 
 BASE_DIR = Path(__file__).resolve().parent.parent

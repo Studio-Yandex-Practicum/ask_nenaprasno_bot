@@ -32,7 +32,7 @@ async def not_expert_callback(update: Update, context: CallbackContext):
         ]
     ]
     reply_markup = InlineKeyboardMarkup(keyboard)
-    await update.message.reply_text(
+    await update.callback_query.message.reply_text(
         text="Этот бот предназначен только для "
         "экспертов справочной службы 'Просто спросить'. "
         "Хотите стать нашим экспертом и отвечать на заявки "
@@ -47,7 +47,7 @@ async def support_or_consult_callback(update: Update, context: CallbackContext):
 
 
 async def registr_as_expert_callback(update: Update, context: CallbackContext):
-    await update.message.reply_text(
+    await update.callback_query.message.reply_text(
         text="Мы всегда рады подключать к проекту новых специалистов! "
         "Здорово, что вы хотите работать с нами. Заполните, "
         "пожалуйста, эту анкету (нужно 15 минут). Команда сервиса "
@@ -60,7 +60,7 @@ async def registr_as_expert_callback(update: Update, context: CallbackContext):
 
 
 async def after_registr_message_callback(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    await update.message.reply_text(
+    await update.callback_query.message.reply_text(
         text="Вы успешно начали работу с ботом. Меня зовут Женя Краб, "
         "я telegram-bot для экспертов справочной службы "
         "'Просто спросить'. Я буду сообщать вам о новых заявках, "
@@ -81,10 +81,9 @@ async def is_expert_callback(update: Update, context: CallbackContext):
     telegram_id = update.effective_user.id
     user_data = await api_service.authenticate_user(telegram_id=telegram_id)
     if user_data is None:
-        await update.callback_query.edit_message_text(text="Ошибка авторизации")
+        await update.callback_query.callback_query.edit_message_text(text="Ошибка авторизации")
         return states.UNAUTHORIZED_STATE
     context.user_data["user_name"] = user_data.user_name
-    context.user_data["user_id_in_trello"] = user_data.user_id_in_trello
     context.user_data["user_time_zone"] = user_data.user_time_zone
     await update.callback_query.edit_message_text(
         text=f"Авторизация прошла успешно\n" f"Добро пожаловать {user_data.user_name}"
@@ -94,6 +93,10 @@ async def is_expert_callback(update: Update, context: CallbackContext):
 
 
 async def timezone_callback(update: Update, context: CallbackContext):
+    """
+    Sends the user a suggestion to configure the time zone. Redirects either to setting the time zone or to skipping
+    the setting.
+    """
     return states.MENU_STATE
 
 
@@ -107,7 +110,7 @@ async def timezone_message_callback(update: Update, context: ContextTypes.DEFAUL
         chat_id=update.effective_user.id,
         text="Вы настроили часовой пояс, теперь уведомления будут приходить в удобное время",
     )
-    return ConversationHandler.END
+    return states.MENU_STATE
 
 
 async def menu(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
@@ -137,30 +140,82 @@ async def menu(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
         ],
     ]
     await update.message.reply_text("Меню", reply_markup=InlineKeyboardMarkup(menu_buttons))
+    return states.MENU_STATE
 
 
-async def handling_menu_button_click_callback(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
-    query = update.callback_query
-    await query.answer()
-    await query.edit_message_text(query.data)
+async def configurate_timezone_callback(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
+    """
+    Makes the timezone setting.
+    """
+    await update.callback_query.message.reply_text(text="")
+    return states.TIMEZONE_STATE
+
+
+async def statistic_month_callback(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
+    """
+    Sends monthly statistics to the user.
+    """
+    await update.callback_query.message.reply_text(text="")
+    return states.MENU_STATE
+
+
+async def statistic_week_callback(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
+    """
+    Sends weekly statistics to the user.
+    """
+    await update.callback_query.message.reply_text(text="")
+    return states.MENU_STATE
+
+
+async def actual_requests_callback(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
+    """
+    Sends a list of current requests/requests to the user.
+    """
+    await update.callback_query.message.reply_text(text="")
+    return states.MENU_STATE
+
+
+async def overdue_requests_callback(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
+    """
+    Sends to the user a list of overdue applications/requests or those that are running out of time.
+    """
+    await update.callback_query.message.reply_text(text="")
+    return states.MENU_STATE
 
 
 start_command_handler = CommandHandler("start", start)
 menu_command_handler = CommandHandler("menu", menu)
+# srok_command_handler = CommandHandler("srok", srok)
+# zayavki_handler = CommandHandler("zayavki", zayavki)
+# pravila_command_handler = CommandHandler("pravila", pravila)
+# help_unauthorized_command_handler = CommandHandler("help", help_unauthorized)
+# help_authorized_command_handler = CommandHandler("help", help_authorized)
 
-callback_menu_handler = CallbackQueryHandler(handling_menu_button_click_callback)
+authorized_user_command_handlers = (
+    menu_command_handler,
+    # srok_command_handler,
+    # zayavki_handler,
+    # pravila_command_handler,
+    # help_authorized_command_handler,
+)
+
+unauthorized_user_command_handlers = tuple(
+    # help_unauthorized_command_handler,
+)
 
 start_conversation = ConversationHandler(
     allow_reentry=True,
     persistent=True,
     name="start_conversation",
-    entry_points=[start_command_handler, menu_command_handler],
+    entry_points=[start_command_handler],
     states={
         states.UNAUTHORIZED_STATE: [
+            *unauthorized_user_command_handlers,
             CallbackQueryHandler(is_expert_callback, pattern=callback_data.CALLBACK_IS_EXPERT_COMMAND),
             CallbackQueryHandler(not_expert_callback, pattern=callback_data.CALLBACK_NOT_EXPERT_COMMAND),
         ],
         states.REGISTRATION_STATE: [
+            *unauthorized_user_command_handlers,
             CallbackQueryHandler(registr_as_expert_callback, pattern=callback_data.CALLBACK_REGISTR_AS_EXPERT_COMMAND),
             CallbackQueryHandler(
                 support_or_consult_callback, pattern=callback_data.CALLBACK_SUPPORT_OR_CONSULT_COMMAND
@@ -168,11 +223,21 @@ start_conversation = ConversationHandler(
         ],
         states.NEW_EXPERT_STATE: [CallbackQueryHandler(after_registr_message_callback)],
         states.TIMEZONE_STATE: [
+            *authorized_user_command_handlers,
             CallbackQueryHandler(timezone_callback, pattern=callback_data.CALLBACK_TIMEZONE_COMMAND),
             CallbackQueryHandler(skip_timezone_callback, pattern=callback_data.CALLBACK_SKIP_TIMEZONE_COMMAND),
             CallbackQueryHandler(timezone_message_callback),
         ],
-        states.MENU_STATE: [callback_menu_handler],
+        states.MENU_STATE: [
+            *authorized_user_command_handlers,
+            CallbackQueryHandler(
+                configurate_timezone_callback, pattern=callback_data.CALLBACK_CONFIGURATE_TIMEZONE_COMMAND
+            ),
+            CallbackQueryHandler(statistic_month_callback, pattern=callback_data.CALLBACK_STATISTIC_MONTH_COMMAND),
+            CallbackQueryHandler(statistic_week_callback, pattern=callback_data.CALLBACK_STATISTIC_WEEK_COMMAND),
+            CallbackQueryHandler(actual_requests_callback, pattern=callback_data.CALLBACK_ACTUAL_REQUESTS_COMMAND),
+            CallbackQueryHandler(overdue_requests_callback, pattern=callback_data.CALLBACK_OVERDUE_REQUESTS_COMMAND),
+        ],
     },
     fallbacks=[],
 )
