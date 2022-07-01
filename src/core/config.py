@@ -1,5 +1,6 @@
-from pathlib import Path
 from datetime import datetime
+from pathlib import Path
+
 from dotenv import dotenv_values
 
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -42,3 +43,8 @@ URL_SERVICE_RULES = env.get(
 BOT_PERSISTENCE_FILE = env.get("BOT_PERSISTENCE_FILE")  # имя файла persistence бота
 IS_FAKE_API = env.get("IS_FAKE_API")  # флаг, определяющий какой АПИ клиент используется - боевой или "заглушка"
 SITE_API_URL = env.get("SITE_API_URL")  # адрес сервера, к которому будет отправлять запросы АПИ клиент
+
+TRELLO_API_KEY = env.get("TRELLO_API_KEY")  # API ключ разработчика
+TRELLO_URL = env.get("TRELLO_URL")  # адрес для обращения к API TRELLO
+TRELLO_ID_MODEL = env.get("TRELLO_ID_MODEL")  # id таблицы, к которой будет привязан webhook
+TRELLO_TOKEN = env.get("TRELLO_TOKEN")  # токен для доступа к TRELLO
