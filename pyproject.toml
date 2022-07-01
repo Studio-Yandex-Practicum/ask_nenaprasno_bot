@@ -65,6 +65,7 @@ tzdata = "^2022.1"
 tzlocal = "^4.2"
 uvicorn = "^0.17.6"
 wrapt = "1.14.1"
+dataclasses-json = "^0.5.7"
 
 [tool.poetry.dev-dependencies]
 isort = ">=5.10.1"

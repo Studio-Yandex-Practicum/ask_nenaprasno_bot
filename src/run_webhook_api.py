@@ -1,5 +1,4 @@
 import json
-from dataclasses import asdict
 
 import httpx
 import uvicorn
@@ -12,7 +11,7 @@ from telegram import Update
 from bot import init_webhook
 from core import config
 from core.logger import logging
-from service.trello_data_deserializer import TrelloData, trello_deserializer
+from service.trello_data_deserializer import TrelloData
 
 
 async def start_bot() -> None:
@@ -50,18 +49,17 @@ async def trello_webhook_api(request: Request) -> Response:
     :param request: Trello request
     :return: Response "ok"
     """
-    response_json: dict = dict(await request.json())
+    response_json: dict = await request.json()
     try:
         if "action" in response_json.keys():
             if "id" in response_json["action"].keys():
-                trello_data: TrelloData = await trello_deserializer(response_json)
-                logging.info(f"Got trello request: {trello_data}.")
-                trello_data_json = json.dumps(asdict(trello_data))
-                return Response(trello_data_json)
+                trello_data: TrelloData = TrelloData.from_dict(response_json)
+                logging.info(f"New case assigned to the doctor: {trello_data}.")
+                return Response("New case assigned to the doctor.", status_code=httpx.codes.OK)
         else:
             trello_model_id: int = response_json["model"]["id"]
             logging.info(f"Got trello request, model id: {trello_model_id}.")
-            return Response("Trello request recieved.", status_code=httpx.codes.OK)
+            return Response("Got trello request.", status_code=httpx.codes.OK)
     except KeyError:
         logging.info("Got not trello or empty request.")
     except json.decoder.JSONDecodeError:
