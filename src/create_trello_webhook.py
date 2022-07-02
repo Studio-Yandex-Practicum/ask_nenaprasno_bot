@@ -4,7 +4,7 @@ import json
 import httpx
 
 from core import config
-from core.logger import logging
+from core.logger import logger
 
 
 async def create_trello_webhook():
@@ -26,9 +26,13 @@ async def create_trello_webhook():
         response = await client.send(request)
     try:
         response = response.json()
-        logging.info(f"Trello webhook id: {response['id']}")
+        webhook_id = response.get("id")
+        if webhook_id:
+            logger.info("Trello webhook id: %s", webhook_id)
+        else:
+            logger.info("Something got wrong: %s", response.get("message"))
     except json.decoder.JSONDecodeError:
-        logging.info(response.text)
+        logger.info(response.text)
 
 
 async def main():
