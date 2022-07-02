@@ -1,5 +1,6 @@
-import httpx
 import json
+
+import httpx
 import uvicorn
 from starlette.applications import Starlette
 from starlette.requests import Request
@@ -9,7 +10,6 @@ from telegram import Update
 
 from bot import init_webhook
 from core import config
-
 from core.logger import logging
 
 
