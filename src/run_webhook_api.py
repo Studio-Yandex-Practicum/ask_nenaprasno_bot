@@ -29,7 +29,7 @@ async def stop_bot() -> None:
 
 
 async def healthcheck_api(request: Request) -> PlainTextResponse:
-    message: str = f"Бот запущен и работает. Сообщение получено по запросу на Api сервера {config.WEBHOOK_URL}"
+    message: str = f"Бот запущен и работает. Сообщение получено по запросу на Api сервера {config.WEBHOOK_URL_TELEGRAM}"
 
     logging.info(message)
 

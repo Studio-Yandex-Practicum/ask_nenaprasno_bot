@@ -6,8 +6,6 @@ import httpx
 from core import config
 from core.logger import logging
 
-client = httpx.AsyncClient()
-
 
 async def create_trello_webhook():
     """
@@ -18,19 +16,19 @@ async def create_trello_webhook():
     """
     headers = {"Accept": "application/json"}
     params = {
-        "callbackURL": f"{config.WEBHOOK_URL}/trelloWebhookApi",
+        "callbackURL": config.WEBHOOK_URL_TRELLO,
         "idModel": config.TRELLO_ID_MODEL,
         "key": config.TRELLO_API_KEY,
         "token": config.TRELLO_TOKEN,
     }
-    request = client.build_request(method="POST", url=config.TRELLO_URL, headers=headers, params=params)
-    response = await client.send(request, stream=True)
-    data = (await response.aread()).decode("utf-8")
+    async with httpx.AsyncClient() as client:
+        request = client.build_request(method="POST", url=config.TRELLO_URL, headers=headers, params=params)
+        response = await client.send(request)
     try:
-        json_data = json.loads(data)
-        logging.info(f"Trello webhook id: {json_data['id']}")
+        response = response.json()
+        logging.info(f"Trello webhook id: {response['id']}")
     except json.decoder.JSONDecodeError:
-        logging.info(data)
+        logging.info(response.text)
 
 
 async def main():
