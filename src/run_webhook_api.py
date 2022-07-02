@@ -10,7 +10,7 @@ from telegram import Update
 
 from bot import init_webhook
 from core import config
-from core.logger import logging
+from core.logger import logger
 
 
 async def start_bot() -> None:
@@ -31,7 +31,7 @@ async def stop_bot() -> None:
 async def healthcheck_api(request: Request) -> PlainTextResponse:
     message: str = f"Бот запущен и работает. Сообщение получено по запросу на Api сервера {config.WEBHOOK_URL_TELEGRAM}"
 
-    logging.info(message)
+    logger.info(message)
 
     return PlainTextResponse(content=f'Request has been received and logged: "{message}"')
 
@@ -52,11 +52,11 @@ async def trello_webhook_api(request: Request) -> Response:
         response_json: dict = dict(await request.json())
         trello_model_id: int = response_json.get("model").get("id")
         if trello_model_id:
-            logging.info(f"Got trello request, model id: {trello_model_id}.")
+            logger.info("Got trello request, model id: %s", trello_model_id)
         else:
-            logging.info("Got not trello or empty request.")
+            logger.info("Got not trello or empty request.")
     except json.decoder.JSONDecodeError:
-        logging.info("Got data is not json.")
+        logger.info("Got data is not json.")
     return Response("Message received.", status_code=httpx.codes.OK)
 
 
