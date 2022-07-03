@@ -1,5 +1,4 @@
 import json
-import threading
 
 import httpx
 import uvicorn
@@ -12,7 +11,7 @@ from telegram import Update
 from bot import init_webhook
 from core import config
 from core.logger import logger
-from create_trello_webhook import create_trello_webhook
+from create_trello_webhook import main as trello_webhook
 
 
 async def start_bot() -> None:
@@ -71,9 +70,8 @@ routes = [
     Route("/trelloWebhookApi", trello_webhook_api, methods=["POST", "HEAD"]),
 ]
 
-trello_webhook_check = threading.Thread(target=create_trello_webhook)
 
-api = Starlette(routes=routes, on_startup=[start_bot, trello_webhook_check.start], on_shutdown=[stop_bot])
+api = Starlette(routes=routes, on_startup=[start_bot, trello_webhook], on_shutdown=[stop_bot])
 
 if __name__ == "__main__":
     uvicorn.run(app=api, debug=True, host=config.HOST, port=config.PORT)

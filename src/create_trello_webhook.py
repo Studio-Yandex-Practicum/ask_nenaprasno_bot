@@ -1,3 +1,4 @@
+import asyncio
 import json
 
 import httpx
@@ -6,7 +7,7 @@ from core import config
 from core.logger import logger
 
 
-def create_trello_webhook():
+async def create_trello_webhook():
     """
     Function that create request Trello Api to create or check webhook
 
@@ -20,11 +21,11 @@ def create_trello_webhook():
         "key": config.TRELLO_API_KEY,
         "token": config.TRELLO_TOKEN,
     }
-    with httpx.Client() as client:
+    async with httpx.AsyncClient() as client:
         request = client.build_request(
             method="POST", url="https://api.trello.com/1/webhooks/", headers=headers, params=params
         )
-        response = client.send(request)
+        response = await client.send(request)
     try:
         response = response.json()
         webhook_id = response.get("id")
@@ -34,3 +35,11 @@ def create_trello_webhook():
             logger.info("Something got wrong: %s", response.get("message"))
     except json.decoder.JSONDecodeError:
         logger.info(response.text)
+
+
+async def main():
+    loop = asyncio.get_event_loop()
+    asyncio.run_coroutine_threadsafe(loop=loop, coro=create_trello_webhook())
+
+
+asyncio.run(main())
