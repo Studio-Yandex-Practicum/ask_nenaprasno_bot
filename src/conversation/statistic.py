@@ -2,8 +2,11 @@ from telegram import Update
 from telegram.ext import CallbackQueryHandler, CommandHandler, ContextTypes
 
 from constants import callback_data, commands, states
+from core.logger import logger
+from decorators.logger import async_error_logger
 
 
+@async_error_logger(name="conversation.statistic.statistic_month_callback", logger=logger)
 async def statistic_month_callback(update: Update, context: ContextTypes.DEFAULT_TYPE):
     """
     Sends monthly statistics to the user.
@@ -12,6 +15,7 @@ async def statistic_month_callback(update: Update, context: ContextTypes.DEFAULT
     return states.BASE_STATE
 
 
+@async_error_logger(name="conversation.statistic.statistic_week_callback", logger=logger)
 async def statistic_week_callback(update: Update, context: ContextTypes.DEFAULT_TYPE):
     """
     Sends weekly statistics to the user.
@@ -28,6 +32,7 @@ statistic_week_callback_handler = CallbackQueryHandler(
 )
 
 
+@async_error_logger(name="conversation.statistic.statistic", logger=logger)
 async def statistic(update: Update, context: ContextTypes.DEFAULT_TYPE):
     """
     Sends statistics to the user.

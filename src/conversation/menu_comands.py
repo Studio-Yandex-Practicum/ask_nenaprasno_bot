@@ -15,8 +15,11 @@ from conversation.statistic import (
 )
 from conversation.timezone import get_timezone, states_timezone_conversation_dict, timezone_command_handler
 from core.config import URL_SERVICE_RULES
+from core.logger import logger
+from decorators.logger import async_error_logger
 
 
+@async_error_logger(name="conversation.menu_commands.menu", logger=logger)
 async def menu(update: Update, context: ContextTypes.DEFAULT_TYPE):
     """
     Displays the menu.

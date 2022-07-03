@@ -2,8 +2,11 @@ from telegram import Update
 from telegram.ext import CallbackQueryHandler, CommandHandler, ContextTypes
 
 from constants import callback_data, commands, states
+from core.logger import logger
+from decorators.logger import async_error_logger
 
 
+@async_error_logger(name="conversation.requests.actual_requests_callback", logger=logger)
 async def actual_requests_callback(update: Update, context: ContextTypes.DEFAULT_TYPE):
     """
     Sends a list of current requests/requests to the user.
@@ -12,6 +15,7 @@ async def actual_requests_callback(update: Update, context: ContextTypes.DEFAULT
     return states.BASE_STATE
 
 
+@async_error_logger(name="conversation.requests.overdue_requests_callback", logger=logger)
 async def overdue_requests_callback(update: Update, context: ContextTypes.DEFAULT_TYPE):
     """
     Sends to the user a list of overdue applications/requests or those that are running out of time.
@@ -28,6 +32,7 @@ overdue_requests_callback_handler = CallbackQueryHandler(
 )
 
 
+@async_error_logger(name="conversation.requests.actual_requests", logger=logger)
 async def actual_requests(update: Update, context: ContextTypes.DEFAULT_TYPE):
     """
     Sends a list of current requests/requests to the user.
@@ -36,6 +41,7 @@ async def actual_requests(update: Update, context: ContextTypes.DEFAULT_TYPE):
     return states.BASE_STATE
 
 
+@async_error_logger(name="conversation.requests.overdue_requests", logger=logger)
 async def overdue_requests(update: Update, context: ContextTypes.DEFAULT_TYPE):
     """
     Sends to the user a list of overdue applications/requests or those that are running out of time.

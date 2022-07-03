@@ -5,6 +5,8 @@ from telegram import KeyboardButton, ReplyKeyboardMarkup, Update
 from telegram.ext import CallbackContext
 from timezonefinder import TimezoneFinder
 
+from core.logger import logger
+from decorators.logger import async_error_logger
 from service.api_client import APIService
 
 TIME_ZONE = "UTC"
@@ -15,6 +17,7 @@ async def set_timezone(telegram_id: int, text_utc: str, context: CallbackContext
     await api.set_user_timezone(telegram_id=telegram_id, user_time_zone=text_utc)
 
 
+@async_error_logger(name="conversation.get_timezone.get_timezone", logger=logger)
 async def get_timezone(update: Update, context: CallbackContext):
     """
     Requests a timezone from the user.
