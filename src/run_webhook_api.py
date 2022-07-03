@@ -1,4 +1,5 @@
 import json
+from threading import Thread
 
 import httpx
 import uvicorn
@@ -11,6 +12,7 @@ from telegram import Update
 from bot import init_webhook
 from core import config
 from core.logger import logger
+from create_trello_webhook import create_trello_webhook
 
 
 async def start_bot() -> None:
@@ -29,7 +31,10 @@ async def stop_bot() -> None:
 
 
 async def healthcheck_api(request: Request) -> PlainTextResponse:
-    message: str = f"Бот запущен и работает. Сообщение получено по запросу на Api сервера {config.WEBHOOK_URL_TELEGRAM}"
+    message: str = (
+        "Бот запущен и работает. Сообщение получено по запросу на Api сервера "
+        f"{config.WEBHOOK_URL}/telegramWebhookApi"
+    )
 
     logger.info(message)
 
@@ -66,8 +71,11 @@ routes = [
     Route("/trelloWebhookApi", trello_webhook_api, methods=["POST", "HEAD"]),
 ]
 
-api = Starlette(routes=routes, on_startup=[start_bot], on_shutdown=[stop_bot])
 
+trello_webhook_check = Thread(target=create_trello_webhook)
+
+
+api = Starlette(routes=routes, on_startup=[start_bot, trello_webhook_check.start], on_shutdown=[stop_bot])
 
 if __name__ == "__main__":
     uvicorn.run(app=api, debug=True, host=config.HOST, port=config.PORT)

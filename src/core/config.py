@@ -15,8 +15,7 @@ LOG_NAME = env.get("LOG_NAME")
 LOG_PATH = BASE_DIR / LOG_NAME
 
 HOST = env.get("HOST")  # host для доступа к uvicorn серверу, по умолчанию localhost или 127.0.0.1
-WEBHOOK_URL_TELEGRAM = env.get("WEBHOOK_URL_TELEGRAM")  # адрес сервера, где будет запущен бот
-WEBHOOK_URL_TRELLO = env.get("WEBHOOK_URL_TRELLO")  # endpoint для связи с trello
+WEBHOOK_URL = env.get("WEBHOOK_URL")  # адрес сервера, где будет запущен бот
 
 PORT = int(env.get("BOT_PORT"))  # port для доступа к uvicorn серверу, по умолчанию 8000
 TOKEN = env.get("TELEGRAM_TOKEN")  # Токен телеграм бота
@@ -45,6 +44,5 @@ IS_FAKE_API = env.get("IS_FAKE_API")  # флаг, определяющий ка�
 SITE_API_URL = env.get("SITE_API_URL")  # адрес сервера, к которому будет отправлять запросы АПИ клиент
 
 TRELLO_API_KEY = env.get("TRELLO_API_KEY")  # API ключ разработчика
-TRELLO_URL = env.get("TRELLO_URL")  # адрес для обращения к API TRELLO
 TRELLO_ID_MODEL = env.get("TRELLO_ID_MODEL")  # id таблицы, к которой будет привязан webhook
 TRELLO_TOKEN = env.get("TRELLO_TOKEN")  # токен для доступа к TRELLO
