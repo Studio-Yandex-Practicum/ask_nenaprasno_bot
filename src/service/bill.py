@@ -1,18 +1,10 @@
 from telegram import InlineKeyboardButton, InlineKeyboardMarkup, Update
 from telegram.ext import CallbackContext, ContextTypes
 
-from constants.callback_data import CALLBACK_BILL_DONE, CALLBACK_BILL_SKIP
+from constants.callback_data import CALLBACK_BILL_DONE_COMMAND, CALLBACK_BILL_SKIP_COMMAND
 from core import config
 from core.send_message import send_message
 from service.repeat_message import repeat_after_one_hour_button
-
-MESSAGE = "Вам необходимо сформировать чек"
-
-
-bill_done_button = InlineKeyboardButton(text="✅ Уже отправил(а)", callback_data=CALLBACK_BILL_DONE)
-bill_skip_button = InlineKeyboardButton(text="🕑 Скоро отправлю", callback_data=CALLBACK_BILL_SKIP)
-
-menu = [[repeat_after_one_hour_button], [bill_done_button], [bill_skip_button]]
 
 
 async def daily_bill_remind_job(context: CallbackContext) -> None:
@@ -22,13 +14,18 @@ async def daily_bill_remind_job(context: CallbackContext) -> None:
     :return:
     """
     job = context.job
-    await send_message(chat_id=job.user_id, text=MESSAGE, reply_markup=InlineKeyboardMarkup(menu), context=context)
-    send_time = config.WEEKLY_STAT_TIME
+    message = "Вам необходимо сформировать чек"
+    bill_done_button = InlineKeyboardButton(text="✅ Уже отправил(а)", callback_data=CALLBACK_BILL_DONE_COMMAND)
+    bill_skip_button = InlineKeyboardButton(text="🕑 Скоро отправлю", callback_data=CALLBACK_BILL_SKIP_COMMAND)
+    menu = InlineKeyboardMarkup([[repeat_after_one_hour_button], [bill_done_button], [bill_skip_button]])
+    await send_message(chat_id=job.user_id, text=message, reply_markup=menu, context=context)
+    send_time = config.MONTHLY_RECEIPT_REMINDER_TIME
     # user_utc = context.user_data.get("UTC")
     # Не смог понять, в каком виде хранятся данные о часовом поясе юзера. Здесь надо переопределить информацию о
     # времени отправки сообщения
     # if user_utc:
     #     send_time += user_utc
+
     context.job_queue.run_daily(
         daily_bill_remind_job,
         time=send_time,

@@ -11,7 +11,7 @@ async def callback_router(update: Update, context: ContextTypes.DEFAULT_TYPE) ->
     match callback_message:
         case callback_data.CALLBACK_REPEAT_COMMAND:
             await repeat_message_after_1_hour_callback(update=update, context=context)
-        case callback_data.CALLBACK_BILL_DONE:
+        case callback_data.CALLBACK_BILL_DONE_COMMAND:
             await bill_done_callback(update=update, context=context)
-        case callback_data.CALLBACK_BILL_SKIP:
+        case callback_data.CALLBACK_BILL_SKIP_COMMAND:
             await skip_callback(update=update, context=context)
