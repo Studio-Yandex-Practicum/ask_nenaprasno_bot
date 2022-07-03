@@ -33,6 +33,7 @@ starlette = "^0.20.4"
 uvicorn = "^0.18.2"
 python-dotenv = "^0.20.0"
 asgiref = "^3.5.2"
+dataclasses-json = "^0.5.7"
 
 
 [tool.poetry.dev-dependencies]
