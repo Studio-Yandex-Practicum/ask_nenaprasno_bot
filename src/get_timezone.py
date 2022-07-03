@@ -60,4 +60,4 @@ async def get_timezone_from_text_message(update: Update, context: CallbackContex
     Sets timezone based on a text message from the user.
     Return None if error, any else (string with timezone will be best).
     """
-    return "X"
+    return str(update.message.text)
