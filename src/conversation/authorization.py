@@ -7,10 +7,7 @@ from service.api_client import APIService
 
 from menu_button import COMMANDS, COMMANDS_UNAUTHORIZWD, menu_button
 from conversation.menu_comands import menu_conversation
-
-
-TIME_ZONE = "UTC"
-
+from conversation.service_police import service_police_command_handler
 
 
 async def start(update: Update, context: CallbackContext):
@@ -112,7 +109,10 @@ authorization_conversation = ConversationHandler(
     allow_reentry=True,
     persistent=True,
     name="authorization_conversation",
-    entry_points=[CommandHandler("start", start)],
+    entry_points=[
+        CommandHandler("start", start),
+        service_police_command_handler,
+    ],
     states={
         states.UNAUTHORIZED_STATE: [
             CallbackQueryHandler(is_expert_callback, pattern=callback_data.CALLBACK_IS_EXPERT_COMMAND),
