@@ -52,6 +52,7 @@ async def get_timezone_from_location(update: Update, context: CallbackContext):
         text_utc = TIME_ZONE + utc
         await set_timezone(update.effective_chat.id, text_utc, context)
         return text_utc
+    return None
 
 
 async def get_timezone_from_text_message(update: Update, context: CallbackContext):
