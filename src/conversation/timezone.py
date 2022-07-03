@@ -32,8 +32,9 @@ async def get_timezone(update: Update, context: CallbackContext):
 async def check_timezone(update: Update, context: ContextTypes.DEFAULT_TYPE, timezone):
     """
     Sends a message after a successful timezone installation.
+    Return state for ConversationHandler.
     """
-    chat_id = (update.effective_chat.id,)
+    chat_id = update.effective_chat.id
     if timezone is None:
         await context.bot.send_message(
             chat_id=chat_id,
@@ -62,17 +63,14 @@ async def get_timezone_from_text_message_callback(update: Update, context: Callb
     Sets timezone based on a text message from the user.
     """
     text = str(update.message.text)
+    chat_id = update.effective_chat.id
     if text == "Напишу свою таймзону сам":
-        await context.bot.send_message(
-            chat_id=update.effective_chat.id,
-            text="Введите таймзону UTC. Например: UTC+03:00",
-        )
+        await context.bot.send_message(chat_id=chat_id, text="Введите таймзону UTC. Например: UTC+03:00")
         return states.TIMEZONE_STATE
     timezone = await get_timezone_from_text_message(update, context)
     if timezone:
-        await send_message(
-            context=context, chat_id=update.effective_chat.id, text=("вы установили таймзону " + str(timezone))
-        )
+        text = "вы установили таймзону " + str(timezone)
+        await send_message(context=context, chat_id=chat_id, text=text)
     return await check_timezone(update, context, timezone)
 
 
