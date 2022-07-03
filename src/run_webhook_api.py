@@ -10,14 +10,15 @@ from telegram import Update
 
 from bot import init_webhook
 from core import config
-from core.logger import logger
-from create_trello_webhook import trello_webhook
+from core.logger import logging
+from service.trello_data_deserializer import TrelloData
 
 
 async def start_bot() -> None:
     bot_app = await init_webhook()
     await bot_app.initialize()
     await bot_app.start()
+
     # provide bot started bot application to server via global state variable
     # https://www.starlette.io/applications/#storing-state-on-the-app-instance
     api.state.bot_app = bot_app
@@ -29,12 +30,9 @@ async def stop_bot() -> None:
 
 
 async def healthcheck_api(request: Request) -> PlainTextResponse:
-    message: str = (
-        "Бот запущен и работает. Сообщение получено по запросу на Api сервера "
-        f"{config.WEBHOOK_URL}/telegramWebhookApi"
-    )
+    message: str = f"Бот запущен и работает. Сообщение получено по запросу на Api сервера {config.WEBHOOK_URL}"
 
-    logger.info(message)
+    logging.info(message)
 
     return PlainTextResponse(content=f'Request has been received and logged: "{message}"')
 
@@ -52,15 +50,13 @@ async def trello_webhook_api(request: Request) -> Response:
     :return: Response "ok"
     """
     try:
-        response_json: dict = dict(await request.json())
-        trello_model_id: int = response_json.get("model").get("id")
-        if trello_model_id:
-            logger.info("Got trello request, model id: %s", trello_model_id)
-        else:
-            logger.info("Got not trello or empty request.")
+        trello_data: TrelloData = TrelloData.from_dict(await request.json())
+        logging.info(f"New case assigned to the doctor. {trello_data}.")
+        return Response("New case assigned to the doctor.", status_code=httpx.codes.OK)
+    except KeyError:
+        logging.info("Got not trello or empty request.")
     except json.decoder.JSONDecodeError:
-        logger.info("Got data is not json.")
-    return Response("Message received.", status_code=httpx.codes.OK)
+        logging.info("Got data is not json.")
 
 
 routes = [
@@ -69,8 +65,8 @@ routes = [
     Route("/trelloWebhookApi", trello_webhook_api, methods=["POST", "HEAD"]),
 ]
 
+api = Starlette(routes=routes, on_startup=[start_bot], on_shutdown=[stop_bot])
 
-api = Starlette(routes=routes, on_startup=[start_bot, trello_webhook], on_shutdown=[stop_bot])
 
 if __name__ == "__main__":
     uvicorn.run(app=api, debug=True, host=config.HOST, port=config.PORT)
