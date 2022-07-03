@@ -1,9 +1,8 @@
 from telegram import KeyboardButton, ReplyKeyboardMarkup, ReplyKeyboardRemove, Update
 from telegram.ext import CallbackContext, CommandHandler, ContextTypes, MessageHandler, filters
 
-from constants import states, commands
+from constants import commands, states
 from core.send_message import send_message
-
 from get_timezone import get_timezone_from_location, get_timezone_from_text_message
 
 TIME_ZONE = "UTC"
@@ -44,7 +43,7 @@ async def check_timezone(update: Update, context: ContextTypes.DEFAULT_TYPE, tim
         context=context,
         chat_id=update.effective_chat.id,
         text="Вы настроили часовой пояс, теперь уведомления будут приходить в удобное время",
-        reply_markup=ReplyKeyboardRemove()
+        reply_markup=ReplyKeyboardRemove(),
     )
     return states.BASE_STATE
 
@@ -72,7 +71,8 @@ async def get_timezone_from_text_message_callback(update: Update, context: Callb
     timezone = await get_timezone_from_text_message(update, context)
     if timezone:
         await send_message(
-            context=context, chat_id=update.effective_chat.id, text=("вы установили таймзону " + str(timezone)))
+            context=context, chat_id=update.effective_chat.id, text=("вы установили таймзону " + str(timezone))
+        )
 
     state = await check_timezone(update, context, timezone)
     return state

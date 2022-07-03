@@ -2,10 +2,20 @@ from telegram import InlineKeyboardButton, InlineKeyboardMarkup, Update
 from telegram.ext import CallbackQueryHandler, CommandHandler, ContextTypes, ConversationHandler
 
 from constants import callback_data, states
-from core.config import URL_SERVICE_RULES
+from conversation.requests import (
+    actual_requests_callback_handler,
+    actual_requests_command_handler,
+    overdue_requests_callback_handler,
+    overdue_requests_command_handler,
+)
+from conversation.statistic import (
+    statistic_command_handler,
+    statistic_month_callback_handler,
+    statistic_week_callback_handler,
+)
 from conversation.timezone import get_timezone, states_timezone_conversation_dict, timezone_command_handler
-from conversation.statistic import statistic_week_callback_handler, statistic_month_callback_handler, statistic_command_handler
-from conversation.requests import actual_requests_callback_handler, actual_requests_command_handler, overdue_requests_callback_handler, overdue_requests_command_handler
+from core.config import URL_SERVICE_RULES
+
 
 async def menu(update: Update, context: ContextTypes.DEFAULT_TYPE):
     """
@@ -47,7 +57,7 @@ authorized_user_command_handlers = (
     timezone_command_handler,
     statistic_command_handler,
     actual_requests_command_handler,
-    overdue_requests_command_handler
+    overdue_requests_command_handler,
 )
 
 menu_conversation = ConversationHandler(
@@ -67,7 +77,5 @@ menu_conversation = ConversationHandler(
         **states_timezone_conversation_dict,
     },
     fallbacks=[],
-    map_to_parent={
-        states.END_STATE: states.BASE_STATE
-    }
+    map_to_parent={states.END_STATE: states.BASE_STATE},
 )

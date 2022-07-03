@@ -14,7 +14,7 @@ COMMANDS = (
     BotCommand(commands.GET_TIMEZONE, "Установить часовой пояс."),
     BotCommand(commands.DEADLINES, "Количество просроченных заявок."),
     BotCommand(commands.STATEMENTS, "Количество заявок в работе."),
-    *COMMANDS_UNAUTHORIZWD
+    *COMMANDS_UNAUTHORIZWD,
 )
 
 
