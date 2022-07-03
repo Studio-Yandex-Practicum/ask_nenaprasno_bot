@@ -33,17 +33,18 @@ async def check_timezone(update: Update, context: ContextTypes.DEFAULT_TYPE, tim
     """
     Sends a message after a successful timezone installation.
     """
+    chat_id = (update.effective_chat.id,)
     if timezone is None:
         await context.bot.send_message(
-            chat_id=update.effective_chat.id,
+            chat_id=chat_id,
             text="Не удалось определить часовой пояс. Пожалуйста, введите его вручную. Например: UTC+03:00",
         )
         return states.TIMEZONE_STATE
+    await context.bot.send_message(chat_id=chat_id, reply_markup=ReplyKeyboardRemove())
     await send_message(
         context=context,
-        chat_id=update.effective_chat.id,
+        chat_id=chat_id,
         text="Вы настроили часовой пояс, теперь уведомления будут приходить в удобное время",
-        reply_markup=ReplyKeyboardRemove(),
     )
     return states.BASE_STATE
 
@@ -53,8 +54,7 @@ async def get_timezone_from_location_callback(update: Update, context: CallbackC
     Sets timezone by geolocation.
     """
     timezone = await get_timezone_from_location(update, context)
-    state = await check_timezone(update, context, timezone)
-    return state
+    return await check_timezone(update, context, timezone)
 
 
 async def get_timezone_from_text_message_callback(update: Update, context: CallbackContext):
@@ -73,9 +73,7 @@ async def get_timezone_from_text_message_callback(update: Update, context: Callb
         await send_message(
             context=context, chat_id=update.effective_chat.id, text=("вы установили таймзону " + str(timezone))
         )
-
-    state = await check_timezone(update, context, timezone)
-    return state
+    return await check_timezone(update, context, timezone)
 
 
 states_timezone_conversation_dict = {
