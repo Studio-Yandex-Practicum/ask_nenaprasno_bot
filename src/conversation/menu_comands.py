@@ -4,6 +4,8 @@ from telegram.ext import CallbackQueryHandler, CommandHandler, ContextTypes, Con
 from constants import callback_data, states
 from core.config import URL_SERVICE_RULES
 from conversation.timezone import get_timezone, states_timezone_conversation_dict, timezone_command_handler
+from conversation.statistic import statistic_week_callback_handler, statistic_month_callback_handler, statistic_command_handler
+from conversation.requests import actual_requests_callback_handler, actual_requests_command_handler, overdue_requests_callback_handler, overdue_requests_command_handler
 
 async def menu(update: Update, context: ContextTypes.DEFAULT_TYPE):
     """
@@ -38,45 +40,15 @@ async def menu(update: Update, context: ContextTypes.DEFAULT_TYPE):
     return states.BASE_STATE
 
 
-async def statistic_month_callback(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    """
-    Sends monthly statistics to the user.
-    """
-    await update.callback_query.message.reply_text(text="statistic_month_callback")
-    return states.BASE_STATE
-
-
-async def statistic_week_callback(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    """
-    Sends weekly statistics to the user.
-    """
-    await update.callback_query.message.reply_text(text="statistic_week_callback")
-    return states.BASE_STATE
-
-
-async def actual_requests_callback(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    """
-    Sends a list of current requests/requests to the user.
-    """
-    await update.callback_query.message.reply_text(text="actual_requests_callback")
-    return states.BASE_STATE
-
-
-async def overdue_requests_callback(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    """
-    Sends to the user a list of overdue applications/requests or those that are running out of time.
-    """
-    await update.callback_query.message.reply_text(text="overdue_requests_callback")
-    return states.BASE_STATE
-
-
 menu_command_handler = CommandHandler("menu", menu)
 
 authorized_user_command_handlers = (
     menu_command_handler,
     timezone_command_handler,
+    statistic_command_handler,
+    actual_requests_command_handler,
+    overdue_requests_command_handler
 )
-
 
 menu_conversation = ConversationHandler(
     allow_reentry=True,
@@ -86,11 +58,11 @@ menu_conversation = ConversationHandler(
     states={
         states.BASE_STATE: [
             *authorized_user_command_handlers,
+            statistic_month_callback_handler,
+            statistic_week_callback_handler,
+            actual_requests_callback_handler,
+            overdue_requests_callback_handler,
             CallbackQueryHandler(get_timezone, pattern=callback_data.CALLBACK_CONFIGURATE_TIMEZONE_COMMAND),
-            CallbackQueryHandler(statistic_month_callback, pattern=callback_data.CALLBACK_STATISTIC_MONTH_COMMAND),
-            CallbackQueryHandler(statistic_week_callback, pattern=callback_data.CALLBACK_STATISTIC_WEEK_COMMAND),
-            CallbackQueryHandler(actual_requests_callback, pattern=callback_data.CALLBACK_ACTUAL_REQUESTS_COMMAND),
-            CallbackQueryHandler(overdue_requests_callback, pattern=callback_data.CALLBACK_OVERDUE_REQUESTS_COMMAND),
         ],
         **states_timezone_conversation_dict,
     },

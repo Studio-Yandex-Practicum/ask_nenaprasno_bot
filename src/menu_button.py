@@ -11,7 +11,7 @@ COMMANDS_UNAUTHORIZWD = (
 COMMANDS = (
     BotCommand(commands.STATISTIC, "stat"),
     BotCommand(commands.MENU, "menu"),
-    BotCommand(commands.GET_TIMZONE, "get_timezone"),
+    BotCommand(commands.GET_TIMEZONE, "get_timezone"),
     BotCommand(commands.DEADLINES, "srok"),
     BotCommand(commands.STATEMENTS, "zayavki"),
     *COMMANDS_UNAUTHORIZWD
