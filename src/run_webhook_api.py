@@ -11,6 +11,7 @@ from telegram import Update
 from bot import init_webhook
 from core import config
 from core.logger import logging
+from service.trello_data_deserializer import TrelloData
 
 
 async def start_bot() -> None:
@@ -48,16 +49,14 @@ async def trello_webhook_api(request: Request) -> Response:
     :param request: Trello request
     :return: Response "ok"
     """
-    response_json: dict = dict(await request.json())
     try:
-        trello_model_id: int = response_json["model"]["id"]
-        logging.info(f"Got trello request, model id: {trello_model_id}.")
+        trello_data: TrelloData = TrelloData.from_dict(await request.json())
+        logging.info(f"New case assigned to the doctor. {trello_data}.")
+        return Response("New case assigned to the doctor.", status_code=httpx.codes.OK)
     except KeyError:
         logging.info("Got not trello or empty request.")
     except json.decoder.JSONDecodeError:
         logging.info("Got data is not json.")
-    finally:
-        return Response("Message received.", status_code=httpx.codes.OK)
 
 
 routes = [
