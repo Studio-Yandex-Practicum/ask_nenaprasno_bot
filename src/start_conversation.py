@@ -54,7 +54,7 @@ async def get_timezone_from_location_callback(update: Update, context: CallbackC
     text_utc = TIME_ZONE + utc
     await set_timezone(update.effective_chat.id, text_utc, context)
     await timezone_message_callback(update, context)
-    return states.MENU_STATE
+    return states.BASE_STATE
 
 
 async def get_timezone_from_text_message_callback(update: Update, context: CallbackContext):
@@ -73,7 +73,7 @@ async def get_timezone_from_text_message_callback(update: Update, context: Callb
         text="вы установили таймзону X",
     )
     await timezone_message_callback(update, context)
-    return states.MENU_STATE
+    return states.BASE_STATE
 
 
 async def start(update: Update, context: CallbackContext):
@@ -199,7 +199,7 @@ async def menu(update: Update, context: ContextTypes.DEFAULT_TYPE):
         ],
     ]
     await update.message.reply_text("Меню", reply_markup=InlineKeyboardMarkup(menu_buttons))
-    return states.MENU_STATE
+    return states.BASE_STATE
 
 
 async def configurate_timezone_callback(update: Update, context: ContextTypes.DEFAULT_TYPE):
@@ -215,7 +215,7 @@ async def statistic_month_callback(update: Update, context: ContextTypes.DEFAULT
     Sends monthly statistics to the user.
     """
     await update.callback_query.message.reply_text(text="statistic_month_callback")
-    return states.MENU_STATE
+    return states.BASE_STATE
 
 
 async def statistic_week_callback(update: Update, context: ContextTypes.DEFAULT_TYPE):
@@ -223,7 +223,7 @@ async def statistic_week_callback(update: Update, context: ContextTypes.DEFAULT_
     Sends weekly statistics to the user.
     """
     await update.callback_query.message.reply_text(text="statistic_week_callback")
-    return states.MENU_STATE
+    return states.BASE_STATE
 
 
 async def actual_requests_callback(update: Update, context: ContextTypes.DEFAULT_TYPE):
@@ -231,7 +231,7 @@ async def actual_requests_callback(update: Update, context: ContextTypes.DEFAULT
     Sends a list of current requests/requests to the user.
     """
     await update.callback_query.message.reply_text(text="actual_requests_callback")
-    return states.MENU_STATE
+    return states.BASE_STATE
 
 
 async def overdue_requests_callback(update: Update, context: ContextTypes.DEFAULT_TYPE):
@@ -239,7 +239,7 @@ async def overdue_requests_callback(update: Update, context: ContextTypes.DEFAUL
     Sends to the user a list of overdue applications/requests or those that are running out of time.
     """
     await update.callback_query.message.reply_text(text="overdue_requests_callback")
-    return states.MENU_STATE
+    return states.BASE_STATE
 
 
 start_command_handler = CommandHandler("start", start)
@@ -273,7 +273,7 @@ start_conversation = ConversationHandler(
             MessageHandler(filters.LOCATION, get_timezone_from_location_callback),
             MessageHandler(filters.TEXT, get_timezone_from_text_message_callback),
         ],
-        states.MENU_STATE: [
+        states.BASE_STATE: [
             *authorized_user_command_handlers,
             CallbackQueryHandler(
                 configurate_timezone_callback, pattern=callback_data.CALLBACK_CONFIGURATE_TIMEZONE_COMMAND
