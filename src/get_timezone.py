@@ -1,8 +1,8 @@
 import datetime
 
 import pytz
-from telegram.ext import CallbackContext
 from telegram import KeyboardButton, ReplyKeyboardMarkup, Update
+from telegram.ext import CallbackContext
 from timezonefinder import TimezoneFinder
 
 from service.api_client import APIService
@@ -11,7 +11,6 @@ TIME_ZONE = "UTC"
 
 
 async def set_timezone(telegram_id: int, text_utc: str, context: CallbackContext):
-    await context.bot.send_message(chat_id=telegram_id, text=f"Установлен часовой пояс для {text_utc}")
     api = APIService()
     await api.set_user_timezone(telegram_id=telegram_id, user_time_zone=text_utc)
 
