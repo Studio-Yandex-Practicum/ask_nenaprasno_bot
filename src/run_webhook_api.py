@@ -1,5 +1,5 @@
 import json
-from threading import Thread
+import threading
 
 import httpx
 import uvicorn
@@ -71,9 +71,7 @@ routes = [
     Route("/trelloWebhookApi", trello_webhook_api, methods=["POST", "HEAD"]),
 ]
 
-
-trello_webhook_check = Thread(target=create_trello_webhook)
-
+trello_webhook_check = threading.Thread(target=create_trello_webhook)
 
 api = Starlette(routes=routes, on_startup=[start_bot, trello_webhook_check.start], on_shutdown=[stop_bot])
 
