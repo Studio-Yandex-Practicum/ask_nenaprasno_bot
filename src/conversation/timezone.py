@@ -1,7 +1,7 @@
 from telegram import KeyboardButton, ReplyKeyboardMarkup, ReplyKeyboardRemove, Update
-from telegram.ext import CallbackContext, CommandHandler, ContextTypes, MessageHandler, filters
+from telegram.ext import CallbackContext, ContextTypes, MessageHandler, filters
 
-from constants import commands, states
+from constants import states
 from core.logger import logger
 from decorators.logger import async_error_logger
 from get_timezone import get_timezone_from_location, get_timezone_from_text_message
@@ -82,5 +82,3 @@ states_timezone_conversation_dict = {
         MessageHandler(filters.TEXT & ~filters.COMMAND, get_timezone_from_text_message_callback),
     ],
 }
-
-timezone_command_handler = CommandHandler(commands.GET_TIMEZONE, get_timezone)

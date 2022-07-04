@@ -2,8 +2,7 @@ from telegram import InlineKeyboardButton, InlineKeyboardMarkup, Update
 from telegram.ext import CallbackContext, CallbackQueryHandler, CommandHandler, ConversationHandler
 
 from constants import callback_data, states
-from conversation.menu_commands import menu_conversation
-from conversation.service_police import service_police_command_handler
+from conversation.menu import menu_conversation
 from conversation.timezone import get_timezone, states_timezone_conversation_dict
 from core.logger import logger
 from decorators.logger import async_error_logger
@@ -117,7 +116,6 @@ authorization_conversation = ConversationHandler(
     name="authorization_conversation",
     entry_points=[
         CommandHandler("start", start),
-        service_police_command_handler,
     ],
     states={
         states.UNAUTHORIZED_STATE: [

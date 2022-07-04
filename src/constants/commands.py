@@ -1,8 +1,3 @@
 START = "start"
 STOP = "stop"
-STATISTIC = "stat"
 MENU = "menu"
-GET_TIMEZONE = "get_timezone"
-DEADLINES = "srok"
-STATEMENTS = "zayavki"
-SERVICE_POLICE = "pravila"
