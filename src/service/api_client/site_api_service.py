@@ -4,8 +4,6 @@ from core import config
 from service.api_client.base import AbstractAPIService
 from service.api_client.models import BillStat, MonthStat, UserData, UserMonthStat, UserWeekStat, WeekStat
 
-BASE_REQUEST_ATTRS = {"base_url": config.SITE_API_URL, "headers": {"token": config.SITE_API_BOT_TOKEN}}
-
 
 class SiteAPIService(AbstractAPIService):
     """
@@ -14,14 +12,16 @@ class SiteAPIService(AbstractAPIService):
 
     def __init__(self):
         self.site_url: str = config.SITE_API_URL
+        self.bot_token: str = config.SITE_API_BOT_TOKEN
 
     async def get_bill(self) -> BillStat:
         pass
 
     async def get_week_stat(self) -> list[WeekStat]:
-        url = "stat/weekly"
-        async with httpx.AsyncClient(**BASE_REQUEST_ATTRS) as client:
-            response = await client.get(url=url)
+        url = f"{self.site_url}/tgbot/stat/weekly"
+        headers = {"token": self.bot_token}
+        async with httpx.AsyncClient() as client:
+            response = await client.get(url=url, headers=headers)
             response = await response.json()
             return [
                 WeekStat(
