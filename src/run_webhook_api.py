@@ -10,7 +10,8 @@ from telegram import Update
 
 from bot import init_webhook
 from core import config
-from core.logger import logging
+from core.logger import logger
+from create_trello_webhook import trello_webhook
 
 
 async def start_bot() -> None:
@@ -28,8 +29,13 @@ async def stop_bot() -> None:
 
 
 async def healthcheck_api(request: Request) -> PlainTextResponse:
-    message: str = f"Бот запущен и работает. Сообщение получено по запросу на Api сервера {config.WEBHOOK_URL}"
-    logging.info(message)
+    message: str = (
+        "Бот запущен и работает. Сообщение получено по запросу на Api сервера "
+        f"{config.WEBHOOK_URL}/telegramWebhookApi"
+    )
+
+    logger.info(message)
+
     return PlainTextResponse(content=f'Request has been received and logged: "{message}"')
 
 
@@ -45,14 +51,15 @@ async def trello_webhook_api(request: Request) -> Response:
     :param request: Trello request
     :return: Response "ok"
     """
-    response_json: dict = dict(await request.json())
     try:
-        trello_model_id: int = response_json["model"]["id"]
-        logging.info(f"Got trello request, model id: {trello_model_id}.")
-    except KeyError:
-        logging.info("Got not trello or empty request.")
+        response_json: dict = dict(await request.json())
+        trello_model_id: int = response_json.get("model").get("id")
+        if trello_model_id:
+            logger.info("Got trello request, model id: %s", trello_model_id)
+        else:
+            logger.info("Got not trello or empty request.")
     except json.decoder.JSONDecodeError:
-        logging.info("Got data is not json.")
+        logger.info("Got data is not json.")
     return Response("Message received.", status_code=httpx.codes.OK)
 
 
@@ -62,8 +69,8 @@ routes = [
     Route("/trelloWebhookApi", trello_webhook_api, methods=["POST", "HEAD"]),
 ]
 
-api = Starlette(routes=routes, on_startup=[start_bot], on_shutdown=[stop_bot])
 
+api = Starlette(routes=routes, on_startup=[start_bot, trello_webhook], on_shutdown=[stop_bot])
 
 if __name__ == "__main__":
     uvicorn.run(app=api, debug=True, host=config.HOST, port=config.PORT)
