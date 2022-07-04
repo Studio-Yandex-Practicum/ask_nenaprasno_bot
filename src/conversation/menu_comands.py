@@ -80,5 +80,5 @@ menu_conversation = ConversationHandler(
         **states_timezone_conversation_dict,
     },
     fallbacks=[],
-    map_to_parent={states.END_STATE: states.BASE_STATE},
+    map_to_parent={ConversationHandler.END: states.BASE_STATE},
 )
