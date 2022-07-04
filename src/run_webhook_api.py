@@ -1,5 +1,3 @@
-import json
-
 import httpx
 import uvicorn
 from starlette.applications import Starlette
@@ -10,8 +8,8 @@ from telegram import Update
 
 from bot import init_webhook
 from core import config
-from core.logger import logging
-from service.trello_data_deserializer import TrelloData
+from core.logger import logger
+from service.trello_data_deserializer import TrelloDeserializerModel
 
 
 async def start_bot() -> None:
@@ -32,7 +30,7 @@ async def stop_bot() -> None:
 async def healthcheck_api(request: Request) -> PlainTextResponse:
     message: str = f"Бот запущен и работает. Сообщение получено по запросу на Api сервера {config.WEBHOOK_URL}"
 
-    logging.info(message)
+    logger.info(message)
 
     return PlainTextResponse(content=f'Request has been received and logged: "{message}"')
 
@@ -50,13 +48,12 @@ async def trello_webhook_api(request: Request) -> Response:
     :return: Response "ok"
     """
     try:
-        trello_data: TrelloData = TrelloData.from_dict(await request.json())
-        logging.info(f"New case assigned to the doctor. {trello_data}.")
-        return Response("New case assigned to the doctor.", status_code=httpx.codes.OK)
-    except KeyError:
-        logging.info("Got not trello or empty request.")
-    except json.decoder.JSONDecodeError:
-        logging.info("Got data is not json.")
+        trello_data: TrelloDeserializerModel = TrelloDeserializerModel.from_dict(await request.json())
+        logger.info(f"Got new trello request: {trello_data}.")
+        return Response(status_code=httpx.codes.OK)
+    except KeyError as error:
+        logger.error(f"Got a KeyError: {error}")
+        return Response(status_code=httpx.codes.BAD_REQUEST)
 
 
 routes = [
