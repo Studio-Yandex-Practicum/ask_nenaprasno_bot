@@ -1,7 +1,7 @@
 from telegram import InlineKeyboardButton, InlineKeyboardMarkup, Update
 from telegram.ext import CallbackContext, ContextTypes
 
-from constants.callback_data import CALLBACK_BILL_DONE_COMMAND, CALLBACK_BILL_SKIP_COMMAND
+from constants.callback_data import CALLBACK_DONE_BILL_COMMAND, CALLBACK_SKIP_BILL_COMMAND
 from core import config
 from core.send_message import send_message
 from service.repeat_message import repeat_after_one_hour_button
@@ -15,8 +15,8 @@ async def daily_bill_remind_job(context: CallbackContext) -> None:
     """
     job = context.job
     message = "Вам необходимо сформировать чек"
-    bill_done_button = InlineKeyboardButton(text="✅ Уже отправил(а)", callback_data=CALLBACK_BILL_DONE_COMMAND)
-    bill_skip_button = InlineKeyboardButton(text="🕑 Скоро отправлю", callback_data=CALLBACK_BILL_SKIP_COMMAND)
+    bill_done_button = InlineKeyboardButton(text="✅ Уже отправил(а)", callback_data=CALLBACK_DONE_BILL_COMMAND)
+    bill_skip_button = InlineKeyboardButton(text="🕑 Скоро отправлю", callback_data=CALLBACK_SKIP_BILL_COMMAND)
     menu = InlineKeyboardMarkup([[repeat_after_one_hour_button], [bill_done_button], [bill_skip_button]])
     await send_message(chat_id=job.user_id, text=message, reply_markup=menu, context=context)
     send_time = config.MONTHLY_RECEIPT_REMINDER_TIME
@@ -34,7 +34,7 @@ async def daily_bill_remind_job(context: CallbackContext) -> None:
     )
 
 
-async def bill_done_callback(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
+async def done_bill_callback_handler(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     """
     Delete job from JobQueue
     """
@@ -47,7 +47,7 @@ async def bill_done_callback(update: Update, context: ContextTypes.DEFAULT_TYPE)
     await query.answer()  # close progress bar in chat
 
 
-async def skip_callback(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
+async def skip_bill_callback_handler(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     """Delete button under message"""
     query = update.callback_query
     data = query.message
