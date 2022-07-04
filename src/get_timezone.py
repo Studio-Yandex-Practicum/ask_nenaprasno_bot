@@ -1,12 +1,10 @@
 import datetime
 
 import pytz
-from telegram import KeyboardButton, ReplyKeyboardMarkup, Update
+from telegram import Update
 from telegram.ext import CallbackContext
 from timezonefinder import TimezoneFinder
 
-from core.logger import logger
-from decorators.logger import async_error_logger
 from service.api_client import APIService
 
 TIME_ZONE = "UTC"
@@ -15,27 +13,6 @@ TIME_ZONE = "UTC"
 async def set_timezone(telegram_id: int, text_utc: str, context: CallbackContext):
     api = APIService()
     await api.set_user_timezone(telegram_id=telegram_id, user_time_zone=text_utc)
-
-
-@async_error_logger(name="conversation.get_timezone.get_timezone", logger=logger)
-async def get_timezone(update: Update, context: CallbackContext):
-    """
-    Requests a timezone from the user.
-    """
-    keyboard = [
-        [
-            KeyboardButton(
-                "Отправить свою геолокацию для автоматической настройки часового пояса", request_location=True
-            )
-        ],
-        [KeyboardButton("Напишу свою таймзону сам")],
-    ]
-    markup = ReplyKeyboardMarkup(keyboard, resize_keyboard=True, one_time_keyboard=True)
-    await context.bot.send_message(
-        chat_id=update.effective_chat.id,
-        text="Для начала, давайте настроим часовой пояс, чтобы вы получали уведомления в удобное время",
-        reply_markup=markup,
-    )
 
 
 async def get_timezone_from_location(update: Update, context: CallbackContext):
