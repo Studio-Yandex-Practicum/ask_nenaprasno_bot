@@ -4,7 +4,7 @@ from core import config
 from service.api_client.base import AbstractAPIService
 from service.api_client.models import BillStat, MonthStat, UserData, UserMonthStat, UserWeekStat, WeekStat
 
-REQUEST_ATTRS = {"base_url": config.SITE_API_URL, "headers": {"token": config.SITE_API_BOT_TOKEN}}
+BASE_REQUEST_ATTRS = {"base_url": config.SITE_API_URL, "headers": {"token": config.SITE_API_BOT_TOKEN}}
 
 
 class SiteAPIService(AbstractAPIService):
@@ -20,8 +20,8 @@ class SiteAPIService(AbstractAPIService):
 
     async def get_week_stat(self) -> list[WeekStat]:
         url = "stat/weekly"
-        async with httpx.AsyncClient(**REQUEST_ATTRS) as client:
-            response = await client.get(url)
+        async with httpx.AsyncClient(**BASE_REQUEST_ATTRS) as client:
+            response = await client.get(url=url)
             response = await response.json()
             return [
                 WeekStat(
