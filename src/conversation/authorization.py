@@ -2,7 +2,7 @@ from telegram import InlineKeyboardButton, InlineKeyboardMarkup, Update
 from telegram.ext import CallbackContext, CallbackQueryHandler, CommandHandler, ConversationHandler
 
 from constants import callback_data, states
-from conversation.menu_comands import menu_conversation
+from conversation.menu_commands import menu_conversation
 from conversation.service_police import service_police_command_handler
 from conversation.timezone import get_timezone, states_timezone_conversation_dict
 from core.logger import logger
