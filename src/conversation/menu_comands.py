@@ -13,7 +13,8 @@ from conversation.statistic import (
     statistic_month_callback_handler,
     statistic_week_callback_handler,
 )
-from conversation.timezone import get_timezone, states_timezone_conversation_dict, timezone_command_handler
+from conversation.timezone import get_timezone as configurate_timezone
+from conversation.timezone import states_timezone_conversation_dict, timezone_command_handler
 from core.config import URL_SERVICE_RULES
 from core.logger import logger
 from decorators.logger import async_error_logger
@@ -75,7 +76,7 @@ menu_conversation = ConversationHandler(
             statistic_week_callback_handler,
             actual_requests_callback_handler,
             overdue_requests_callback_handler,
-            CallbackQueryHandler(get_timezone, pattern=callback_data.CALLBACK_CONFIGURATE_TIMEZONE_COMMAND),
+            CallbackQueryHandler(configurate_timezone, pattern=callback_data.CALLBACK_CONFIGURATE_TIMEZONE_COMMAND),
         ],
         **states_timezone_conversation_dict,
     },
