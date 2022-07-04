@@ -11,7 +11,7 @@ from telegram import Update
 from bot import init_webhook
 from core import config
 from core.logger import logger
-from create_trello_webhook import main as trello_webhook
+from create_trello_webhook import trello_webhook
 
 
 async def start_bot() -> None:

@@ -37,9 +37,6 @@ async def create_trello_webhook():
         logger.info(response.text)
 
 
-async def main():
+async def trello_webhook():
     loop = asyncio.get_event_loop()
     asyncio.run_coroutine_threadsafe(loop=loop, coro=create_trello_webhook())
-
-
-asyncio.run(main())
