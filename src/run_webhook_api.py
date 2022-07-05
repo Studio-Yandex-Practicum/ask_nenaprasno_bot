@@ -1,3 +1,5 @@
+from json import JSONDecodeError
+
 import httpx
 import uvicorn
 from starlette.applications import Starlette
@@ -53,6 +55,9 @@ async def trello_webhook_api(request: Request) -> Response:
         return Response(status_code=httpx.codes.OK)
     except KeyError as error:
         logger.error(f"Got a KeyError: {error}")
+        return Response(status_code=httpx.codes.BAD_REQUEST)
+    except JSONDecodeError as error:
+        logger.error(f"Got a JSONDecodeError: {error}")
         return Response(status_code=httpx.codes.BAD_REQUEST)
 
 
