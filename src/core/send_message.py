@@ -1,11 +1,11 @@
-from string import Template
-from typing import Optional, List, Union
 import logging
+from string import Template
+from typing import List, Optional, Union
 
+from telegram import ReplyKeyboardMarkup
 from telegram.constants import ParseMode
 from telegram.error import TelegramError
 from telegram.ext import CallbackContext
-from telegram import ReplyKeyboardMarkup
 
 from service.api_client.models import MonthStat, WeekStat
 
@@ -15,7 +15,7 @@ async def send_message(
     chat_id: int,
     text: str,
     parse_mode: str = ParseMode.MARKDOWN,
-    reply_markup: Optional[ReplyKeyboardMarkup] = None
+    reply_markup: Optional[ReplyKeyboardMarkup] = None,
 ) -> bool:
     """
     Send simple text message.
@@ -59,12 +59,6 @@ async def send_statistics(
     """
     for user_statistic in statistic:
         message = template_message.substitute(
-            {key: getattr(user_statistic, attribute)
-             for key, attribute in template_attribute_aliases.items()}
+            {key: getattr(user_statistic, attribute) for key, attribute in template_attribute_aliases.items()}
         )
-        await send_message(
-            context=context,
-            chat_id=user_statistic.telegram_id,
-            text=message,
-            reply_markup=reply_markup
-        )
+        await send_message(context=context, chat_id=user_statistic.telegram_id, text=message, reply_markup=reply_markup)

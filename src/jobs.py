@@ -1,11 +1,9 @@
-from datetime import timedelta
 from string import Template
 
 from telegram.ext import CallbackContext
 
 from core.send_message import send_statistics
 from service.api_client import APIService
-from service.bill import daily_bill_remind_job
 
 
 async def weekly_stat_job(context: CallbackContext) -> None:
@@ -38,6 +36,13 @@ async def weekly_stat_job(context: CallbackContext) -> None:
     )
 
 
+async def monthly_receipt_reminder_job(context: CallbackContext) -> None:
+    """
+    Send monthly reminder about the receipt formation during payment
+    Only for self-employed users
+    """
+
+
 async def monthly_stat_job(context: CallbackContext) -> None:
     """
     Send monthly statistics on the number of successfully
@@ -66,14 +71,3 @@ async def monthly_stat_job(context: CallbackContext) -> None:
         alias_dict,
         mont_statistics,
     )
-
-
-async def monthly_bill_reminder_job(context: CallbackContext) -> None:
-    """
-    Send monthly reminder about the receipt formation during payment
-    Only for self-employed users
-    """
-    bill_stat = await APIService().get_bill()
-    user_list = bill_stat.telegram_ids
-    for telegram_id in user_list:
-        context.job_queue.run_once(daily_bill_remind_job, when=timedelta(seconds=1), user_id=telegram_id)

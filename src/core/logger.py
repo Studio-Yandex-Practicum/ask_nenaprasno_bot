@@ -1,21 +1,13 @@
 import logging
-
 from logging.handlers import TimedRotatingFileHandler
 
-from src.core.config import LOG_PATH
+from core.config import LOG_PATH
 
-
-FORMATTER = '%(asctime)s %(levelname)s %(name)s:\t%(message)s'
+FORMATTER = "%(asctime)s %(levelname)s %(name)s:\t%(message)s"
 
 
 def get_file_handler():
-    file_handler = TimedRotatingFileHandler(
-        LOG_PATH,
-        when='midnight',
-        interval=1,
-        encoding='utf-8',
-        backupCount=14
-    )
+    file_handler = TimedRotatingFileHandler(LOG_PATH, when="midnight", interval=1, encoding="utf-8", backupCount=14)
     formatter = logging.Formatter(FORMATTER)
     file_handler.setFormatter(formatter)
     return file_handler
