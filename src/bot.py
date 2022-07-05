@@ -1,9 +1,9 @@
 from telegram.ext import Application, ApplicationBuilder, CallbackQueryHandler, PicklePersistence
 
+from conversation import start_conversation
 from core import config
 from jobs import monthly_bill_reminder_job, monthly_stat_job, weekly_stat_job
 from service.callback_router import callback_router
-from start_conversation import start_conversation
 
 
 def create_bot():
