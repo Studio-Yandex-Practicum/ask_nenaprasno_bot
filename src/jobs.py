@@ -12,24 +12,26 @@ async def weekly_stat_job(context: CallbackContext) -> None:
     """
     week_statistics = await APIService().get_week_stat()
     template_message = Template(
-        'Вы делали добрые дела 7 дней!\n'
+        "Вы делали добрые дела 7 дней!\n"
         'Посмотрите, как прошла ваша неделя  в *""Просто спросить""*\n'
-        'Закрыто заявок - *$tickets_closed*\n'
-        'В работе *$tickets_in_work* заявок  за неделю\n\n'
-        'Истекает срок у *$tickets_expiring заявок*\n'
-        'У *$tickets_expired* заявок срок истек\n\n'
-        'Открыть [Trello](https://trello.com)\n\n'
-        'Мы рады работать в одной команде :)\n'
-        '*Так держать!*'
+        "Закрыто заявок - *$tickets_closed*\n"
+        "В работе *$tickets_in_work* заявок  за неделю\n\n"
+        "Истекает срок у *$tickets_expiring заявок*\n"
+        "У *$tickets_expired* заявок срок истек\n\n"
+        "Открыть [Trello](https://trello.com)\n\n"
+        "Мы рады работать в одной команде :)\n"
+        "*Так держать!*"
     )
     alias_dict = dict(
-        tickets_closed='last_week_user_tickets_closed',
-        tickets_in_work='last_week_user_tickets_in_work',
-        tickets_expiring='last_week_user_tickets_expiring',
-        tickets_expired='last_week_user_tickets_expired'
+        tickets_closed="last_week_user_tickets_closed",
+        tickets_in_work="last_week_user_tickets_in_work",
+        tickets_expiring="last_week_user_tickets_expiring",
+        tickets_expired="last_week_user_tickets_expired",
     )
     await send_statistics(
-        context, template_message, alias_dict,
+        context,
+        template_message,
+        alias_dict,
         week_statistics,
     )
 
@@ -49,21 +51,23 @@ async def monthly_stat_job(context: CallbackContext) -> None:
     """
     mont_statistics = await APIService().get_month_stat()
     template_message = Template(
-        'Это был отличный месяц!\n'
+        "Это был отличный месяц!\n"
         'Посмотрите, как он прошел в *""Просто спросить""* 🔥\n\n'
-        'Количество закрытых заявок - *$tickets_closed*\n'
-        'Рейтинг - *$rating*\n'
-        'Среднее время ответа - *$ticket_resolve_avg_time*\n\n'
-        'Открыть [Trello](https://trello.com)\n\n'
-        'Мы рады работать в одной команде :)\n'
-        '*Так держать!*'
+        "Количество закрытых заявок - *$tickets_closed*\n"
+        "Рейтинг - *$rating*\n"
+        "Среднее время ответа - *$ticket_resolve_avg_time*\n\n"
+        "Открыть [Trello](https://trello.com)\n\n"
+        "Мы рады работать в одной команде :)\n"
+        "*Так держать!*"
     )
     alias_dict = dict(
-        tickets_closed='user_tickets_closed',
-        rating='user_rating',
-        ticket_resolve_avg_time='user_ticket_resolve_avg_time',
+        tickets_closed="user_tickets_closed",
+        rating="user_rating",
+        ticket_resolve_avg_time="user_ticket_resolve_avg_time",
     )
     await send_statistics(
-        context, template_message, alias_dict,
+        context,
+        template_message,
+        alias_dict,
         mont_statistics,
     )

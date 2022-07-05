@@ -1,8 +1,8 @@
 from telegram.ext import Application, ApplicationBuilder, PicklePersistence
 
+from conversation import start_conversation
 from core import config
 from jobs import monthly_receipt_reminder_job, monthly_stat_job, weekly_stat_job
-from start_conversation import start_conversation
 
 
 def create_bot():
@@ -28,7 +28,7 @@ async def init_webhook() -> Application:
     """
     bot_app = create_bot()
     bot_app.updater = None
-    await bot_app.bot.set_webhook(url=f"{config.WEBHOOK_URL}/telegramWebhookApi")
+    await bot_app.bot.set_webhook(url=f"{config.WEBHOOK_URL}")
     return bot_app
 
 
