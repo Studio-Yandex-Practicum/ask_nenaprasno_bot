@@ -28,6 +28,10 @@ def get_const_datetime_tuple(setting: str) -> tuple:
     return tuple(map(int, list(filter(None, env.get(setting).split(",")))))
 
 
+def get_const_bool(setting: str):
+    return env.get(setting)
+
+
 LOG_NAME = get_const_string("LOG_NAME")
 LOG_PATH = BASE_DIR / LOG_NAME
 
@@ -52,12 +56,10 @@ MONTHLY_RECEIPT_REMINDER_DAY = get_const_int(
     "MONTHLY_RECEIPT_REMINDER_DAY"
 )  # день для даты ежемесячного напоминания о чеке
 
-URL_SERVICE_RULES = env.get(
-    "URL_SERVICE_RULES", "https://docs.google.com/document/d/1hW2HUv9aWQMnUBuIE_YQEtmIDDbk8KhpychckbyaIEQ/edit"
-)
+URL_SERVICE_RULES = get_const_string("URL_SERVICE_RULES")
 
 BOT_PERSISTENCE_FILE = get_const_string("BOT_PERSISTENCE_FILE")  # имя файла persistence бота
-IS_FAKE_API = get_const_string(
+IS_FAKE_API = get_const_bool(
     "IS_FAKE_API"
 )  # флаг, определяющий какой АПИ клиент используется - боевой или "заглушка"
 SITE_API_URL = get_const_string("SITE_API_URL")  # адрес сервера, к которому будет отправлять запросы АПИ клиент
