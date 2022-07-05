@@ -59,7 +59,7 @@ async def trello_webhook_api(request: Request) -> Response:
         return Response(status_code=httpx.codes.BAD_REQUEST)
     except JSONDecodeError as error:
         logger.error(f"Got a JSONDecodeError: {error}")
-        return Response(status_code=httpx.codes.BAD_REQUEST)
+        return Response(status_code=httpx.codes.OK)
 
 
 routes = [
