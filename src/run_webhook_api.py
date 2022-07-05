@@ -12,6 +12,7 @@ from bot import init_webhook
 from core import config
 from core.logger import logger
 from service.trello_data_deserializer import TrelloDeserializerModel
+from create_trello_webhook import trello_webhook
 
 
 async def start_bot() -> None:
@@ -67,7 +68,7 @@ routes = [
     Route("/trelloWebhookApi", trello_webhook_api, methods=["POST", "HEAD"]),
 ]
 
-api = Starlette(routes=routes, on_startup=[start_bot], on_shutdown=[stop_bot])
+api = Starlette(routes=routes, on_startup=[start_bot, trello_webhook], on_shutdown=[stop_bot])
 
 
 if __name__ == "__main__":
