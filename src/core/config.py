@@ -28,7 +28,7 @@ def get_const_datetime_tuple(setting: str) -> tuple:
     return tuple(map(int, list(filter(None, env.get(setting).split(",")))))
 
 
-def get_const_bool(setting: str):
+def get_bool(setting: str):
     return env.get(setting)
 
 
@@ -59,7 +59,7 @@ MONTHLY_RECEIPT_REMINDER_DAY = get_const_int(
 URL_SERVICE_RULES = get_const_string("URL_SERVICE_RULES")
 
 BOT_PERSISTENCE_FILE = get_const_string("BOT_PERSISTENCE_FILE")  # имя файла persistence бота
-IS_FAKE_API = get_const_bool(
+IS_FAKE_API = get_bool(
     "IS_FAKE_API"
 )  # флаг, определяющий какой АПИ клиент используется - боевой или "заглушка"
 SITE_API_URL = get_const_string("SITE_API_URL")  # адрес сервера, к которому будет отправлять запросы АПИ клиент
