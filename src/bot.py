@@ -1,8 +1,9 @@
-from telegram.ext import Application, ApplicationBuilder, PicklePersistence
+from telegram.ext import Application, ApplicationBuilder, CallbackQueryHandler, PicklePersistence
 
 from conversation import start_conversation
 from core import config
-from jobs import monthly_receipt_reminder_job, monthly_stat_job, weekly_stat_job
+from jobs import monthly_bill_reminder_job, monthly_stat_job, weekly_stat_job
+from service.callback_router import callback_router
 
 
 def create_bot():
@@ -15,9 +16,10 @@ def create_bot():
     bot_app.add_handler(start_conversation)
     bot_app.job_queue.run_daily(weekly_stat_job, time=config.WEEKLY_STAT_TIME, days=config.WEEKLY_STAT_WEEK_DAYS)
     bot_app.job_queue.run_monthly(
-        monthly_receipt_reminder_job, when=config.MONTHLY_RECEIPT_REMINDER_TIME, day=config.MONTHLY_RECEIPT_REMINDER_DAY
+        monthly_bill_reminder_job, when=config.MONTHLY_RECEIPT_REMINDER_TIME, day=config.MONTHLY_RECEIPT_REMINDER_DAY
     )
     bot_app.job_queue.run_monthly(monthly_stat_job, when=config.MONTHLY_STAT_TIME, day=config.MONTHLY_STAT_DAY)
+    bot_app.add_handler(CallbackQueryHandler(callback_router))
     return bot_app
 
 
