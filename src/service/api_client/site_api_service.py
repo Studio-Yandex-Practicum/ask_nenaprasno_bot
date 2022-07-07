@@ -1,5 +1,4 @@
 import httpx
-from typing import Optional
 
 from core import config
 from service.api_client.base import AbstractAPIService
@@ -13,14 +12,16 @@ class SiteAPIService(AbstractAPIService):
 
     def __init__(self):
         self.site_url: str = config.SITE_API_URL
+        self.bot_token: str = config.SITE_API_BOT_TOKEN
 
     async def get_bill(self) -> BillStat:
         pass
 
     async def get_week_stat(self) -> list[WeekStat]:
         url = f"{self.site_url}/tgbot/stat/weekly"
+        headers = {"token": self.bot_token}
         async with httpx.AsyncClient() as client:
-            response = await client.get(url)
+            response = await client.get(url=url, headers=headers)
             response = await response.json()
             return [
                 WeekStat(
@@ -46,7 +47,7 @@ class SiteAPIService(AbstractAPIService):
     async def get_user_month_stat(self, telegram_id: int) -> UserMonthStat:
         pass
 
-    async def authenticate_user(self, telegram_id: int) -> Optional[UserData]:
+    async def authenticate_user(self, telegram_id: int) -> UserData | None:
         pass
 
     async def set_user_timezone(self, telegram_id: int, user_time_zone: str) -> httpx:

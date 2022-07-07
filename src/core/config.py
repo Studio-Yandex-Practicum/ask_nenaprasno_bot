@@ -29,10 +29,7 @@ def get_datetime_tuple(setting: str) -> tuple:
 
 
 def get_bool(setting: str) -> bool:
-    if env.get(setting) == "True":
-        return True
-    else:
-        return False
+    return env.get(setting) == "True"
 
 
 LOG_NAME = get_string("LOG_NAME")
@@ -62,6 +59,7 @@ URL_SERVICE_RULES = get_string("URL_SERVICE_RULES")
 BOT_PERSISTENCE_FILE = get_string("BOT_PERSISTENCE_FILE")  # имя файла persistence бота
 IS_FAKE_API = get_bool("IS_FAKE_API")  # флаг, определяющий какой АПИ клиент используется - боевой или "заглушка"
 SITE_API_URL = get_string("SITE_API_URL")  # адрес сервера, к которому будет отправлять запросы АПИ клиент
+SITE_API_BOT_TOKEN = get_string("SITE_API_BOT_TOKEN")
 
 TRELLO_API_KEY = get_string("TRELLO_API_KEY")  # API ключ разработчика
 TRELLO_ID_MODEL = get_string("TRELLO_ID_MODEL")  # id таблицы, к которой будет привязан webhook
