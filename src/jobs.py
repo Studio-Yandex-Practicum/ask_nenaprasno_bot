@@ -76,7 +76,9 @@ async def monthly_stat_job(context: CallbackContext) -> None:
 
 
 async def user_monthly_stat_job(update: Update, context: ContextTypes.DEFAULT_TYPE):
-
+    """
+    Send monthly statistics at the user's request.
+    """
     service = APIService()
     telegram_id = update.callback_query.message.chat.id
     user_statistic = await service.get_user_month_stat(telegram_id=telegram_id)
@@ -90,7 +92,6 @@ async def user_monthly_stat_job(update: Update, context: ContextTypes.DEFAULT_TY
         "Среднее время ответа - *$ticket_resolve_avg_time*\n\n"
         "Открыть [Trello](https://trello.com)\n\n"
     )
-
     alias_dict = dict(
         tickets_closed="user_tickets_closed",
         rating="user_rating",
@@ -99,5 +100,4 @@ async def user_monthly_stat_job(update: Update, context: ContextTypes.DEFAULT_TY
     message = template_message.substitute(
         {key: getattr(user_statistic, attribute) for key, attribute in alias_dict.items()}
     )
-
     await send_message(context=context, chat_id=telegram_id, text=message)
