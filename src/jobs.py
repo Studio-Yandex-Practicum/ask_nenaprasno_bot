@@ -3,7 +3,6 @@ from string import Template
 from telegram import Update
 from telegram.ext import CallbackContext, ContextTypes
 
-from constants import states
 from core.send_message import send_message, send_statistics
 from service.api_client import APIService
 
@@ -75,16 +74,13 @@ async def monthly_stat_job(context: CallbackContext) -> None:
     )
 
 
-async def user_monthly_stat_job(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
+async def user_monthly_stat_job(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None | str:
     """
     Send monthly statistics at the user's request.
     """
     service = APIService()
     telegram_id = update.callback_query.message.chat.id
     user_statistic = await service.get_user_month_stat(telegram_id=telegram_id)
-    if user_statistic is None:
-        await update.callback_query.edit_message_text(text="Ошибка авторизации")
-        return states.UNAUTHORIZED_STATE
     template_message = Template(
         "Ваша статистика за месяц!\n"
         "Количество закрытых заявок - *$tickets_closed*\n"
