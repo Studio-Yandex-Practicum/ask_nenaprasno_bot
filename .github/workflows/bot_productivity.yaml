@@ -36,5 +36,4 @@ jobs:
           TELEGRAM_TOKEN: ${{ env.TELEGRAM_TOKEN }}
         run: |
           python3 src/run_bot.py
-        script: |
           echo "::stop-commands::${{ env.TELEGRAM_TOKEN }}"
