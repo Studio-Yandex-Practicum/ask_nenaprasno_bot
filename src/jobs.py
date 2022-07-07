@@ -75,7 +75,7 @@ async def monthly_stat_job(context: CallbackContext) -> None:
     )
 
 
-async def user_monthly_stat_job(update: Update, context: ContextTypes.DEFAULT_TYPE):
+async def user_monthly_stat_job(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     """
     Send monthly statistics at the user's request.
     """
