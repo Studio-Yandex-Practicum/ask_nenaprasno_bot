@@ -110,6 +110,7 @@ async def is_expert_callback(update: Update, context: CallbackContext):
         return states.UNAUTHORIZED_STATE
     context.user_data["user_name"] = user_data.user_name
     context.user_data["user_time_zone"] = user_data.user_time_zone
+    context.user_data["user_name_in_trello"] = user_data.user_name_in_trello
     await update.callback_query.edit_message_text(
         text=f"Авторизация прошла успешно\n" f"Добро пожаловать {user_data.user_name}"
     )
