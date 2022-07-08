@@ -19,19 +19,19 @@ async def weekly_stat_job(context: CallbackContext) -> None:
     template_message = Template(
         "Вы делали добрые дела 7 дней!\n"
         'Посмотрите, как прошла ваша неделя  в *""Просто спросить""*\n'
-        "Закрыто заявок - *$tickets_closed*\n"
-        "В работе *$tickets_in_work* заявок  за неделю\n\n"
-        "Истекает срок у *$tickets_expiring заявок*\n"
-        "У *$tickets_expired* заявок срок истек\n\n"
+        "Закрыто заявок - *$consultations_closed*\n"
+        "В работе *$consultations_in_work* заявок  за неделю\n\n"
+        "Истекает срок у *$consultations_expiring заявок*\n"
+        "У *$consultations_expired* заявок срок истек\n\n"
         "Открыть [Trello](https://trello.com)\n\n"
         "Мы рады работать в одной команде :)\n"
         "*Так держать!*"
     )
     alias_dict = dict(
-        tickets_closed="consultations_closed",
-        tickets_in_work="consultations_in_work",
-        tickets_expiring="consultations_expiring",
-        tickets_expired="consultations_expired",
+        consultations_closed="consultations_closed",
+        consultations_in_work="consultations_in_work",
+        consultations_expiring="consultations_expiring",
+        consultations_expired="consultations_expired",
     )
     await send_statistics(
         context,
@@ -51,17 +51,17 @@ async def monthly_stat_job(context: CallbackContext) -> None:
     template_message = Template(
         "Это был отличный месяц!\n"
         'Посмотрите, как он прошел в *""Просто спросить""* 🔥\n\n'
-        "Количество закрытых заявок - *$tickets_closed*\n"
+        "Количество закрытых заявок - *$consultations_closed*\n"
         "Рейтинг - *$rating*\n"
-        "Среднее время ответа - *$ticket_resolve_avg_time*\n\n"
+        "Среднее время ответа - *$consultation_resolve_time*\n\n"
         "Открыть [Trello](https://trello.com)\n\n"
         "Мы рады работать в одной команде :)\n"
         "*Так держать!*"
     )
     alias_dict = dict(
-        tickets_closed="consultations_closed",
+        consultations_closed="consultations_closed",
         rating="rating",
-        ticket_resolve_avg_time="consultation_resolve_time",
+        consultation_resolve_time="consultation_resolve_time",
     )
     await send_statistics(
         context,
