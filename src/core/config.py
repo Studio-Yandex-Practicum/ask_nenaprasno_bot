@@ -68,4 +68,4 @@ TRELLO_TOKEN = get_string("TRELLO_TOKEN")  # токен для доступа к
 URL_SITE = "https://ask.nenaprasno.ru/"
 URL_SITE_DONATION = "https://ask.nenaprasno.ru/#donation"
 
-FORM_URL_FUTURE_EXPERT = "https://docs.google.com/forms/d/1GvlemFyhMyVy_Wf91NPYTAfD5717W44-Ge7HQ6ealA0/edit"
+FORM_URL_FUTURE_EXPERT = "https://forms.gle/DGMUm35bxZytE3QLA"
