@@ -26,7 +26,7 @@ class SiteAPIService(AbstractAPIService):
             return [
                 WeekStat(
                     telegram_id=week_stat["telegram_name"],
-                    timezone=week_stat["user_timezone"],
+                    timezone=week_stat["timezone"],
                     username_trello=week_stat["username_trello"],
                     consultations_closed=week_stat["consultations_closed"],
                     consultations_not_expiring=week_stat["consultations_not_expiring"],
