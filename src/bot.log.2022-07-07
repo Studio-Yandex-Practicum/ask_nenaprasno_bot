@@ -1,0 +1,3 @@
+2022-07-07 12:59:45,719 ERROR core.logger:	The error: 'Can't parse inline keyboard button: text buttons are unallowed in the inline keyboard' after command: 'conversation.menu_commands.menu'
+2022-07-07 13:32:46,294 ERROR core.logger:	The error: ''CallbackContext' object has no attribute 'callback_query'' after command: 'conversation.requests.actual_requests_callback'
+2022-07-07 13:33:33,648 ERROR core.logger:	The error: ''CallbackQuery' object has no attribute 'chat'' after command: 'conversation.requests.actual_requests_callback'
