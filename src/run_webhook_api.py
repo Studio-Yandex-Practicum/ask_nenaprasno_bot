@@ -14,6 +14,7 @@ from core import config
 from core.logger import logger
 from service.api_client import APIService
 from service.trello_data_deserializer import TrelloDeserializerModel
+from service.healthcheck_serializer import HealthSerializerModel
 from create_trello_webhook import trello_webhook
 
 
@@ -33,31 +34,23 @@ async def stop_bot() -> None:
 
 
 async def healthcheck_api(request: Request) -> JSONResponse:
-    response = {
-        "Bot_is_avaliable": False,
-        "Database_is_avaliable": False,
-        "Trello_is_avaliable": False,
-    }
+    health = HealthSerializerModel()
     bot: Bot = api.state.bot_app.bot
     try:
         await bot.get_me()
-        response["Bot_is_avaliable"] = True
+        health.bot_is_avaliable = True
     except TelegramError as error:
-        logger.error(f"Faild to connect to bot: {error}")
+        logger.error(f"Failed to connect to bot: {error}")
 
     try:
         api_service = APIService()
         api_service.get_bill()
-        response["Database_is_avaliable"] = True
+        health.db_is_avaliable = True
     except Exception as error:
-        logger.error(f"Faild to connect to database: {error}")
+        logger.error(f"Failed to connect to database: {error}")
 
-    try:
-        response["Trello_is_avaliable"] = True
-    except Exception as error:
-        logger.error(f"Faild to connect to trello: {error}")
 
-    return JSONResponse(content=response)
+    return JSONResponse(content=health.to_dict())
 
 
 async def telegram_webhook_api(request: Request) -> Response:
