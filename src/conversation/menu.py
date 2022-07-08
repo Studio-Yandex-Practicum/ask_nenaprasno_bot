@@ -4,9 +4,10 @@ from telegram.ext import CallbackQueryHandler, CommandHandler, ContextTypes, Con
 from constants import callback_data, states
 from conversation.timezone import get_timezone as configurate_timezone
 from conversation.timezone import states_timezone_conversation_dict
-from core.config import URL_SERVICE_RULES
+from core.config import TRELLO_BORD_ID, URL_SERVICE_RULES
 from core.logger import logger
 from decorators.logger import async_error_logger
+from service.api_client import APIService
 from service.repeat_message import repeat_message_after_1_hour_callback
 
 
@@ -74,6 +75,25 @@ async def skip_bill_callback_handler(update: Update, context: ContextTypes.DEFAU
     await query.answer()  # close progress bar in chat
 
 
+@async_error_logger(name="conversation.requests.statistic_month_callback", logger=logger)
+async def button_statistic_month_callback(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
+    """
+    Send monthly statistics at the user's request.
+    """
+    service = APIService()
+    telegram_id = update.effective_user.id
+    user_statistic = await service.get_user_month_stat(telegram_id=telegram_id)
+    user_name_in_trello = context.user_data["user_name_in_trello"]
+    message = (
+        f"❗Cтатистика за месяц❗ \n\n"
+        f"✅Количество закрытых заявок - {user_statistic.user_tickets_closed}\n"
+        f"✅Рейтинг - {user_statistic.user_rating:.1f}\n"
+        f"✅Среднее время ответа - {user_statistic.user_ticket_resolve_avg_time:.1f}\n\n"
+        f"Открыть [Trello](https://trello.com/{TRELLO_BORD_ID}/?filter=member:{user_name_in_trello})\n\n"
+    )
+    await update.callback_query.message.reply_text(text=message)
+
+
 menu_conversation = ConversationHandler(
     allow_reentry=True,
     persistent=True,
@@ -81,7 +101,9 @@ menu_conversation = ConversationHandler(
     entry_points=[CommandHandler("menu", menu)],
     states={
         states.BASE_STATE: [
-            CallbackQueryHandler(button_reaction_callback, pattern=callback_data.CALLBACK_STATISTIC_MONTH_COMMAND),
+            CallbackQueryHandler(
+                button_statistic_month_callback, pattern=callback_data.CALLBACK_STATISTIC_MONTH_COMMAND
+            ),
             CallbackQueryHandler(button_reaction_callback, pattern=callback_data.CALLBACK_STATISTIC_WEEK_COMMAND),
             CallbackQueryHandler(button_reaction_callback, pattern=callback_data.CALLBACK_ACTUAL_REQUESTS_COMMAND),
             CallbackQueryHandler(button_reaction_callback, pattern=callback_data.CALLBACK_OVERDUE_REQUESTS_COMMAND),
