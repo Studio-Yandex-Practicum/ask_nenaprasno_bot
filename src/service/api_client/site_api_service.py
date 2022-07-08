@@ -26,14 +26,14 @@ class SiteAPIService(AbstractAPIService):
             return [
                 WeekStat(
                     telegram_id=week_stat["telegram_name"],
-                    user_time_zone=week_stat["user_timezone"],
-                    user_name_in_trello=week_stat["user_name_in_trello"],
-                    last_week_user_tickets_closed=week_stat["last_week_user_tickets_closed"],
-                    last_week_user_tickets_not_expiring=week_stat["last_week_user_tickets_not_expiring"],
-                    last_week_user_tickets_expiring=week_stat["last_week_user_tickets_expiring"],
-                    last_week_user_tickets_expired=week_stat["last_week_user_tickets_expired"],
-                    last_week_user_tickets_in_work=week_stat["last_week_user_tickets_in_work"],
-                    last_week_user_tickets_all=week_stat["last_week_user_tickets_all"],
+                    timezone=week_stat["user_timezone"],
+                    username_trello=week_stat["username_trello"],
+                    consultations_closed=week_stat["consultations_closed"],
+                    consultations_not_expiring=week_stat["consultations_not_expiring"],
+                    consultations_expiring=week_stat["consultations_expiring"],
+                    consultations_expired=week_stat["consultations_expired"],
+                    consultations_in_work=week_stat["consultations_in_work"],
+                    consultations_all=week_stat["consultations_all"],
                 )
                 for week_stat in response
             ]

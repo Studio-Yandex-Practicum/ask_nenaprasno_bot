@@ -28,10 +28,10 @@ async def weekly_stat_job(context: CallbackContext) -> None:
         "*Так держать!*"
     )
     alias_dict = dict(
-        tickets_closed="last_week_user_tickets_closed",
-        tickets_in_work="last_week_user_tickets_in_work",
-        tickets_expiring="last_week_user_tickets_expiring",
-        tickets_expired="last_week_user_tickets_expired",
+        tickets_closed="consultations_closed",
+        tickets_in_work="consultations_in_work",
+        tickets_expiring="consultations_expiring",
+        tickets_expired="consultations_expired",
     )
     await send_statistics(
         context,
@@ -59,9 +59,9 @@ async def monthly_stat_job(context: CallbackContext) -> None:
         "*Так держать!*"
     )
     alias_dict = dict(
-        tickets_closed="user_tickets_closed",
-        rating="user_rating",
-        ticket_resolve_avg_time="user_ticket_resolve_avg_time",
+        tickets_closed="consultations_closed",
+        rating="rating",
+        ticket_resolve_avg_time="consultation_resolve_time",
     )
     await send_statistics(
         context,
