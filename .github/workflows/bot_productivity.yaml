@@ -1,20 +1,17 @@
 name: Check bot productivity
 
 on:
-  push:
-    branches:
-      -develop
   pull_request:
     types:
       - opened
     branches:
       - develop
 
+
 jobs:
   build_and_run_bot:
     name: Startup bot
     runs-on: ubuntu-latest
-
     steps:
       - name: Checkout repo
         uses: actions/checkout@v3
@@ -27,14 +24,8 @@ jobs:
       - name: Install dependencies
         run: |
           python -m pip install --upgrade pip
-          pip install flake8 pep8-naming flake8-broken-line flake8-return
-          pip install black==22.3.0
           pip install -r requirements.txt
 
       - name: Start the bot
-        env:
-          TELEGRAM_TOKEN: ${{ env.TELEGRAM_TOKEN }}
         run: |
-          python3 src/run_bot.py
-        script: |
-          echo "::stop-commands::${{ env.TELEGRAM_TOKEN }}"
+          python3 src/run_bot.py & sleep 5 && pkill -9 python
