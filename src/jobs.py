@@ -1,9 +1,8 @@
 from string import Template
 
-from telegram import Update
-from telegram.ext import CallbackContext, ContextTypes
+from telegram.ext import CallbackContext
 
-from core.send_message import send_message, send_statistics
+from core.send_message import send_statistics
 from service.api_client import APIService
 
 
@@ -72,28 +71,3 @@ async def monthly_stat_job(context: CallbackContext) -> None:
         alias_dict,
         mont_statistics,
     )
-
-
-async def user_monthly_stat_job(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None | str:
-    """
-    Send monthly statistics at the user's request.
-    """
-    service = APIService()
-    telegram_id = update.callback_query.message.chat.id
-    user_statistic = await service.get_user_month_stat(telegram_id=telegram_id)
-    template_message = Template(
-        "Ваша статистика за месяц!\n"
-        "Количество закрытых заявок - *$tickets_closed*\n"
-        "Рейтинг - *$rating*\n"
-        "Среднее время ответа - *$ticket_resolve_avg_time*\n\n"
-        "Открыть [Trello](https://trello.com)\n\n"
-    )
-    alias_dict = dict(
-        tickets_closed="user_tickets_closed",
-        rating="user_rating",
-        ticket_resolve_avg_time="user_ticket_resolve_avg_time",
-    )
-    message = template_message.substitute(
-        {key: getattr(user_statistic, attribute) for key, attribute in alias_dict.items()}
-    )
-    await send_message(context=context, chat_id=telegram_id, text=message)
