@@ -64,3 +64,8 @@ SITE_API_BOT_TOKEN = get_string("SITE_API_BOT_TOKEN")
 TRELLO_API_KEY = get_string("TRELLO_API_KEY")  # API ключ разработчика
 TRELLO_ID_MODEL = get_string("TRELLO_ID_MODEL")  # id таблицы, к которой будет привязан webhook
 TRELLO_TOKEN = get_string("TRELLO_TOKEN")  # токен для доступа к TRELLO
+
+URL_SITE = "https://ask.nenaprasno.ru/"
+URL_SITE_DONATION = "https://ask.nenaprasno.ru/#donation"
+
+FORM_URL_FUTURE_EXPERT = "https://docs.google.com/forms/d/1GvlemFyhMyVy_Wf91NPYTAfD5717W44-Ge7HQ6ealA0/edit"
