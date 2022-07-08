@@ -58,14 +58,25 @@ async def support_or_consult_callback(update: Update, context: CallbackContext):
     """
     Offers to support the project.
     """
-    await update.callback_query.message.reply_text(
-        text="Наш Проект\nhttps://ask.nenaprasno.ru/\nподдержать нас можно здесь\nhttps://ask.nenaprasno.ru/#donation"
+    keyboard = [
+        [
+            InlineKeyboardButton("Получить онлайн консультацию", url=config.URL_SITE),
+            InlineKeyboardButton("Поддержать проект", url=config.URL_SITE_DONATION),
+        ]
+    ]
+    reply_markup = InlineKeyboardMarkup(keyboard)
+    await update.callback_query.edit_message_text(
+        text='Этот бот предназначен только для экспертов справочной службы ***"Просто спросить"***.\n'
+        "Если у вас возникли вопросы об онкологическом заболевании, "
+        'заполните заявку на странице справочной службы ***"Просто спросить"***.',
+        reply_markup=reply_markup,
+        parse_mode=ParseMode.MARKDOWN,
     )
     return ConversationHandler.END
 
 
-@async_error_logger(name="conversation.authorization.registr_as_expert_callback", logger=logger)
-async def registr_as_expert_callback(update: Update, context: CallbackContext):
+@async_error_logger(name="conversation.authorization.register_as_expert_callback", logger=logger)
+async def register_as_expert_callback(update: Update, context: CallbackContext):
     """
     Sends a registration form to the user.
     """
@@ -130,7 +141,9 @@ authorization_conversation = ConversationHandler(
             CallbackQueryHandler(not_expert_callback, pattern=callback_data.CALLBACK_NOT_EXPERT_COMMAND),
         ],
         states.REGISTRATION_STATE: [
-            CallbackQueryHandler(registr_as_expert_callback, pattern=callback_data.CALLBACK_REGISTER_AS_EXPERT_COMMAND),
+            CallbackQueryHandler(
+                register_as_expert_callback, pattern=callback_data.CALLBACK_REGISTER_AS_EXPERT_COMMAND
+            ),
             CallbackQueryHandler(
                 support_or_consult_callback, pattern=callback_data.CALLBACK_SUPPORT_OR_CONSULT_COMMAND
             ),
