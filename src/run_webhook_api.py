@@ -49,7 +49,6 @@ async def healthcheck_api(request: Request) -> JSONResponse:
     except Exception as error:
         logger.error(f"Failed to connect to database: {error}")
 
-
     return JSONResponse(content=health.to_dict())
 
 
