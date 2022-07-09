@@ -33,4 +33,5 @@ jobs:
 
       - name: Start the bot
         run: |
-          python3 src/run_bot.py & sleep 5 && sudo pkill -9 python
+          python3 src/run_bot.py & sleep 5 && pkill -9 python
+          python3 src/run_webhook_api.py & sleep 5 && pkill -9 python
