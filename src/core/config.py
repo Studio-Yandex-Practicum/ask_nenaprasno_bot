@@ -64,4 +64,9 @@ TRELLO_ID_MODEL = get_string("TRELLO_ID_MODEL")  # id таблицы, к кот�
 TRELLO_TOKEN = get_string("TRELLO_TOKEN")  # токен для доступа к TRELLO
 TRELLO_BORD_ID = get_string("TRELLO_BORD_ID")  # доска в TRELLO
 
+
+URL_SITE = "https://ask.nenaprasno.ru/"
+URL_SITE_DONATION = "https://ask.nenaprasno.ru/#donation"
+
+FORM_URL_FUTURE_EXPERT = "https://forms.gle/DGMUm35bxZytE3QLA"
 URL_SERVICE_RULES = "https://vse.nenaprasno.ru/rules"  # адрес страницыы с правилами
