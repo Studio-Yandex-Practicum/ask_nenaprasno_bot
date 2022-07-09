@@ -75,7 +75,7 @@ async def skip_bill_callback_handler(update: Update, context: ContextTypes.DEFAU
     await query.answer()  # close progress bar in chat
 
 
-@async_error_logger(name="conversation.requests.statistic_month_callback", logger=logger)
+@async_error_logger(name="conversation.requests.button_statistic_month_callback", logger=logger)
 async def button_statistic_month_callback(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     """
     Send monthly statistics at the user's request.
