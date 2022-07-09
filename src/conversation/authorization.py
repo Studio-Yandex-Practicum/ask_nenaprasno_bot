@@ -6,7 +6,7 @@ from conversation.menu import menu_conversation
 from conversation.timezone import get_timezone, states_timezone_conversation_dict
 from core.logger import logger
 from decorators.logger import async_error_logger
-from menu_button import COMMANDS, COMMANDS_UNAUTHORIZWD, menu_button
+from menu_button import COMMANDS, COMMANDS_UNAUTHORIZED, menu_button
 from service.api_client import APIService
 
 
@@ -15,7 +15,10 @@ async def start(update: Update, context: CallbackContext):
     """
     Responds to the start command. The entry point to telegram bot.
     """
-    await menu_button(context, COMMANDS_UNAUTHORIZWD)
+    state = await is_expert_callback(update, context)
+    if state == states.TIMEZONE_STATE:
+        return state
+    await menu_button(context, COMMANDS_UNAUTHORIZED)
     keyboard = [
         [
             InlineKeyboardButton("Да", callback_data=callback_data.CALLBACK_IS_EXPERT_COMMAND),
@@ -87,15 +90,17 @@ async def is_expert_callback(update: Update, context: CallbackContext):
     telegram_id = update.effective_user.id
     user_data = await api_service.authenticate_user(telegram_id=telegram_id)
     if user_data is None:
-        await update.callback_query.edit_message_text(text="Ошибка авторизации")
+        if update.callback_query:
+            await update.callback_query.edit_message_text(text="Ошибка авторизации")
         return states.UNAUTHORIZED_STATE
+    message = update.message if update.message else update.callback_query.message
     context.user_data["user_name"] = user_data.user_name
     context.user_data["user_time_zone"] = user_data.user_time_zone
-    await update.callback_query.edit_message_text(
+    await message.reply_text(
         text=f"Авторизация прошла успешно\n" f"Добро пожаловать {user_data.user_name}"
     )
     await menu_button(context, COMMANDS)
-    await update.callback_query.message.reply_text(
+    await message.reply_text(
         text="Вы успешно начали работу с ботом. Меня зовут Женя Краб, "
         "я telegram-bot для экспертов справочной службы "
         "'Просто спросить'. Я буду сообщать вам о новых заявках, "
@@ -105,8 +110,9 @@ async def is_expert_callback(update: Update, context: CallbackContext):
         "Для начала, давайте настроим часовой пояс, чтобы вы получали "
         "уведомления в удобное время."
     )
-    await update.callback_query.answer()
     await get_timezone(update, context)
+    if update.callback_query:
+        update.callback_query.answer()
     return states.TIMEZONE_STATE
 
 
@@ -128,7 +134,7 @@ authorization_conversation = ConversationHandler(
                 support_or_consult_callback, pattern=callback_data.CALLBACK_SUPPORT_OR_CONSULT_COMMAND
             ),
         ],
-        states.BASE_STATE: [menu_conversation],
+        states.MENU_STATE: [menu_conversation],
         **states_timezone_conversation_dict,
     },
     fallbacks=[],
