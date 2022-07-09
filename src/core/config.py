@@ -54,8 +54,6 @@ MONTHLY_RECEIPT_REMINDER_TIME = get_datetime(
 )  # время для ежемесячного напоминания о чеке
 MONTHLY_RECEIPT_REMINDER_DAY = get_int("MONTHLY_RECEIPT_REMINDER_DAY")  # день для даты ежемесячного напоминания о чеке
 
-URL_SERVICE_RULES = get_string("URL_SERVICE_RULES")
-
 BOT_PERSISTENCE_FILE = get_string("BOT_PERSISTENCE_FILE")  # имя файла persistence бота
 IS_FAKE_API = get_bool("IS_FAKE_API")  # флаг, определяющий какой АПИ клиент используется - боевой или "заглушка"
 SITE_API_URL = get_string("SITE_API_URL")  # адрес сервера, к которому будет отправлять запросы АПИ клиент
@@ -66,7 +64,9 @@ TRELLO_ID_MODEL = get_string("TRELLO_ID_MODEL")  # id таблицы, к кот�
 TRELLO_TOKEN = get_string("TRELLO_TOKEN")  # токен для доступа к TRELLO
 TRELLO_BORD_ID = get_string("TRELLO_BORD_ID")  # доска в TRELLO
 
+
 URL_SITE = "https://ask.nenaprasno.ru/"
 URL_SITE_DONATION = "https://ask.nenaprasno.ru/#donation"
 
 FORM_URL_FUTURE_EXPERT = "https://forms.gle/DGMUm35bxZytE3QLA"
+URL_SERVICE_RULES = "https://vse.nenaprasno.ru/rules"  # адрес страницыы с правилами
