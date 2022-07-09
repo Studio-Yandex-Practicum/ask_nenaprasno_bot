@@ -5,7 +5,7 @@ on:
     types:
       - opened
     branches:
-      - feature/check_bot_productivity
+      - develop
   pull_request:
     types:
       - opened
