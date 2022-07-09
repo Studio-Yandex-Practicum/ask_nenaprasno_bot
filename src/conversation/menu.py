@@ -4,9 +4,10 @@ from telegram.ext import CallbackQueryHandler, CommandHandler, ContextTypes, Con
 from constants import callback_data, states
 from conversation.timezone import get_timezone as configurate_timezone
 from conversation.timezone import states_timezone_conversation_dict
-from core.config import URL_SERVICE_RULES
+from core.config import TRELLO_BORD_ID, URL_SERVICE_RULES
 from core.logger import logger
 from decorators.logger import async_error_logger
+from service.api_client import APIService
 from service.repeat_message import repeat_message_after_1_hour_callback
 
 
@@ -72,6 +73,46 @@ async def skip_bill_callback_handler(update: Update, context: ContextTypes.DEFAU
     data = query.message
     await query.edit_message_text(text=data.text_markdown_v2_urled)
     await query.answer()  # close progress bar in chat
+
+
+async def done_bill_callback_handler(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
+    """
+    Delete job from JobQueue
+    """
+    query = update.callback_query
+    user_id = query.from_user.id
+    current_jobs = context.job_queue.get_jobs_by_name(f"send_{user_id}_bill_until_complete")
+    for job in current_jobs:
+        job.schedule_removal()
+    await query.edit_message_text(text="Не будем напоминать до следующего месяца")
+    await query.answer()  # close progress bar in chat
+
+
+async def skip_bill_callback_handler(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
+    """Delete button under message"""
+    query = update.callback_query
+    data = query.message
+    await query.edit_message_text(text=data.text_markdown_v2_urled)
+    await query.answer()  # close progress bar in chat
+
+
+@async_error_logger(name="conversation.requests.statistic_month_callback", logger=logger)
+async def button_statistic_month_callback(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
+    """
+    Send monthly statistics at the user's request.
+    """
+    service = APIService()
+    telegram_id = update.effective_user.id
+    user_statistic = await service.get_user_month_stat(telegram_id=telegram_id)
+    user_name_in_trello = context.user_data["user_name_in_trello"]
+    message = (
+        f"❗Cтатистика за месяц❗ \n\n"
+        f"✅Количество закрытых заявок - {user_statistic.user_tickets_closed}\n"
+        f"✅Рейтинг - {user_statistic.user_rating:.1f}\n"
+        f"✅Среднее время ответа - {user_statistic.user_ticket_resolve_avg_time:.1f}\n\n"
+        f"Открыть [Trello](https://trello.com/{TRELLO_BORD_ID}/?filter=member:{user_name_in_trello})\n\n"
+    )
+    await update.callback_query.message.reply_text(text=message)
 
 
 menu_conversation = ConversationHandler(

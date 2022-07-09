@@ -99,7 +99,7 @@ async def is_expert_callback(update: Update, context: CallbackContext):
     text = f"Авторизация прошла успешно\n" f"Добро пожаловать {user_data.user_name}"
     if update.callback_query:
         await update.callback_query.edit_message_text(text=text)
-    else: 
+    else:
         message.reply_text(text=text)
     await menu_button(context, COMMANDS)
     await message.reply_text(
