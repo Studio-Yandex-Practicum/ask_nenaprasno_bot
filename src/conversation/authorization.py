@@ -96,9 +96,11 @@ async def is_expert_callback(update: Update, context: CallbackContext):
     message = update.message if update.message else update.callback_query.message
     context.user_data["user_name"] = user_data.user_name
     context.user_data["user_time_zone"] = user_data.user_time_zone
-    await message.reply_text(
-        text=f"Авторизация прошла успешно\n" f"Добро пожаловать {user_data.user_name}"
-    )
+    text = f"Авторизация прошла успешно\n" f"Добро пожаловать {user_data.user_name}"
+    if update.callback_query:
+        await update.callback_query.edit_message_text(text=text)
+    else: 
+        message.reply_text(text=text)
     await menu_button(context, COMMANDS)
     await message.reply_text(
         text="Вы успешно начали работу с ботом. Меня зовут Женя Краб, "
