@@ -34,10 +34,10 @@ async def start(update: Update, context: CallbackContext):
     """
     user_data = await autorize_callback(update, context)
 
-    if user_data != None:
+    if user_data is not None:
         await update.message.reply_text(
             text=SUCCESSFUL_AUTORIZATION_MESSAGE
-                .format(user_name=user_data.user_name)
+            .format(user_name=user_data.user_name)
         )
         await update.message.reply_text(
             text=BOT_GREETINGS_MESSAGE
@@ -143,7 +143,7 @@ async def is_expert_callback(update: Update, context: CallbackContext):
     """
     user_data = await autorize_callback(update, context)
 
-    if user_data == None:
+    if user_data is None:
         telegram_id = update.effective_user.id
         message = (
             f"Ваш Telegram-идентификатор - ```{telegram_id}```\n\n"
@@ -155,7 +155,7 @@ async def is_expert_callback(update: Update, context: CallbackContext):
 
     await update.callback_query.edit_message_text(
         text=SUCCESSFUL_AUTORIZATION_MESSAGE
-            .format(user_name=user_data.user_name)
+        .format(user_name=user_data.user_name)
     )
     await update.callback_query.message.reply_text(
         text=BOT_GREETINGS_MESSAGE
