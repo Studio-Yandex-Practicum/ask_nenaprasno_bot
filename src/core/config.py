@@ -1,3 +1,4 @@
+import os
 from datetime import datetime
 from pathlib import Path
 
@@ -13,23 +14,27 @@ env = dotenv_values()
 
 
 def get_string(setting: str) -> str:
-    return env.get(setting)
+    return env.get(setting) or os.getenv(setting)
 
 
 def get_int(setting: str) -> int:
-    return int(env.get(setting))
+    setting_value = env.get(setting) or os.getenv(setting)
+    return int(setting_value)
 
 
 def get_datetime(setting: str) -> datetime:
-    return datetime.strptime(env.get(setting), "%H:%M")
+    setting_value = env.get(setting) or os.getenv(setting)
+    return datetime.strptime(setting_value, "%H:%M")
 
 
 def get_datetime_tuple(setting: str) -> tuple:
-    return tuple(map(int, list(filter(None, env.get(setting).split(",")))))
+    setting_value = env.get(setting) or os.getenv(setting)
+    return tuple(map(int, list(filter(None, setting_value.split(",")))))
 
 
 def get_bool(setting: str) -> bool:
-    return env.get(setting) == "True"
+    setting_value = env.get(setting) or os.getenv(setting)
+    return setting_value == "True"
 
 
 LOG_NAME = get_string("LOG_NAME")
