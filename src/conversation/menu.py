@@ -42,7 +42,7 @@ async def menu(update: Update, context: ContextTypes.DEFAULT_TYPE):
         ],
     ]
     await update.message.reply_text("Меню", reply_markup=InlineKeyboardMarkup(menu_buttons))
-    return states.BASE_STATE
+    return states.MENU_STATE
 
 
 @async_error_logger(name="conversation.requests.actual_requests_callback", logger=logger)
@@ -51,7 +51,7 @@ async def button_reaction_callback(update: Update, context: ContextTypes.DEFAULT
     Sends a list of current requests/requests to the user.
     """
     await update.callback_query.message.reply_text(text="button_reaction_callback")
-    return states.BASE_STATE
+    return states.MENU_STATE
 
 
 async def done_bill_callback_handler(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
@@ -100,7 +100,7 @@ menu_conversation = ConversationHandler(
     name="menu_conversation",
     entry_points=[CommandHandler("menu", menu)],
     states={
-        states.BASE_STATE: [
+        states.MENU_STATE: [
             CallbackQueryHandler(
                 button_statistic_month_callback, pattern=callback_data.CALLBACK_STATISTIC_MONTH_COMMAND
             ),
