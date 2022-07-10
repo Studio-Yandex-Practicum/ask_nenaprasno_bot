@@ -44,8 +44,9 @@ async def healthcheck_api(request: Request) -> JSONResponse:
 
     try:
         api_service = APIService()
-        api_service.get_bill()
-        health.db_is_avaliable = True
+        bill = await api_service.get_bill()
+        if bill is not None:
+            health.site_api_is_avaliable = True
     except Exception as error:
         logger.error(f"Failed to connect to database: {error}")
 
