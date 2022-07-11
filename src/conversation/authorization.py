@@ -120,9 +120,9 @@ async def autorize(telegram_id: int, context: CallbackContext):
     api_service = APIService()
     user_data = await api_service.authenticate_user(telegram_id=telegram_id)
     if user_data is not None:
-        context.user_data["user_name"] = user_data.user_name
-        context.user_data["user_time_zone"] = user_data.user_time_zone
-        context.user_data["user_name_in_trello"] = user_data.user_name_in_trello
+        context.user_data["username"] = user_data.username
+        context.user_data["timezone"] = user_data.timezone
+        context.user_data["username_trello"] = user_data.username_trello
     return user_data
 
 
@@ -133,6 +133,7 @@ async def is_expert_callback(update: Update, context: CallbackContext):
     """
     telegram_id = update.effective_user.id
     user_data = await autorize(update.effective_user.id, context)
+    await update.callback_query.answer()
 
     if user_data is None:
         message = (
@@ -140,11 +141,9 @@ async def is_expert_callback(update: Update, context: CallbackContext):
             f"Для дальнейшей работы, пожалуйста, перешлите это сообщение кейс-менеджеру, "
             f"чтобы начать получать уведомления."
         )
-        await update.callback_query.answer()
         await update.callback_query.edit_message_text(text=message, parse_mode=ParseMode.MARKDOWN)
         return states.UNAUTHORIZED_STATE
 
-    await update.callback_query.answer()
     await update.callback_query.edit_message_text(
         text=BOT_GREETINGS_MESSAGE
     )
