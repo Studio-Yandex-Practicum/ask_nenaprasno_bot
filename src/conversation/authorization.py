@@ -141,8 +141,10 @@ async def is_expert_callback(update: Update, context: CallbackContext):
             f"чтобы начать получать уведомления."
         )
         await update.callback_query.edit_message_text(text=message, parse_mode=ParseMode.MARKDOWN)
+        await update.callback_query.answer()
         return states.UNAUTHORIZED_STATE
 
+    await update.callback_query.answer()
     await update.callback_query.edit_message_text(
         text=BOT_GREETINGS_MESSAGE
     )
