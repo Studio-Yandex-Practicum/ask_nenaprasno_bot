@@ -11,10 +11,6 @@ from decorators.logger import async_error_logger
 from menu_button import COMMANDS, COMMANDS_UNAUTHORIZED, menu_button
 from service.api_client import APIService
 
-SUCCESSFUL_AUTORIZATION_MESSAGE = (
-    "Авторизация прошла успешно\n"
-    "Добро пожаловать {user_name}"
-)
 BOT_GREETINGS_MESSAGE = (
     "Вы успешно начали работу с ботом. Меня зовут Женя Краб, "
     "я telegram-bot для экспертов справочной службы "
@@ -32,13 +28,9 @@ async def start(update: Update, context: CallbackContext):
     """
     Responds to the start command. The entry point to telegram bot.
     """
-    user_data = await autorize_callback(update, context)
+    user_data = await autorize(update.effective_user.id, context)
 
     if user_data is not None:
-        await update.message.reply_text(
-            text=SUCCESSFUL_AUTORIZATION_MESSAGE
-            .format(user_name=user_data.user_name)
-        )
         await update.message.reply_text(
             text=BOT_GREETINGS_MESSAGE
         )
@@ -121,13 +113,11 @@ async def register_as_expert_callback(update: Update, context: CallbackContext):
     return ConversationHandler.END
 
 
-@async_error_logger(name="conversation.authorization.autorize_callback", logger=logger)
-async def autorize_callback(update: Update, context: CallbackContext):
+async def autorize(telegram_id: int, context: CallbackContext):
     """
     try to authenticate telegram user on site API
     """
     api_service = APIService()
-    telegram_id = update.effective_user.id
     user_data = await api_service.authenticate_user(telegram_id=telegram_id)
     if user_data is not None:
         context.user_data["user_name"] = user_data.user_name
@@ -141,7 +131,7 @@ async def is_expert_callback(update: Update, context: CallbackContext):
     """
     try to authenticate telegram user on site API and write trello_id to persistence file
     """
-    user_data = await autorize_callback(update, context)
+    user_data = await autorize(update, context)
 
     if user_data is None:
         telegram_id = update.effective_user.id
@@ -154,10 +144,6 @@ async def is_expert_callback(update: Update, context: CallbackContext):
         return states.UNAUTHORIZED_STATE
 
     await update.callback_query.edit_message_text(
-        text=SUCCESSFUL_AUTORIZATION_MESSAGE
-        .format(user_name=user_data.user_name)
-    )
-    await update.callback_query.message.reply_text(
         text=BOT_GREETINGS_MESSAGE
     )
     await menu_button(context, COMMANDS)
