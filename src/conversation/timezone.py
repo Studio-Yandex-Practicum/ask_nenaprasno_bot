@@ -50,7 +50,7 @@ async def check_timezone(update: Update, context: ContextTypes.DEFAULT_TYPE, tim
         text="Вы настроили часовой пояс, теперь уведомления будут приходить в удобное время",
         reply_markup=ReplyKeyboardRemove(),
     )
-    return states.BASE_STATE
+    return states.MENU_STATE
 
 
 @async_error_logger(name="conversation.timezone.get_timezone_from_location_callback", logger=logger)
