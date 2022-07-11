@@ -34,6 +34,7 @@ jobs:
       - name: Start the bot
         env:
           TELEGRAM_TOKEN: ${{ env.TELEGRAM_TOKEN }}
+          LOG_NAME: bot.log
         run: |
           python3 src/run_bot.py & sleep 15 && pkill -9 python
           python3 src/run_webhook_api.py & sleep 15 && pkill -9 python

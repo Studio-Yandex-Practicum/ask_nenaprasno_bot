@@ -82,14 +82,14 @@ async def button_statistic_month_callback(update: Update, context: ContextTypes.
     """
     service = APIService()
     telegram_id = update.effective_user.id
-    user_statistic = await service.get_user_month_stat(telegram_id=telegram_id)
-    user_name_in_trello = context.user_data["user_name_in_trello"]
+    user_statistics = await service.get_user_month_stat(telegram_id=telegram_id)
+    username_trello = context.user_data["username_trello"]
     message = (
         f"❗Cтатистика за месяц❗ \n\n"
-        f"✅Количество закрытых заявок - {user_statistic.user_tickets_closed}\n"
-        f"✅Рейтинг - {user_statistic.user_rating:.1f}\n"
-        f"✅Среднее время ответа - {user_statistic.user_ticket_resolve_avg_time:.1f}\n\n"
-        f"Открыть [Trello](https://trello.com/{TRELLO_BORD_ID}/?filter=member:{user_name_in_trello})\n\n"
+        f"✅Количество закрытых заявок - {user_statistics.consultations_closed}\n"
+        f"✅Рейтинг - {user_statistics.rating:.1f}\n"
+        f"✅Среднее время ответа - {user_statistics.consultation_resolve_time:.1f}\n\n"
+        f"Открыть [Trello](https://trello.com/{TRELLO_BORD_ID}/?filter=member:{username_trello})\n\n"
     )
     await update.callback_query.message.reply_text(text=message)
 
