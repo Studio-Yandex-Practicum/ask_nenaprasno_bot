@@ -86,9 +86,9 @@ async def button_statistic_month_callback(update: Update, context: ContextTypes.
     username_trello = context.user_data["username_trello"]
     message = (
         f"❗Cтатистика за месяц❗ \n\n"
-        f"✅Количество закрытых заявок - {user_statistics.user_tickets_closed}\n"
-        f"✅Рейтинг - {user_statistics.user_rating:.1f}\n"
-        f"✅Среднее время ответа - {user_statistics.user_ticket_resolve_avg_time:.1f}\n\n"
+        f"✅Количество закрытых заявок - {user_statistics.consultations_closed}\n"
+        f"✅Рейтинг - {user_statistics.rating:.1f}\n"
+        f"✅Среднее время ответа - {user_statistics.consultation_resolve_time:.1f}\n\n"
         f"Открыть [Trello](https://trello.com/{TRELLO_BORD_ID}/?filter=member:{username_trello})\n\n"
     )
     await update.callback_query.message.reply_text(text=message)
