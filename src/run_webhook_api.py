@@ -14,7 +14,7 @@ from core import config
 from core.logger import logger
 from service.api_client import APIService
 from service.trello_data_deserializer import TrelloDeserializerModel
-from service.healthcheck_serializer import HealthSerializerModel
+from service.models import HealthCheckResponseModel
 from create_trello_webhook import trello_webhook
 
 
@@ -34,7 +34,7 @@ async def stop_bot() -> None:
 
 
 async def healthcheck_api(request: Request) -> JSONResponse:
-    health = HealthSerializerModel()
+    health = HealthCheckResponseModel()
     bot: Bot = api.state.bot_app.bot
     try:
         await bot.get_me()
