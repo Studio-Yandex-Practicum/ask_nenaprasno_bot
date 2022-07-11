@@ -42,7 +42,7 @@ async def menu(update: Update, context: ContextTypes.DEFAULT_TYPE):
         ],
     ]
     await update.message.reply_text("Меню", reply_markup=InlineKeyboardMarkup(menu_buttons))
-    return states.BASE_STATE
+    return states.MENU_STATE
 
 
 @async_error_logger(name="conversation.requests.actual_requests_callback", logger=logger)
@@ -51,7 +51,7 @@ async def button_reaction_callback(update: Update, context: ContextTypes.DEFAULT
     Sends a list of current requests/requests to the user.
     """
     await update.callback_query.message.reply_text(text="button_reaction_callback")
-    return states.BASE_STATE
+    return states.MENU_STATE
 
 
 async def done_bill_callback_handler(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
@@ -82,14 +82,14 @@ async def button_statistic_month_callback(update: Update, context: ContextTypes.
     """
     service = APIService()
     telegram_id = update.effective_user.id
-    user_statistic = await service.get_user_month_stat(telegram_id=telegram_id)
-    user_name_in_trello = context.user_data["user_name_in_trello"]
+    user_statistics = await service.get_user_month_stat(telegram_id=telegram_id)
+    username_trello = context.user_data["username_trello"]
     message = (
         f"❗Cтатистика за месяц❗ \n\n"
-        f"✅Количество закрытых заявок - {user_statistic.user_tickets_closed}\n"
-        f"✅Рейтинг - {user_statistic.user_rating:.1f}\n"
-        f"✅Среднее время ответа - {user_statistic.user_ticket_resolve_avg_time:.1f}\n\n"
-        f"Открыть [Trello](https://trello.com/{TRELLO_BORD_ID}/?filter=member:{user_name_in_trello})\n\n"
+        f"✅Количество закрытых заявок - {user_statistics.consultations_closed}\n"
+        f"✅Рейтинг - {user_statistics.rating:.1f}\n"
+        f"✅Среднее время ответа - {user_statistics.consultation_resolve_time:.1f}\n\n"
+        f"Открыть [Trello](https://trello.com/{TRELLO_BORD_ID}/?filter=member:{username_trello})\n\n"
     )
     await update.callback_query.message.reply_text(text=message)
 
@@ -100,7 +100,7 @@ menu_conversation = ConversationHandler(
     name="menu_conversation",
     entry_points=[CommandHandler("menu", menu)],
     states={
-        states.BASE_STATE: [
+        states.MENU_STATE: [
             CallbackQueryHandler(
                 button_statistic_month_callback, pattern=callback_data.CALLBACK_STATISTIC_MONTH_COMMAND
             ),
