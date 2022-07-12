@@ -4,14 +4,17 @@ import httpx
 import uvicorn
 from starlette.applications import Starlette
 from starlette.requests import Request
-from starlette.responses import PlainTextResponse, Response
+from starlette.responses import JSONResponse, Response
 from starlette.routing import Route
-from telegram import Update
+from telegram import Bot, Update
+from telegram.error import TelegramError
 
 from bot import init_webhook
 from core import config
 from core.logger import logger
+from service.api_client import APIService
 from service.trello_data_deserializer import TrelloDeserializerModel
+from service.models import HealthCheckResponseModel
 from create_trello_webhook import trello_webhook
 
 
@@ -30,12 +33,24 @@ async def stop_bot() -> None:
     await api.state.bot_app.shutdown()
 
 
-async def healthcheck_api(request: Request) -> PlainTextResponse:
-    message: str = f"Бот запущен и работает. Сообщение получено по запросу на Api сервера {config.WEBHOOK_URL}"
+async def healthcheck_api(request: Request) -> JSONResponse:
+    health = HealthCheckResponseModel()
+    bot: Bot = api.state.bot_app.bot
+    try:
+        await bot.get_me()
+        health.bot_is_avaliable = True
+    except TelegramError as error:
+        logger.error(f"Failed to connect to bot: {error}")
 
-    logger.info(message)
+    try:
+        api_service = APIService()
+        bill = await api_service.get_bill()
+        if bill is not None:
+            health.site_api_is_avaliable = True
+    except Exception as error:
+        logger.error(f"Failed to connect to database: {error}")
 
-    return PlainTextResponse(content=f'Request has been received and logged: "{message}"')
+    return JSONResponse(content=health.to_dict())
 
 
 async def telegram_webhook_api(request: Request) -> Response:
