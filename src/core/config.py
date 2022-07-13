@@ -4,6 +4,8 @@ from pathlib import Path
 
 from dotenv import dotenv_values
 
+from core.exceptions import EnvVariablesError
+
 BASE_DIR = Path(__file__).resolve().parent.parent
 
 # --------------------------------------------------------------------------------- #
@@ -19,17 +21,26 @@ def get_string(setting: str) -> str:
 
 def get_int(setting: str) -> int:
     setting_value = env.get(setting) or os.getenv(setting)
-    return int(setting_value)
+    try:
+        return int(setting_value)
+    except Exception as exc:
+        raise EnvVariablesError(setting, setting_value) from exc
 
 
 def get_datetime(setting: str) -> datetime:
     setting_value = env.get(setting) or os.getenv(setting)
-    return datetime.strptime(setting_value, "%H:%M")
+    try:
+        return datetime.strptime(setting_value, "%H:%M")
+    except Exception as exc:
+        raise EnvVariablesError(setting, setting_value) from exc
 
 
 def get_datetime_tuple(setting: str) -> tuple:
     setting_value = env.get(setting) or os.getenv(setting)
-    return tuple(map(int, list(filter(None, setting_value.split(",")))))
+    try:
+        return tuple(map(int, list(filter(None, setting_value.split(",")))))
+    except Exception as exc:
+        raise EnvVariablesError(setting, setting_value) from exc
 
 
 def get_bool(setting: str) -> bool:
