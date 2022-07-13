@@ -2,7 +2,15 @@ from http import HTTPStatus
 from typing import Optional
 
 from service.api_client.base import AbstractAPIService
-from service.api_client.models import BillStat, MonthStat, UserData, UserMonthStat, UserWeekStat, WeekStat
+from service.api_client.models import (
+    BillStat,
+    MonthStat,
+    UserActiveConsultations,
+    UserData,
+    UserExpiredConsultations,
+    UserMonthStat,
+    WeekStat,
+)
 
 
 class MockAPIService(AbstractAPIService):
@@ -13,25 +21,25 @@ class MockAPIService(AbstractAPIService):
         return [
             WeekStat(
                 telegram_id=971746479,
-                user_time_zone="UTC+3",
-                user_name_in_trello="user1@trello",
-                last_week_user_tickets_closed=10,
-                last_week_user_tickets_not_expiring=2,
-                last_week_user_tickets_expiring=1,
-                last_week_user_tickets_expired=1,
-                last_week_user_tickets_in_work=4,
-                last_week_user_tickets_all=14,
+                timezone="UTC+3",
+                username_trello="user1@trello",
+                closed_consultations=10,
+                not_expiring_consultations=2,
+                expiring_consultations=1,
+                expired_consultations=1,
+                active_consultations=4,
+                all_consultations=14,
             ),
             WeekStat(
                 telegram_id=721889325,
-                user_time_zone="UTC+3",
-                user_name_in_trello="user2@trello",
-                last_week_user_tickets_closed=5,
-                last_week_user_tickets_not_expiring=3,
-                last_week_user_tickets_expiring=2,
-                last_week_user_tickets_expired=1,
-                last_week_user_tickets_in_work=6,
-                last_week_user_tickets_all=16,
+                timezone="UTC+3",
+                username_trello="user2@trello",
+                closed_consultations=5,
+                not_expiring_consultations=3,
+                expiring_consultations=2,
+                expired_consultations=1,
+                active_consultations=6,
+                all_consultations=11,
             ),
         ]
 
@@ -39,43 +47,49 @@ class MockAPIService(AbstractAPIService):
         return [
             MonthStat(
                 telegram_id=971746479,
-                user_time_zone="UTC+3",
-                user_tickets_closed=10,
-                user_rating=3.2,
-                user_ticket_resolve_avg_time=4.1,
+                timezone="UTC+03:00",
+                closed_consultations=10,
+                rating=3.2,
+                average_user_answer_time=4.1,
             ),
             MonthStat(
                 telegram_id=721889325,
-                user_time_zone="UTC+3",
-                user_tickets_closed=5,
-                user_rating=2.2,
-                user_ticket_resolve_avg_time=5.1,
+                timezone="UTC+05:00",
+                closed_consultations=5,
+                rating=2.2,
+                average_user_answer_time=5.1,
             ),
         ]
 
-    async def get_user_week_stat(self, telegram_id: int) -> UserWeekStat:
-        return UserWeekStat(
-            user_name_in_trello="user1@telegram",
-            last_week_user_tickets_closed=10,
-            last_week_user_tickets_not_expiring=2,
-            last_week_user_tickets_expiring=1,
-            last_week_user_tickets_expired=1,
-            last_week_user_tickets_in_work=4,
-            last_week_user_tickets_all=14,
+    async def get_user_active_consultations(self, telegram_id: int) -> UserActiveConsultations:
+        return UserActiveConsultations(
+            username_trello="user1@telegram",
+            active_consultations=6,
+            expiring_consultations=2,
+            expiring_consultation_ids=[256, 512],
+            expiring_consultation_trello_card_ids=[12345, 98765],
+        )
+
+    async def get_user_expired_consultations(self, telegram_id: int) -> UserExpiredConsultations:
+        return UserExpiredConsultations(
+            username_trello="user1@telegram",
+            expired_consultations=2,
+            expired_consultation_ids=[64, 128],
+            expired_consultation_trello_card_ids=[8888, 52167],
         )
 
     async def get_user_month_stat(self, telegram_id: int) -> UserMonthStat:
         return UserMonthStat(
-            user_tickets_closed=5,
-            user_rating=2.2,
-            user_ticket_resolve_avg_time=5.1,
+            closed_consultations=5,
+            rating=2.2,
+            average_user_answer_time=5.1,
         )
 
     async def authenticate_user(self, telegram_id: int) -> Optional[None]:
         return UserData(
-            user_name="Bob",
-            user_time_zone="UTC+3",
-            user_name_in_trello="user1@telegram",
+            username="Bob",
+            timezone="UTC+03:00",
+            username_trello="user1@telegram",
         )
 
     async def set_user_timezone(self, telegram_id: int, user_time_zone: str) -> HTTPStatus:

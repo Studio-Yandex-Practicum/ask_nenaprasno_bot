@@ -2,7 +2,15 @@ import httpx
 
 from core import config
 from service.api_client.base import AbstractAPIService
-from service.api_client.models import BillStat, MonthStat, UserData, UserMonthStat, UserWeekStat, WeekStat
+from service.api_client.models import (
+    BillStat,
+    MonthStat,
+    UserActiveConsultations,
+    UserData,
+    UserExpiredConsultations,
+    UserMonthStat,
+    WeekStat,
+)
 
 
 class SiteAPIService(AbstractAPIService):
@@ -15,7 +23,7 @@ class SiteAPIService(AbstractAPIService):
         self.bot_token: str = config.SITE_API_BOT_TOKEN
 
     async def get_bill(self) -> BillStat:
-        pass
+        ...
 
     async def get_week_stat(self) -> list[WeekStat]:
         url = f"{self.site_url}/tgbot/stat/weekly"
@@ -26,29 +34,32 @@ class SiteAPIService(AbstractAPIService):
             return [
                 WeekStat(
                     telegram_id=week_stat["telegram_name"],
-                    user_time_zone=week_stat["user_timezone"],
-                    user_name_in_trello=week_stat["user_name_in_trello"],
-                    last_week_user_tickets_closed=week_stat["last_week_user_tickets_closed"],
-                    last_week_user_tickets_not_expiring=week_stat["last_week_user_tickets_not_expiring"],
-                    last_week_user_tickets_expiring=week_stat["last_week_user_tickets_expiring"],
-                    last_week_user_tickets_expired=week_stat["last_week_user_tickets_expired"],
-                    last_week_user_tickets_in_work=week_stat["last_week_user_tickets_in_work"],
-                    last_week_user_tickets_all=week_stat["last_week_user_tickets_all"],
+                    timezone=week_stat["timezone"],
+                    username_trello=week_stat["username_trello"],
+                    closed_consultations=week_stat["closed_consultations"],
+                    not_expiring_consultations=week_stat["not_expiring_consultations:"],
+                    expiring_consultations=week_stat["expiring_consultations"],
+                    expired_consultations=week_stat["expired_consultations"],
+                    active_consultations=week_stat["active_consultations"],
+                    all_consultations=week_stat["all_consultations"],
                 )
                 for week_stat in response
             ]
 
     async def get_month_stat(self) -> list[MonthStat]:
-        pass
+        ...
 
-    async def get_user_week_stat(self, telegram_id: int) -> UserWeekStat:
-        pass
+    async def get_user_active_consultations(self, telegram_id: int) -> UserActiveConsultations:
+        ...
+
+    async def get_user_expired_consultations(self, telegram_id: int) -> UserExpiredConsultations:
+        ...
 
     async def get_user_month_stat(self, telegram_id: int) -> UserMonthStat:
-        pass
+        ...
 
     async def authenticate_user(self, telegram_id: int) -> UserData | None:
-        pass
+        ...
 
     async def set_user_timezone(self, telegram_id: int, user_time_zone: str) -> httpx:
-        pass
+        ...

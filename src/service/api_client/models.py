@@ -3,49 +3,52 @@ from dataclasses import dataclass
 
 @dataclass
 class UserData:
-    user_name: str
-    user_time_zone: str
-    user_name_in_trello: str
+    username: str
+    timezone: str
+    username_trello: str
+
+
+@dataclass
+class UserMonthStat:
+    closed_consultations: int
+    rating: float
+    average_user_answer_time: float
+
+
+@dataclass
+class MonthStat(UserMonthStat):
+    telegram_id: int
+    timezone: str
 
 
 @dataclass
 class WeekStat:
     telegram_id: int
-    user_time_zone: str
-    user_name_in_trello: str
-    last_week_user_tickets_closed: int
-    last_week_user_tickets_not_expiring: int
-    last_week_user_tickets_expiring: int
-    last_week_user_tickets_expired: int
-    last_week_user_tickets_in_work: int
-    last_week_user_tickets_all: int
+    timezone: str
+    username_trello: str
+    closed_consultations: int
+    not_expiring_consultations: int
+    expiring_consultations: int
+    expired_consultations: int
+    active_consultations: int
+    all_consultations: int
 
 
 @dataclass
-class MonthStat:
-    telegram_id: int
-    user_time_zone: str
-    user_tickets_closed: int
-    user_rating: float
-    user_ticket_resolve_avg_time: float
+class UserActiveConsultations:
+    username_trello: str
+    active_consultations: int
+    expiring_consultations: int
+    expiring_consultation_ids: list[int]
+    expiring_consultation_trello_card_ids: list[int]
 
 
 @dataclass
-class UserMonthStat:
-    user_tickets_closed: int
-    user_rating: float
-    user_ticket_resolve_avg_time: float
-
-
-@dataclass
-class UserWeekStat:
-    user_name_in_trello: str
-    last_week_user_tickets_closed: int
-    last_week_user_tickets_not_expiring: int
-    last_week_user_tickets_expiring: int
-    last_week_user_tickets_expired: int
-    last_week_user_tickets_in_work: int
-    last_week_user_tickets_all: int
+class UserExpiredConsultations:
+    username_trello: str
+    expired_consultations: int
+    expired_consultation_ids: list[int]
+    expired_consultation_trello_card_ids: list[int]
 
 
 @dataclass

@@ -85,7 +85,7 @@ Poetry - это инструмент для управления зависим�
 
 или
 
-> poetry run python src/run_bot.py
+> poetry run python script_name>.py
 >
 > poetry run pytest
 >
