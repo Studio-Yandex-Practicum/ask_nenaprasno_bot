@@ -19,19 +19,19 @@ async def weekly_stat_job(context: CallbackContext) -> None:
     template_message = Template(
         "Вы делали добрые дела 7 дней!\n"
         'Посмотрите, как прошла ваша неделя  в *""Просто спросить""*\n'
-        "Закрыто заявок - *$consultations_closed*\n"
-        "В работе *$consultations_in_work* заявок  за неделю\n\n"
-        "Истекает срок у *$consultations_expiring заявок*\n"
-        "У *$consultations_expired* заявок срок истек\n\n"
+        "Закрыто заявок - *$closed_consultations*\n"
+        "В работе *$active_consultations* заявок  за неделю\n\n"
+        "Истекает срок у *$expiring_consultations заявок*\n"
+        "У *$expired_consultations* заявок срок истек\n\n"
         "Открыть [Trello](https://trello.com)\n\n"
         "Мы рады работать в одной команде :)\n"
         "*Так держать!*"
     )
     alias_dict = dict(
-        consultations_closed="consultations_closed",
-        consultations_in_work="consultations_in_work",
-        consultations_expiring="consultations_expiring",
-        consultations_expired="consultations_expired",
+        closed_consultations="closed_consultations",
+        active_consultations="active_consultations",
+        expiring_consultations="expiring_consultations",
+        expired_consultations="expired_consultations",
     )
     await send_statistics(
         context,
@@ -47,27 +47,27 @@ async def monthly_stat_job(context: CallbackContext) -> None:
     closed requests.
     Only if the user had requests
     """
-    mont_statistics = await APIService().get_month_stat()
+    month_statistics = await APIService().get_month_stat()
     template_message = Template(
         "Это был отличный месяц!\n"
         'Посмотрите, как он прошел в *""Просто спросить""* 🔥\n\n'
-        "Количество закрытых заявок - *$consultations_closed*\n"
+        "Количество закрытых заявок - *$closed_consultations*\n"
         "Рейтинг - *$rating*\n"
-        "Среднее время ответа - *$consultation_resolve_time*\n\n"
+        "Среднее время ответа - *$average_user_answer_time*\n\n"
         "Открыть [Trello](https://trello.com)\n\n"
         "Мы рады работать в одной команде :)\n"
         "*Так держать!*"
     )
     alias_dict = dict(
-        consultations_closed="consultations_closed",
+        closed_consultations="closed_consultations",
         rating="rating",
-        consultation_resolve_time="consultation_resolve_time",
+        average_user_answer_time="average_user_answer_time",
     )
     await send_statistics(
         context,
         template_message,
         alias_dict,
-        mont_statistics,
+        month_statistics,
     )
 
 

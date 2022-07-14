@@ -9,43 +9,46 @@ class UserData:
 
 
 @dataclass
+class UserMonthStat:
+    closed_consultations: int
+    rating: float
+    average_user_answer_time: float
+
+
+@dataclass
+class MonthStat(UserMonthStat):
+    telegram_id: int
+    timezone: str
+
+
+@dataclass
 class WeekStat:
     telegram_id: int
     timezone: str
     username_trello: str
-    consultations_closed: int
-    consultations_not_expiring: int
-    consultations_expiring: int
-    consultations_expired: int
-    consultations_in_work: int
-    consultations_all: int
+    closed_consultations: int
+    not_expiring_consultations: int
+    expiring_consultations: int
+    expired_consultations: int
+    active_consultations: int
+    all_consultations: int
 
 
 @dataclass
-class MonthStat:
-    telegram_id: int
-    timezone: str
-    consultations_closed: int
-    rating: float
-    consultation_resolve_time: float
-
-
-@dataclass
-class UserMonthStat:
-    consultations_closed: int
-    rating: float
-    consultation_resolve_time: float
-
-
-@dataclass
-class UserWeekStat:
+class UserActiveConsultations:
     username_trello: str
-    consultations_closed: int
-    consultations_not_expiring: int
-    consultations_expiring: int
-    consultations_expired: int
-    consultations_in_work: int
-    consultations_all: int
+    active_consultations: int
+    expiring_consultations: int
+    expiring_consultation_ids: list[int]
+    expiring_consultation_trello_card_ids: list[int]
+
+
+@dataclass
+class UserExpiredConsultations:
+    username_trello: str
+    expired_consultations: int
+    expired_consultation_ids: list[int]
+    expired_consultation_trello_card_ids: list[int]
 
 
 @dataclass

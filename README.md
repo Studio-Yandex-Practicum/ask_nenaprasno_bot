@@ -82,6 +82,11 @@ Poetry - это инструмент для управления зависим�
 
 > poetry run <script_name>.py
 >
+
+или
+
+> poetry run python script_name>.py
+>
 > poetry run pytest
 >
 > poetry run black
