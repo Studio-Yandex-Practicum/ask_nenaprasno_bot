@@ -47,7 +47,7 @@ async def monthly_stat_job(context: CallbackContext) -> None:
     closed requests.
     Only if the user had requests
     """
-    mont_statistics = await APIService().get_month_stat()
+    month_statistics = await APIService().get_month_stat()
     template_message = Template(
         "Это был отличный месяц!\n"
         'Посмотрите, как он прошел в *""Просто спросить""* 🔥\n\n'
@@ -67,7 +67,7 @@ async def monthly_stat_job(context: CallbackContext) -> None:
         context,
         template_message,
         alias_dict,
-        mont_statistics,
+        month_statistics,
     )
 
 
