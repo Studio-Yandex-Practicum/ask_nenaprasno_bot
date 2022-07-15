@@ -24,7 +24,7 @@ def get_datetime_tuple(setting: str) -> tuple:
 
 
 def get_bool(setting: str) -> bool:
-    return get_string(setting) == "True"
+    return get_string(setting).capitalize() == "True"
 
 
 HOST = get_string("HOST")  # host для доступа к uvicorn серверу, по умолчанию localhost или 127.0.0.1
