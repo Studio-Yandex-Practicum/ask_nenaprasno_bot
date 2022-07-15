@@ -1,5 +1,6 @@
 import os
 from datetime import datetime
+from functools import wraps
 from pathlib import Path
 
 from dotenv import dotenv_values
@@ -15,37 +16,45 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 env = dotenv_values()
 
 
+#  from core.logger import logger
+#  from decorators.logger import async_error_logger
+# @async_error_logger('get_safe_env_variables_decorator', logger)
+# Не плохо было бы для конфигурации логера собрать свой конфиг и далее уже тут логировать в том числе и проблемы с
+# загрузкой переменных окружения. Только сразу надо подумать о том, что бы токены в логи не попадали в открытом виде.
+# Может быть и плюнуть на эти исключения, нихай логируются отдельно на сервере к которому у посторонних доступа не будет
+def get_safe_env_variables_decorator(func):
+    @wraps(func)
+    def wrapper(setting):
+        setting_value = get_string(setting)
+        try:
+            return func(setting_value)
+        except Exception as exc:
+            raise EnvVariablesError(setting, setting_value) from exc
+
+    return wrapper
+
+
 def get_string(setting: str) -> str:
     return env.get(setting) or os.getenv(setting)
 
 
+@get_safe_env_variables_decorator
 def get_int(setting: str) -> int:
-    setting_value = env.get(setting) or os.getenv(setting)
-    try:
-        return int(setting_value)
-    except Exception as exc:
-        raise EnvVariablesError(setting, setting_value) from exc
+    return int(setting)
 
 
+@get_safe_env_variables_decorator
 def get_datetime(setting: str) -> datetime:
-    setting_value = env.get(setting) or os.getenv(setting)
-    try:
-        return datetime.strptime(setting_value, "%H:%M")
-    except Exception as exc:
-        raise EnvVariablesError(setting, setting_value) from exc
+    return datetime.strptime(setting, "%H:%M")
 
 
+@get_safe_env_variables_decorator
 def get_datetime_tuple(setting: str) -> tuple:
-    setting_value = env.get(setting) or os.getenv(setting)
-    try:
-        return tuple(map(int, list(filter(None, setting_value.split(",")))))
-    except Exception as exc:
-        raise EnvVariablesError(setting, setting_value) from exc
+    return tuple(map(int, list(filter(None, setting.split(",")))))
 
 
 def get_bool(setting: str) -> bool:
-    setting_value = env.get(setting) or os.getenv(setting)
-    return setting_value == "True"
+    return get_string(setting) == "True"
 
 
 LOG_NAME = get_string("LOG_NAME")
