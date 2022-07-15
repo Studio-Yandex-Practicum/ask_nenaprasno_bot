@@ -1,30 +1,11 @@
 from datetime import datetime
-from functools import wraps
 
 from core import get_string
-from core.exceptions import EnvVariablesError
+from decorators.converter import get_safe_env_variables_decorator
 
 # --------------------------------------------------------------------------------- #
 # Getting variables from .env                                                       #
 # --------------------------------------------------------------------------------- #
-
-
-#  from core.logger import logger
-#  from decorators.logger import async_error_logger
-# @async_error_logger('get_safe_env_variables_decorator', logger)
-# Не плохо было бы для конфигурации логера собрать свой конфиг и далее уже тут логировать в том числе и проблемы с
-# загрузкой переменных окружения. Только сразу надо подумать о том, что бы токены в логи не попадали в открытом виде.
-# Может быть и плюнуть на эти исключения, нихай логируются отдельно на сервере к которому у посторонних доступа не будет
-def get_safe_env_variables_decorator(func):
-    @wraps(func)
-    def wrapper(setting):
-        setting_value = get_string(setting)
-        try:
-            return func(setting_value)
-        except Exception as exc:
-            raise EnvVariablesError(setting, setting_value) from exc
-
-    return wrapper
 
 
 @get_safe_env_variables_decorator

@@ -3,6 +3,9 @@ from pathlib import Path
 
 from dotenv import dotenv_values
 
+# This code is needed right here in order to import LOG_PATH into the logger. If this code is moved to config.py, then
+# a cyclic import exception occurs.
+
 BASE_DIR = Path(__file__).resolve().parent.parent
 
 env = dotenv_values()
