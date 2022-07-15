@@ -1,7 +1,7 @@
 import logging
 from logging.handlers import TimedRotatingFileHandler
 
-from core.config import LOG_PATH
+from core import LOG_PATH
 
 FORMATTER = "%(asctime)s %(levelname)s %(name)s:\t%(message)s"
 

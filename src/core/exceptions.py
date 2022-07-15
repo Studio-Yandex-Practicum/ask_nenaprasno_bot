@@ -1,3 +1,6 @@
+from core.logger import logger
+
+
 class EnvVariablesError(Exception):
     """Exception class for errors caused by type conversion of environment variables."""
 
@@ -8,4 +11,6 @@ class EnvVariablesError(Exception):
         super().__init__(self.message)
 
     def __str__(self):
-        return f"{self.setting}={self.setting_value} -> {self.message}"
+        err = f"{self.setting}={self.setting_value} -> {self.message}"
+        logger.error(("The error: '%s'", str(err)))
+        return err

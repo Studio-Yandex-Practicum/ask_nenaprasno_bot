@@ -1,19 +1,12 @@
-import os
 from datetime import datetime
 from functools import wraps
-from pathlib import Path
 
-from dotenv import dotenv_values
-
+from core import get_string
 from core.exceptions import EnvVariablesError
-
-BASE_DIR = Path(__file__).resolve().parent.parent
 
 # --------------------------------------------------------------------------------- #
 # Getting variables from .env                                                       #
 # --------------------------------------------------------------------------------- #
-
-env = dotenv_values()
 
 
 #  from core.logger import logger
@@ -34,10 +27,6 @@ def get_safe_env_variables_decorator(func):
     return wrapper
 
 
-def get_string(setting: str) -> str:
-    return env.get(setting) or os.getenv(setting)
-
-
 @get_safe_env_variables_decorator
 def get_int(setting: str) -> int:
     return int(setting)
@@ -56,9 +45,6 @@ def get_datetime_tuple(setting: str) -> tuple:
 def get_bool(setting: str) -> bool:
     return get_string(setting) == "True"
 
-
-LOG_NAME = get_string("LOG_NAME")
-LOG_PATH = BASE_DIR / LOG_NAME
 
 HOST = get_string("HOST")  # host для доступа к uvicorn серверу, по умолчанию localhost или 127.0.0.1
 WEBHOOK_URL = get_string("WEBHOOK_URL")  # адрес сервера, где будет запущен бот
