@@ -16,7 +16,7 @@ def get_safe_env_variables_decorator(func):
     return wrapper
 
 
-def get_env_variables_string_representation(func):
+def get_env_value_string_representation_by_name(func):
     @wraps(func)
     def wrapper(setting):
         return func(get_string(setting))
