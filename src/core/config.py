@@ -21,25 +21,21 @@ def get_string(setting: str) -> str:
 
 @safe_conversion
 def get_int(setting: str) -> int:
-    setting_value = env.get(setting) or os.getenv(setting)
-    return int(setting_value)
+    return int(get_string(setting))
 
 
 @safe_conversion
 def get_datetime(setting: str) -> datetime:
-    setting_value = env.get(setting) or os.getenv(setting)
-    return datetime.strptime(setting_value, "%H:%M")
+    return datetime.strptime(get_string(setting), "%H:%M")
 
 
 @safe_conversion
 def get_datetime_tuple(setting: str) -> tuple:
-    setting_value = env.get(setting) or os.getenv(setting)
-    return tuple(map(int, list(filter(None, setting_value.split(",")))))
+    return tuple(map(int, list(filter(None, get_string(setting).split(",")))))
 
 
 def get_bool(setting: str) -> bool:
-    setting_value = env.get(setting) or os.getenv(setting)
-    return setting_value == "True"
+    return get_string(setting) == "True"
 
 
 LOG_NAME = get_string("LOG_NAME")
