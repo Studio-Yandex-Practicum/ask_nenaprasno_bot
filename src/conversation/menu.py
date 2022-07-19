@@ -94,6 +94,25 @@ async def button_statistic_month_callback(update: Update, context: ContextTypes.
     await update.callback_query.message.reply_text(text=message)
 
 
+@async_error_logger(name="conversation.requests.button_overdue_requests_callback", logger=logger)
+async def button_overdue_requests_callback(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
+    """
+    Send information about expiring and overdue requests.
+    """
+    service = APIService()
+    telegram_id = update.effective_user.id
+    user_statistics_expired_consultations = await service.get_user_expired_consultations(telegram_id=telegram_id)
+    user_statistics_expiring_consultations = await service.get_user_active_consultations(telegram_id=telegram_id)
+    username_trello = context.user_data["username_trello"]
+    message = (
+        f"❗Статистика заявок с истекающим/истекшим сроком ответа❗ \n\n"
+        f"❌Количество заявок с истекающим сроком - {user_statistics_expiring_consultations.expiring_consultations}\n"
+        f"❌Количество заявок с истекшим сроком - {user_statistics_expired_consultations.expired_consultations}\n"
+        f"Открыть [Trello](https://trello.com/{TRELLO_BORD_ID}/?filter=member:{username_trello})\n\n"
+    )
+    await update.callback_query.message.reply_text(text=message)
+
+
 menu_conversation = ConversationHandler(
     allow_reentry=True,
     persistent=True,
@@ -106,7 +125,9 @@ menu_conversation = ConversationHandler(
             ),
             CallbackQueryHandler(button_reaction_callback, pattern=callback_data.CALLBACK_STATISTIC_WEEK_COMMAND),
             CallbackQueryHandler(button_reaction_callback, pattern=callback_data.CALLBACK_ACTUAL_REQUESTS_COMMAND),
-            CallbackQueryHandler(button_reaction_callback, pattern=callback_data.CALLBACK_OVERDUE_REQUESTS_COMMAND),
+            CallbackQueryHandler(
+                button_overdue_requests_callback, pattern=callback_data.CALLBACK_OVERDUE_REQUESTS_COMMAND
+            ),
             CallbackQueryHandler(configurate_timezone, pattern=callback_data.CALLBACK_CONFIGURATE_TIMEZONE_COMMAND),
             CallbackQueryHandler(repeat_message_after_1_hour_callback, pattern=callback_data.CALLBACK_REPEAT_COMMAND),
             CallbackQueryHandler(done_bill_callback_handler, pattern=callback_data.CALLBACK_DONE_BILL_COMMAND),
