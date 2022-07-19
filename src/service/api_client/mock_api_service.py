@@ -2,7 +2,15 @@ from http import HTTPStatus
 from typing import Optional
 
 from service.api_client.base import AbstractAPIService
-from service.api_client.models import BillStat, MonthStat, UserData, UserMonthStat, UserWeekStat, WeekStat
+from service.api_client.models import (
+    BillStat,
+    MonthStat,
+    UserActiveConsultations,
+    UserData,
+    UserExpiredConsultations,
+    UserMonthStat,
+    WeekStat,
+)
 
 
 class MockAPIService(AbstractAPIService):
@@ -15,23 +23,23 @@ class MockAPIService(AbstractAPIService):
                 telegram_id=971746479,
                 timezone="UTC+3",
                 username_trello="user1@trello",
-                consultations_closed=10,
-                consultations_not_expiring=2,
-                consultations_expiring=1,
-                consultations_expired=1,
-                consultations_in_work=4,
-                consultations_all=14,
+                closed_consultations=10,
+                not_expiring_consultations=2,
+                expiring_consultations=1,
+                expired_consultations=1,
+                active_consultations=4,
+                all_consultations=14,
             ),
             WeekStat(
                 telegram_id=721889325,
                 timezone="UTC+3",
                 username_trello="user2@trello",
-                consultations_closed=5,
-                consultations_not_expiring=3,
-                consultations_expiring=2,
-                consultations_expired=1,
-                consultations_in_work=6,
-                consultations_all=16,
+                closed_consultations=5,
+                not_expiring_consultations=3,
+                expiring_consultations=2,
+                expired_consultations=1,
+                active_consultations=6,
+                all_consultations=11,
             ),
         ]
 
@@ -39,42 +47,48 @@ class MockAPIService(AbstractAPIService):
         return [
             MonthStat(
                 telegram_id=971746479,
-                timezone="UTC+3",
-                consultations_closed=10,
+                timezone="UTC+03:00",
+                closed_consultations=10,
                 rating=3.2,
-                consultation_resolve_time=4.1,
+                average_user_answer_time=4.1,
             ),
             MonthStat(
                 telegram_id=721889325,
-                timezone="UTC+3",
-                consultations_closed=5,
+                timezone="UTC+05:00",
+                closed_consultations=5,
                 rating=2.2,
-                consultation_resolve_time=5.1,
+                average_user_answer_time=5.1,
             ),
         ]
 
-    async def get_user_week_stat(self, telegram_id: int) -> UserWeekStat:
-        return UserWeekStat(
+    async def get_user_active_consultations(self, telegram_id: int) -> UserActiveConsultations:
+        return UserActiveConsultations(
             username_trello="user1@telegram",
-            consultations_closed=10,
-            consultations_not_expiring=2,
-            consultations_expiring=1,
-            consultations_expired=1,
-            consultations_in_work=4,
-            consultations_all=14,
+            active_consultations=6,
+            expiring_consultations=2,
+            expiring_consultation_ids=[256, 512],
+            expiring_consultation_trello_card_ids=[12345, 98765],
+        )
+
+    async def get_user_expired_consultations(self, telegram_id: int) -> UserExpiredConsultations:
+        return UserExpiredConsultations(
+            username_trello="user1@telegram",
+            expired_consultations=2,
+            expired_consultation_ids=[64, 128],
+            expired_consultation_trello_card_ids=[8888, 52167],
         )
 
     async def get_user_month_stat(self, telegram_id: int) -> UserMonthStat:
         return UserMonthStat(
-            consultations_closed=5,
+            closed_consultations=5,
             rating=2.2,
-            consultation_resolve_time=5.1,
+            average_user_answer_time=5.1,
         )
 
     async def authenticate_user(self, telegram_id: int) -> Optional[None]:
         return UserData(
             username="Bob",
-            timezone="UTC+3",
+            timezone="UTC+03:00",
             username_trello="user1@telegram",
         )
 

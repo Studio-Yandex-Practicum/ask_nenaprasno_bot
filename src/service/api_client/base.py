@@ -1,7 +1,15 @@
 from abc import ABC, abstractmethod
 from http import HTTPStatus
 
-from service.api_client.models import BillStat, MonthStat, UserData, UserMonthStat, UserWeekStat, WeekStat
+from service.api_client.models import (
+    BillStat,
+    MonthStat,
+    UserActiveConsultations,
+    UserData,
+    UserExpiredConsultations,
+    UserMonthStat,
+    WeekStat,
+)
 
 
 class AbstractAPIService(ABC):
@@ -18,7 +26,11 @@ class AbstractAPIService(ABC):
         pass
 
     @abstractmethod
-    async def get_user_week_stat(self, telegram_id: int) -> UserWeekStat:
+    async def get_user_active_consultations(self, telegram_id: int) -> UserActiveConsultations:
+        pass
+
+    @abstractmethod
+    async def get_user_expired_consultations(self, telegram_id: int) -> UserExpiredConsultations:
         pass
 
     @abstractmethod
@@ -30,7 +42,5 @@ class AbstractAPIService(ABC):
         pass
 
     @abstractmethod
-    async def set_user_timezone(
-        self, telegram_id: int, user_time_zone: str
-    ) -> HTTPStatus:
+    async def set_user_timezone(self, telegram_id: int, user_time_zone: str) -> HTTPStatus:
         pass
