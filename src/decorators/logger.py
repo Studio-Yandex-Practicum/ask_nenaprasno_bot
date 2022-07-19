@@ -1,5 +1,8 @@
+from core.logger import logger
+
+
 # pylint: disable=W0703
-def async_error_logger(name, logger):
+def async_error_logger(name):
     """Logs errors in wrapped asyc functions."""
 
     def log(func):
@@ -7,7 +10,7 @@ def async_error_logger(name, logger):
             try:
                 return await func(*args, **kwargs)
             except Exception as err:
-                logger.error(f"The error: '{str(err)}' after command: '{name}'")
+                logger.error(("The error: %s after command: %s", str(err), name))
 
         return wrapper
 

@@ -14,3 +14,11 @@ def get_safe_env_variables_decorator(func):
             raise EnvVariablesError(setting, setting_value) from exc
 
     return wrapper
+
+
+def get_env_variables_string_representation(func):
+    @wraps(func)
+    def wrapper(setting):
+        return func(get_string(setting))
+
+    return wrapper

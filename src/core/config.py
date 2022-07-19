@@ -1,23 +1,26 @@
 from datetime import datetime
 
 from core import get_string
-from decorators.converter import get_safe_env_variables_decorator
+from decorators.converter import get_env_variables_string_representation, get_safe_env_variables_decorator
 
 # --------------------------------------------------------------------------------- #
 # Getting variables from .env                                                       #
 # --------------------------------------------------------------------------------- #
 
 
+@get_env_variables_string_representation
 @get_safe_env_variables_decorator
 def get_int(setting: str) -> int:
     return int(setting)
 
 
+@get_env_variables_string_representation
 @get_safe_env_variables_decorator
 def get_datetime(setting: str) -> datetime:
     return datetime.strptime(setting, "%H:%M")
 
 
+@get_env_variables_string_representation
 @get_safe_env_variables_decorator
 def get_datetime_tuple(setting: str) -> tuple:
     return tuple(map(int, list(filter(None, setting.split(",")))))
