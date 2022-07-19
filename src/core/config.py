@@ -11,7 +11,6 @@ from decorators.converter import get_env_value_string_representation_by_name, ge
 @get_env_value_string_representation_by_name
 @get_safe_env_variables_decorator
 def get_int(setting: str) -> int:
-
     return int(setting)
 
 
