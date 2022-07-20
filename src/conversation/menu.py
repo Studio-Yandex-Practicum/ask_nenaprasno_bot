@@ -103,12 +103,24 @@ async def button_overdue_requests_callback(update: Update, context: ContextTypes
     telegram_id = update.effective_user.id
     user_statistics_expired_consultations = await service.get_user_expired_consultations(telegram_id=telegram_id)
     user_statistics_expiring_consultations = await service.get_user_active_consultations(telegram_id=telegram_id)
-    username_trello = context.user_data["username_trello"]
+    list_of_ids = [
+        user_statistics_expired_consultations.expired_consultations_data[i].consultation_id
+        for i in range(len(user_statistics_expired_consultations.expired_consultations_data))
+    ]
+    link_neneprasno = [
+        "http://api.ask.nenaprasno/client/consultation/" + str(list_of_ids[i]) for i in range(len(list_of_ids))
+    ]
+    links_neneprasno_join = ",\n".join(link_neneprasno)
     message = (
-        f"❗Статистика заявок с истекающим/истекшим сроком ответа❗ \n\n"
-        f"❌Количество заявок с истекающим сроком - {user_statistics_expiring_consultations.expiring_consultations}\n"
-        f"❌Количество заявок с истекшим сроком - {user_statistics_expired_consultations.expired_consultations}\n"
-        f"Открыть [Trello](https://trello.com/{TRELLO_BORD_ID}/?filter=member:{username_trello})\n\n"
+        f"Время и стекло 😎\n"
+        f"Ваше количество просроченных заявок - {user_statistics_expired_consultations.expired_consultations}\n"
+        f"Верим и ждем.\n\n"
+        f"Посмотреть заявки на сайте:\n {links_neneprasno_join}\n"
+        f"----\n"
+        f"В работе количество  заявок - {user_statistics_expiring_consultations.active_consultations}\n"
+        f"Истекает срок у количество заявок - {user_statistics_expiring_consultations.expiring_consultations}\n"
+        f"Открыть [Trello](https://trello.com/{TRELLO_BORD_ID}/?filter=member:"
+        f"{user_statistics_expired_consultations.username_trello})\n\n"
     )
     await update.callback_query.message.reply_text(text=message)
 

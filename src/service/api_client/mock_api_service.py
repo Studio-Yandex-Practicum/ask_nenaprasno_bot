@@ -8,6 +8,7 @@ from service.api_client.models import (
     UserActiveConsultations,
     UserData,
     UserExpiredConsultations,
+    UserExpiredConsultationsIds,
     UserMonthStat,
     WeekStat,
 )
@@ -71,11 +72,16 @@ class MockAPIService(AbstractAPIService):
         )
 
     async def get_user_expired_consultations(self, telegram_id: int) -> UserExpiredConsultations:
+
         return UserExpiredConsultations(
-            username_trello="user1@telegram",
-            expired_consultations=2,
-            expired_consultation_ids=[64, 128],
-            expired_consultation_trello_card_ids=[8888, 52167],
+            username_trello="456",
+            expired_consultations=1,
+            expired_consultations_data=[
+                UserExpiredConsultationsIds(
+                    consultation_id="hfkjdshfkjh",
+                    consultation_trello_card_id="sfkghkjsfdgh",
+                ),
+            ],
         )
 
     async def get_user_month_stat(self, telegram_id: int) -> UserMonthStat:
