@@ -13,27 +13,32 @@ env = dotenv_values()
 
 
 def get_string(setting: str) -> str:
+    """Получить строковое значение из .env файла."""
     return env.get(setting)
 
 
 def get_int(setting: str) -> int:
+    """Получить числовое значение из .env файла."""
     return int(env.get(setting))
 
 
 def get_datetime(setting: str) -> datetime:
+    """Получить значение datetime из .env файла."""
     return datetime.strptime(env.get(setting), "%H:%M")
 
 
 def get_datetime_tuple(setting: str) -> tuple:
+    """Получить кортеж datetime из .env файла."""
     return tuple(map(int, list(filter(None, env.get(setting).split(",")))))
 
 
 def get_bool(setting: str) -> bool:
+    """Получить булевое значение из .env файла."""
     return env.get(setting) == "True"
 
 
-LOG_NAME = get_string("LOG_NAME")
-LOG_PATH = BASE_DIR / LOG_NAME
+LOG_NAME = get_string("LOG_NAME")  # название логера для бота
+LOG_PATH = BASE_DIR / LOG_NAME  # путь до логера
 
 HOST = get_string("HOST")  # host для доступа к uvicorn серверу, по умолчанию localhost или 127.0.0.1
 WEBHOOK_URL = get_string("WEBHOOK_URL")  # адрес сервера, где будет запущен бот
@@ -64,9 +69,8 @@ TRELLO_ID_MODEL = get_string("TRELLO_ID_MODEL")  # id таблицы, к кот�
 TRELLO_TOKEN = get_string("TRELLO_TOKEN")  # токен для доступа к TRELLO
 TRELLO_BORD_ID = get_string("TRELLO_BORD_ID")  # доска в TRELLO
 
+URL_SITE = "https://ask.nenaprasno.ru/"  # сайт проекта не напрасно
+URL_SITE_DONATION = "https://ask.nenaprasno.ru/#donation"  # ссылка для отправки пожертвований
 
-URL_SITE = "https://ask.nenaprasno.ru/"
-URL_SITE_DONATION = "https://ask.nenaprasno.ru/#donation"
-
-FORM_URL_FUTURE_EXPERT = "https://forms.gle/DGMUm35bxZytE3QLA"
-URL_SERVICE_RULES = "https://vse.nenaprasno.ru/rules"  # адрес страницыы с правилами
+FORM_URL_FUTURE_EXPERT = "https://forms.gle/DGMUm35bxZytE3QLA"  # ссылка на анкету для регистрации новых экспертов
+URL_SERVICE_RULES = "https://vse.nenaprasno.ru/rules"  # адрес страницы с правилами
