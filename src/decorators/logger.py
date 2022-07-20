@@ -1,4 +1,4 @@
-# pylint: disable=W0703,E0401
+# pylint: disable=W0703
 from core.logger import logger
 
 
