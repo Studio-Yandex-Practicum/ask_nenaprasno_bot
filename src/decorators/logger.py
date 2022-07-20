@@ -10,7 +10,7 @@ def async_error_logger(name):
             try:
                 return await func(*args, **kwargs)
             except Exception as err:
-                logger.error("The error: %s after command: %s", str(err), name)
+                logger.exception("The error after command: %s", name)
 
         return wrapper
 
