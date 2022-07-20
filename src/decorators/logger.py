@@ -1,4 +1,4 @@
-# pylint: disable=W0703
+# pylint: disable=W0703,E0401
 from core.logger import logger
 
 
@@ -10,8 +10,7 @@ def async_error_logger(name):
             try:
                 return await func(*args, **kwargs)
             except Exception as err:
-                error_message = f"The error: '{str(err)}' after command: '{name}'"
-                logger.error(error_message)
+                logger.error("The error: %s after command: %s", str(err), name)
 
         return wrapper
 
