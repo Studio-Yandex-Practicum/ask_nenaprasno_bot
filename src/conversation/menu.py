@@ -102,7 +102,7 @@ async def button_actual_requests_callback(update: Update, context: ContextTypes.
     service = APIService()
     telegram_id = update.effective_user.id
     user_active_consultations = await service.get_user_active_consultations(telegram_id=telegram_id)
-    username_trello = context.user_data["username_trello"]
+    username_trello = user_active_consultations.username_trello
     consultations_list = user_active_consultations.expiring_consultations_data
     list_for_message = ""
     for consultation in consultations_list:
