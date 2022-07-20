@@ -4,7 +4,7 @@ from telegram.ext import CallbackQueryHandler, CommandHandler, ContextTypes, Con
 from constants import callback_data, states
 from conversation.timezone import get_timezone as configurate_timezone
 from conversation.timezone import states_timezone_conversation_dict
-from core.config import TRELLO_BORD_ID, URL_SERVICE_RULES
+from core.config import TRELLO_BORD_ID, URL_SERVICE_RULES, URL_SITE
 from core.logger import logger
 from decorators.logger import async_error_logger
 from service.api_client import APIService
@@ -94,6 +94,28 @@ async def button_statistic_month_callback(update: Update, context: ContextTypes.
     await update.callback_query.message.reply_text(text=message)
 
 
+@async_error_logger(name="conversation.requests.button_actual_requests_callback", logger=logger)
+async def button_actual_requests_callback(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
+    """
+    Sends a list of current requests to the user.
+    """
+    service = APIService()
+    telegram_id = update.effective_user.id
+    user_active_consultations = await service.get_user_active_consultations(telegram_id=telegram_id)
+    username_trello = context.user_data["username_trello"]
+    consultations_list = user_active_consultations.expiring_consultations_data
+    list_for_message = ""
+    for consultation in consultations_list:
+        list_for_message += f"{URL_SITE}client/consultation/{consultation['consultation_id']}\n"
+    message = (
+        f"У вас в работе {user_active_consultations.active_consultations} заявок.\n"
+        f"У {user_active_consultations.expiring_consultations} истекает срок:\n"
+        f"{list_for_message}"
+        f"\n[Открыть Trello](https://trello.com/{TRELLO_BORD_ID}/?filter=member:{username_trello})\n\n"
+    )
+    await update.callback_query.message.reply_text(text=message, parse_mode="Markdown")
+
+
 menu_conversation = ConversationHandler(
     allow_reentry=True,
     persistent=True,
@@ -105,7 +127,9 @@ menu_conversation = ConversationHandler(
                 button_statistic_month_callback, pattern=callback_data.CALLBACK_STATISTIC_MONTH_COMMAND
             ),
             CallbackQueryHandler(button_reaction_callback, pattern=callback_data.CALLBACK_STATISTIC_WEEK_COMMAND),
-            CallbackQueryHandler(button_reaction_callback, pattern=callback_data.CALLBACK_ACTUAL_REQUESTS_COMMAND),
+            CallbackQueryHandler(
+                button_actual_requests_callback, pattern=callback_data.CALLBACK_ACTUAL_REQUESTS_COMMAND
+            ),
             CallbackQueryHandler(button_reaction_callback, pattern=callback_data.CALLBACK_OVERDUE_REQUESTS_COMMAND),
             CallbackQueryHandler(configurate_timezone, pattern=callback_data.CALLBACK_CONFIGURATE_TIMEZONE_COMMAND),
             CallbackQueryHandler(repeat_message_after_1_hour_callback, pattern=callback_data.CALLBACK_REPEAT_COMMAND),
