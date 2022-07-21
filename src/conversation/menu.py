@@ -4,7 +4,7 @@ from telegram.ext import CallbackQueryHandler, CommandHandler, ContextTypes, Con
 from constants import callback_data, states
 from conversation.timezone import get_timezone as configurate_timezone
 from conversation.timezone import states_timezone_conversation_dict
-from core.config import TRELLO_BORD_ID, URL_SERVICE_RULES
+from core.config import TRELLO_BORD_ID, URL_SERVICE_RULES, URL_SITE
 from core.logger import logger
 from decorators.logger import async_error_logger
 from service.api_client import APIService
@@ -103,13 +103,8 @@ async def button_overdue_requests_callback(update: Update, context: ContextTypes
     telegram_id = update.effective_user.id
     user_statistics_expired_consultations = await service.get_user_expired_consultations(telegram_id=telegram_id)
     user_statistics_expiring_consultations = await service.get_user_active_consultations(telegram_id=telegram_id)
-    list_of_ids = [
-        user_statistics_expired_consultations.expired_consultations_data[i].consultation_id
-        for i in range(len(user_statistics_expired_consultations.expired_consultations_data))
-    ]
-    link_neneprasno = [
-        "http://api.ask.nenaprasno/client/consultation/" + str(list_of_ids[i]) for i in range(len(list_of_ids))
-    ]
+    list_of_ids = [i.consultation_id for i in user_statistics_expired_consultations.expired_consultations_data]
+    link_neneprasno = [f"{URL_SITE}client/consultation/{i}" for i in list_of_ids]
     links_neneprasno_join = ",\n".join(link_neneprasno)
     message = (
         f"Время и стекло 😎\n"
