@@ -37,40 +37,64 @@ def get_bool(setting: str) -> bool:
     return env.get(setting) == "True"
 
 
-LOG_NAME = get_string("LOG_NAME")  # название логера для бота
-LOG_PATH = BASE_DIR / LOG_NAME  # путь до логера
+# название логера для бота (по умолчанию None)
+LOG_NAME = get_string("LOG_NAME")
+# путь до логера
+LOG_PATH = BASE_DIR / LOG_NAME
 
-HOST = get_string("HOST")  # host для доступа к uvicorn серверу, по умолчанию localhost или 127.0.0.1
-WEBHOOK_URL = get_string("WEBHOOK_URL")  # адрес сервера, где будет запущен бот
+# host для доступа к uvicorn серверу, по умолчанию localhost или 127.0.0.1
+HOST = get_string("HOST")
+# адрес сервера, где будет запущен бот
+WEBHOOK_URL = get_string("WEBHOOK_URL")
 
-PORT = get_int("BOT_PORT")  # port для доступа к uvicorn серверу, по умолчанию 8000
-TOKEN = get_string("TELEGRAM_TOKEN")  # Токен телеграм бота
+# port для доступа к uvicorn серверу, по умолчанию 8000
+PORT = get_int("BOT_PORT")
+# Токен телеграм бота
+TOKEN = get_string("TELEGRAM_TOKEN")
 
-WEEKLY_STAT_TIME = get_datetime("WEEKLY_STAT_TIME")  # время еженедельной статистики
+# время еженедельной статистики
+WEEKLY_STAT_TIME = get_datetime("WEEKLY_STAT_TIME")
+# дни недели для еженедельной статистики 0-6, где 0 - воскресенье
 WEEKLY_STAT_WEEK_DAYS = get_datetime_tuple(
     "WEEKLY_STAT_WEEK_DAYS"
-)  # дни недели для еженедельной статистики 0-6, где 0 - воскресенье
+)
 
-MONTHLY_STAT_TIME = get_datetime("MONTHLY_STAT_TIME")  # время ежемесячной статистики
-MONTHLY_STAT_DAY = get_int("MONTHLY_STAT_DAY")  # день для даты ежемесячной статистики
+# время ежемесячной статистики
+MONTHLY_STAT_TIME = get_datetime("MONTHLY_STAT_TIME")
+# день для даты ежемесячной статистики
+MONTHLY_STAT_DAY = get_int("MONTHLY_STAT_DAY")
 
+# время для ежемесячного напоминания о чеке
 MONTHLY_RECEIPT_REMINDER_TIME = get_datetime(
     "MONTHLY_RECEIPT_REMINDER_TIME"
-)  # время для ежемесячного напоминания о чеке
-MONTHLY_RECEIPT_REMINDER_DAY = get_int("MONTHLY_RECEIPT_REMINDER_DAY")  # день для даты ежемесячного напоминания о чеке
+)
+# день для даты ежемесячного напоминания о чеке
+MONTHLY_RECEIPT_REMINDER_DAY = get_int("MONTHLY_RECEIPT_REMINDER_DAY")
 
-BOT_PERSISTENCE_FILE = get_string("BOT_PERSISTENCE_FILE")  # имя файла persistence бота
-IS_FAKE_API = get_bool("IS_FAKE_API")  # флаг, определяющий какой АПИ клиент используется - боевой или "заглушка"
-SITE_API_URL = get_string("SITE_API_URL")  # адрес сервера, к которому будет отправлять запросы АПИ клиент
+# имя файла persistence бота
+BOT_PERSISTENCE_FILE = get_string("BOT_PERSISTENCE_FILE")
+# флаг, определяющий какой АПИ клиент используется - боевой или "заглушка"
+IS_FAKE_API = get_bool("IS_FAKE_API")
+# адрес сервера, к которому будет отправлять запросы АПИ клиент
+SITE_API_URL = get_string("SITE_API_URL")
+# токен для сайта
 SITE_API_BOT_TOKEN = get_string("SITE_API_BOT_TOKEN")
 
-TRELLO_API_KEY = get_string("TRELLO_API_KEY")  # API ключ разработчика
-TRELLO_ID_MODEL = get_string("TRELLO_ID_MODEL")  # id таблицы, к которой будет привязан webhook
-TRELLO_TOKEN = get_string("TRELLO_TOKEN")  # токен для доступа к TRELLO
-TRELLO_BORD_ID = get_string("TRELLO_BORD_ID")  # доска в TRELLO
+# API ключ разработчика
+TRELLO_API_KEY = get_string("TRELLO_API_KEY")
+# id таблицы, к которой будет привязан webhook
+TRELLO_ID_MODEL = get_string("TRELLO_ID_MODEL")
+# токен для доступа к TRELLO
+TRELLO_TOKEN = get_string("TRELLO_TOKEN")
+# доска в TRELLO
+TRELLO_BORD_ID = get_string("TRELLO_BORD_ID")
 
-URL_SITE = "https://ask.nenaprasno.ru/"  # сайт проекта не напрасно
-URL_SITE_DONATION = "https://ask.nenaprasno.ru/#donation"  # ссылка для отправки пожертвований
+# сайт проекта не напрасно
+URL_SITE = "https://ask.nenaprasno.ru/"
+# ссылка для отправки пожертвований
+URL_SITE_DONATION = "https://ask.nenaprasno.ru/#donation"
 
-FORM_URL_FUTURE_EXPERT = "https://forms.gle/DGMUm35bxZytE3QLA"  # ссылка на анкету для регистрации новых экспертов
-URL_SERVICE_RULES = "https://vse.nenaprasno.ru/rules"  # адрес страницы с правилами
+# ссылка на анкету для регистрации новых экспертов
+FORM_URL_FUTURE_EXPERT = "https://forms.gle/DGMUm35bxZytE3QLA"
+# адрес страницы с правилами
+URL_SERVICE_RULES = "https://vse.nenaprasno.ru/rules"
