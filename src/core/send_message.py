@@ -14,7 +14,7 @@ async def send_message(
     context: CallbackContext,
     chat_id: int,
     text: str,
-    parse_mode: str = ParseMode.HTML,
+    parse_mode: str = ParseMode.MARKDOWN,
     reply_markup: Optional[ReplyKeyboardMarkup] = None,
 ) -> bool:
     """
@@ -44,7 +44,7 @@ async def edit_message(
     chat_id: int,
     message_id: int,
     new_text: str,
-    **settings,
+    reply_markup: Optional[ReplyKeyboardMarkup] = None,
 ) -> bool:
     """
     Edit text message.
@@ -52,19 +52,15 @@ async def edit_message(
     :param chat_id: int
     :param message_id: int
     :param new_text: str
-    :param **settings - expected data
-        :param parse_mode: HTML (Optional) | Markdown
-        :param reply_markup: ReplyKeyboardMarkup | None
+    :param reply_markup: ReplyKeyboardMarkup | None
     """
     try:
-        if settings.get("parse_mode") != ParseMode.MARKDOWN:
-            settings["parse_mode"] = ParseMode.HTML
         await context.bot.edit_message_text(
             chat_id=chat_id,
             message_id=message_id,
             text=new_text,
-            parse_mode=settings.get("parse_mode"),
-            reply_markup=settings.get("reply_markup"),
+            parse_mode=ParseMode.MARKDOWN,
+            reply_markup=reply_markup,
         )
         return True
     except TelegramError as error:
@@ -77,27 +73,23 @@ async def reply_message(
     chat_id: int,
     reply_to_message_id: int,
     text: str,
-    **settings,
+    reply_markup: Optional[ReplyKeyboardMarkup] = None,
 ) -> bool:
     """
     Reply on the message.
     :param context: CallbackContext
     :param chat_id: int
-    :param text: str
     :param reply_to_message_id: int
-    :param **settings - expected data
-        :param parse_mode: HTML (Optional) | Markdown
-        :param reply_markup: ReplyKeyboardMarkup | None
+    :param text: str
+    :param reply_markup: ReplyKeyboardMarkup | None
     """
     try:
-        if settings.get("parse_mode") != ParseMode.MARKDOWN:
-            settings["parse_mode"] = ParseMode.HTML
         await context.bot.send_message(
             chat_id=chat_id,
             text=text,
             reply_to_message_id=reply_to_message_id,
-            parse_mode=settings.get("parse_mode"),
-            reply_markup=settings.get("reply_markup"),
+            parse_mode=ParseMode.MARKDOWN,
+            reply_markup=reply_markup,
         )
         return True
     except TelegramError as error:
