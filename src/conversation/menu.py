@@ -89,9 +89,9 @@ async def button_statistic_month_callback(update: Update, context: ContextTypes.
         f"✅Количество закрытых заявок - {user_statistics.closed_consultations}\n"
         f"✅Рейтинг - {user_statistics.rating:.1f}\n"
         f"✅Среднее время ответа - {user_statistics.average_user_answer_time:.1f}\n\n"
-        f"Открыть [Trello](https://trello.com/{TRELLO_BORD_ID}/?filter=member:{username_trello})\n\n"
+        f"[Открыть Trello](https://trello.com/{TRELLO_BORD_ID}/?filter=member:{username_trello})\n\n"
     )
-    await update.callback_query.message.reply_text(text=message)
+    await update.callback_query.message.reply_text(text=message, parse_mode="Markdown")
 
 
 @async_error_logger(name="conversation.requests.button_actual_requests_callback", logger=logger)
@@ -106,7 +106,7 @@ async def button_actual_requests_callback(update: Update, context: ContextTypes.
     consultations_list = user_active_consultations.expiring_consultations_data
     list_for_message = ""
     for consultation in consultations_list:
-        list_for_message += f"{URL_SITE}client/consultation/{consultation['consultation_id']}\n"
+        list_for_message += f"{URL_SITE}doctor/consultation/{consultation['consultation_id']}\n"
     message = (
         f"У вас в работе {user_active_consultations.active_consultations} заявок.\n"
         f"У {user_active_consultations.expiring_consultations} истекает срок:\n"
