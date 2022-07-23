@@ -5,13 +5,11 @@ from constants import callback_data, states
 from conversation.timezone import get_timezone as configurate_timezone
 from conversation.timezone import states_timezone_conversation_dict
 from core.config import TRELLO_BORD_ID, URL_SERVICE_RULES, URL_SITE
-from core.logger import logger
 from decorators.logger import async_error_logger
 from service.api_client import APIService
-from service.repeat_message import repeat_message_after_1_hour_callback
 
 
-@async_error_logger(name="conversation.menu_commands.menu", logger=logger)
+@async_error_logger(name="conversation.menu_commands.menu")
 async def menu(update: Update, context: ContextTypes.DEFAULT_TYPE):
     """
     Displays the menu.
@@ -45,7 +43,7 @@ async def menu(update: Update, context: ContextTypes.DEFAULT_TYPE):
     return states.MENU_STATE
 
 
-@async_error_logger(name="conversation.requests.actual_requests_callback", logger=logger)
+@async_error_logger(name="conversation.requests.actual_requests_callback")
 async def button_reaction_callback(update: Update, context: ContextTypes.DEFAULT_TYPE):
     """
     Sends a list of current requests/requests to the user.
@@ -54,28 +52,7 @@ async def button_reaction_callback(update: Update, context: ContextTypes.DEFAULT
     return states.MENU_STATE
 
 
-async def done_bill_callback_handler(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
-    """
-    Delete job from JobQueue
-    """
-    query = update.callback_query
-    user_id = query.from_user.id
-    current_jobs = context.job_queue.get_jobs_by_name(f"send_{user_id}_bill_until_complete")
-    for job in current_jobs:
-        job.schedule_removal()
-    await query.edit_message_text(text="Не будем напоминать до следующего месяца")
-    await query.answer()  # close progress bar in chat
-
-
-async def skip_bill_callback_handler(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
-    """Delete button under message"""
-    query = update.callback_query
-    data = query.message
-    await query.edit_message_text(text=data.text_markdown_v2_urled)
-    await query.answer()  # close progress bar in chat
-
-
-@async_error_logger(name="conversation.requests.button_statistic_month_callback", logger=logger)
+@async_error_logger(name="conversation.requests.button_statistic_month_callback")
 async def button_statistic_month_callback(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     """
     Send monthly statistics at the user's request.
@@ -94,7 +71,7 @@ async def button_statistic_month_callback(update: Update, context: ContextTypes.
     await update.callback_query.message.reply_text(text=message, parse_mode="Markdown")
 
 
-@async_error_logger(name="conversation.requests.button_actual_requests_callback", logger=logger)
+@async_error_logger(name="conversation.requests.button_actual_requests_callback")
 async def button_actual_requests_callback(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     """
     Sends a list of active consultations to the user.
@@ -132,9 +109,6 @@ menu_conversation = ConversationHandler(
             ),
             CallbackQueryHandler(button_reaction_callback, pattern=callback_data.CALLBACK_OVERDUE_REQUESTS_COMMAND),
             CallbackQueryHandler(configurate_timezone, pattern=callback_data.CALLBACK_CONFIGURATE_TIMEZONE_COMMAND),
-            CallbackQueryHandler(repeat_message_after_1_hour_callback, pattern=callback_data.CALLBACK_REPEAT_COMMAND),
-            CallbackQueryHandler(done_bill_callback_handler, pattern=callback_data.CALLBACK_DONE_BILL_COMMAND),
-            CallbackQueryHandler(skip_bill_callback_handler, pattern=callback_data.CALLBACK_SKIP_BILL_COMMAND),
         ],
         **states_timezone_conversation_dict,
     },
