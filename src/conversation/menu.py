@@ -97,7 +97,7 @@ async def button_statistic_month_callback(update: Update, context: ContextTypes.
 @async_error_logger(name="conversation.requests.button_actual_requests_callback", logger=logger)
 async def button_actual_requests_callback(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     """
-    Sends a list of current requests to the user.
+    Sends a list of active consultations to the user.
     """
     service = APIService()
     telegram_id = update.effective_user.id

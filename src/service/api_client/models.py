@@ -39,7 +39,7 @@ class UserActiveConsultations:
     username_trello: str
     active_consultations: int
     expiring_consultations: int
-    expiring_consultations_data: list[dict[str, int]]
+    expiring_consultations_data: list[dict[str, str]]
 
 
 @dataclass

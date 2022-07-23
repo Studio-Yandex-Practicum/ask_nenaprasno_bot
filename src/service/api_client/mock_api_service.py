@@ -67,8 +67,8 @@ class MockAPIService(AbstractAPIService):
             active_consultations=6,
             expiring_consultations=2,
             expiring_consultations_data=[
-                {"consultation_id": 256, "consultation_trello_card_id": 12345},
-                {"consultation_id": 512, "consultation_trello_card_id": 98765},
+                {"consultation_id": "str", "consultation_trello_card_id": "str"},
+                {"consultation_id": "str", "consultation_trello_card_id": "str"},
             ],
         )
 
