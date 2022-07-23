@@ -5,7 +5,6 @@ from constants import callback_data, states
 from conversation.timezone import get_timezone as configurate_timezone
 from conversation.timezone import states_timezone_conversation_dict
 from core.config import TRELLO_BORD_ID, URL_SERVICE_RULES
-from core.logger import logger
 from decorators.logger import async_error_logger
 from service.api_client import APIService
 
