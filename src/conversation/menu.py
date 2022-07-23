@@ -101,21 +101,23 @@ async def button_overdue_requests_callback(update: Update, context: ContextTypes
     """
     service = APIService()
     telegram_id = update.effective_user.id
-    user_statistics_expired_consultations = await service.get_user_expired_consultations(telegram_id=telegram_id)
-    user_statistics_expiring_consultations = await service.get_user_active_consultations(telegram_id=telegram_id)
-    list_of_ids = [i.consultation_id for i in user_statistics_expired_consultations.expired_consultations_data]
-    link_neneprasno = [f"{URL_SITE}client/consultation/{i}" for i in list_of_ids]
-    links_neneprasno_join = ",\n".join(link_neneprasno)
+    expired_consultations = await service.get_user_expired_consultations(telegram_id=telegram_id)
+    expiring_consultations = await service.get_user_active_consultations(telegram_id=telegram_id)
+    username_trello = expired_consultations.username_trello
+    expiring_consultations_list = expired_consultations.expired_consultations_data
+    link_neneprasno = ""
+    for consultation in expiring_consultations_list:
+        link_neneprasno += f"{URL_SITE}doctor/consultation/{consultation['consultation_id']}\n"
     message = (
-        f"Время и стекло 😎\n"
-        f"Ваше количество просроченных заявок - {user_statistics_expired_consultations.expired_consultations}\n"
+        f"Время истекло 😎\n"
+        f"Ваше количество просроченных заявок - {expired_consultations.expired_consultations}\n"
         f"Верим и ждем.\n\n"
-        f"Посмотреть заявки на сайте:\n {links_neneprasno_join}\n"
+        f"Посмотреть заявки на сайте:\n {link_neneprasno}\n"
         f"----\n"
-        f"В работе количество  заявок - {user_statistics_expiring_consultations.active_consultations}\n"
-        f"Истекает срок у количество заявок - {user_statistics_expiring_consultations.expiring_consultations}\n"
+        f"В работе количество  заявок - {expiring_consultations.active_consultations}\n"
+        f"Истекает срок у количество заявок - {expiring_consultations.expiring_consultations}\n"
         f"Открыть [Trello](https://trello.com/{TRELLO_BORD_ID}/?filter=member:"
-        f"{user_statistics_expired_consultations.username_trello})\n\n"
+        f"{username_trello}/?filter=overdue:true)\n\n"
     )
     await update.callback_query.message.reply_text(text=message)
 

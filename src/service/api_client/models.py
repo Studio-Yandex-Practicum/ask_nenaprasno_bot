@@ -44,16 +44,10 @@ class UserActiveConsultations:
 
 
 @dataclass
-class UserExpiredConsultationsIds:
-    consultation_id: str
-    consultation_trello_card_id: str
-
-
-@dataclass
 class UserExpiredConsultations:
     username_trello: str
     expired_consultations: int
-    expired_consultations_data: list[UserExpiredConsultationsIds]
+    expired_consultations_data: list[dict[str, str]]
 
 
 @dataclass

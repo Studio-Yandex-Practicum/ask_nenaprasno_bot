@@ -8,7 +8,6 @@ from service.api_client.models import (
     UserActiveConsultations,
     UserData,
     UserExpiredConsultations,
-    UserExpiredConsultationsIds,
     UserMonthStat,
     WeekStat,
 )
@@ -77,10 +76,7 @@ class MockAPIService(AbstractAPIService):
             username_trello="456",
             expired_consultations=1,
             expired_consultations_data=[
-                UserExpiredConsultationsIds(
-                    consultation_id="hfkjdshfkjh",
-                    consultation_trello_card_id="sfkghkjsfdgh",
-                ),
+                {"consultation_id": "hfkjdshfkjh", "consultation_trello_card_id": "sfkghkjsfdgh"},
             ],
         )
 
