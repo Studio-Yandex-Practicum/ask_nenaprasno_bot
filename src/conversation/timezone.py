@@ -2,14 +2,13 @@ from telegram import KeyboardButton, ReplyKeyboardMarkup, ReplyKeyboardRemove, U
 from telegram.ext import CallbackContext, ContextTypes, MessageHandler, filters
 
 from constants import states
-from core.logger import logger
 from decorators.logger import async_error_logger
 from get_timezone import get_timezone_from_location, get_timezone_from_text_message
 
 TIME_ZONE = "UTC"
 
 
-@async_error_logger(name="conversation.timezone.get_timezone", logger=logger)
+@async_error_logger(name="conversation.timezone.get_timezone")
 async def get_timezone(update: Update, context: CallbackContext):
     """
     Requests a timezone from the user.
@@ -31,7 +30,7 @@ async def get_timezone(update: Update, context: CallbackContext):
     return states.TIMEZONE_STATE
 
 
-@async_error_logger(name="conversation.timezone.check_timezone", logger=logger)
+@async_error_logger(name="conversation.timezone.check_timezone")
 async def check_timezone(update: Update, context: ContextTypes.DEFAULT_TYPE, timezone):
     """
     Sends a message after a successful timezone installation.
@@ -53,7 +52,7 @@ async def check_timezone(update: Update, context: ContextTypes.DEFAULT_TYPE, tim
     return states.MENU_STATE
 
 
-@async_error_logger(name="conversation.timezone.get_timezone_from_location_callback", logger=logger)
+@async_error_logger(name="conversation.timezone.get_timezone_from_location_callback")
 async def get_timezone_from_location_callback(update: Update, context: CallbackContext):
     """
     Sets timezone by geolocation.
@@ -62,7 +61,7 @@ async def get_timezone_from_location_callback(update: Update, context: CallbackC
     return await check_timezone(update, context, timezone)
 
 
-@async_error_logger(name="conversation.timezone.get_timezone_from_text_message_callback", logger=logger)
+@async_error_logger(name="conversation.timezone.get_timezone_from_text_message_callback")
 async def get_timezone_from_text_message_callback(update: Update, context: CallbackContext):
     """
     Sets timezone based on a text message from the user.

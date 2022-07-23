@@ -5,13 +5,12 @@ from constants import callback_data, states
 from conversation.timezone import get_timezone as configurate_timezone
 from conversation.timezone import states_timezone_conversation_dict
 from core.config import TRELLO_BORD_ID, URL_SERVICE_RULES
-from core.logger import logger
 from decorators.logger import async_error_logger
 from service.api_client import APIService
 from service.repeat_message import repeat_message_after_1_hour_callback
 
 
-@async_error_logger(name="conversation.menu_commands.menu", logger=logger)
+@async_error_logger(name="conversation.menu_commands.menu")
 async def menu(update: Update, context: ContextTypes.DEFAULT_TYPE):
     """
     Displays the menu.
@@ -45,7 +44,7 @@ async def menu(update: Update, context: ContextTypes.DEFAULT_TYPE):
     return states.MENU_STATE
 
 
-@async_error_logger(name="conversation.requests.actual_requests_callback", logger=logger)
+@async_error_logger(name="conversation.requests.actual_requests_callback")
 async def button_reaction_callback(update: Update, context: ContextTypes.DEFAULT_TYPE):
     """
     Sends a list of current requests/requests to the user.
@@ -75,7 +74,7 @@ async def skip_bill_callback_handler(update: Update, context: ContextTypes.DEFAU
     await query.answer()  # close progress bar in chat
 
 
-@async_error_logger(name="conversation.requests.button_statistic_month_callback", logger=logger)
+@async_error_logger(name="conversation.requests.button_statistic_month_callback")
 async def button_statistic_month_callback(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     """
     Send monthly statistics at the user's request.
