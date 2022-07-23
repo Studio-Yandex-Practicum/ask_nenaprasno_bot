@@ -4,7 +4,7 @@ from telegram.ext import CallbackQueryHandler, CommandHandler, ContextTypes, Con
 from constants import callback_data, states
 from conversation.timezone import get_timezone as configurate_timezone
 from conversation.timezone import states_timezone_conversation_dict
-from core.config import TRELLO_BORD_ID, URL_SERVICE_RULES
+from core.config import TRELLO_BORD_ID, URL_SERVICE_RULES, URL_SITE
 from decorators.logger import async_error_logger
 from service.api_client import APIService
 
@@ -66,9 +66,31 @@ async def button_statistic_month_callback(update: Update, context: ContextTypes.
         f"✅Количество закрытых заявок - {user_statistics.closed_consultations}\n"
         f"✅Рейтинг - {user_statistics.rating:.1f}\n"
         f"✅Среднее время ответа - {user_statistics.average_user_answer_time:.1f}\n\n"
-        f"Открыть [Trello](https://trello.com/{TRELLO_BORD_ID}/?filter=member:{username_trello})\n\n"
+        f"[Открыть Trello](https://trello.com/{TRELLO_BORD_ID}/?filter=member:{username_trello})\n\n"
     )
-    await update.callback_query.message.reply_text(text=message)
+    await update.callback_query.message.reply_text(text=message, parse_mode="Markdown")
+
+
+@async_error_logger(name="conversation.requests.button_actual_requests_callback")
+async def button_actual_requests_callback(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
+    """
+    Sends a list of active consultations to the user.
+    """
+    service = APIService()
+    telegram_id = update.effective_user.id
+    user_active_consultations = await service.get_user_active_consultations(telegram_id=telegram_id)
+    username_trello = user_active_consultations.username_trello
+    consultations_list = user_active_consultations.expiring_consultations_data
+    list_for_message = ""
+    for consultation in consultations_list:
+        list_for_message += f"{URL_SITE}doctor/consultation/{consultation['consultation_id']}\n"
+    message = (
+        f"У вас в работе {user_active_consultations.active_consultations} заявок.\n"
+        f"У {user_active_consultations.expiring_consultations} истекает срок:\n"
+        f"{list_for_message}"
+        f"\n[Открыть Trello](https://trello.com/{TRELLO_BORD_ID}/?filter=member:{username_trello})\n\n"
+    )
+    await update.callback_query.message.reply_text(text=message, parse_mode="Markdown")
 
 
 menu_conversation = ConversationHandler(
@@ -82,7 +104,9 @@ menu_conversation = ConversationHandler(
                 button_statistic_month_callback, pattern=callback_data.CALLBACK_STATISTIC_MONTH_COMMAND
             ),
             CallbackQueryHandler(button_reaction_callback, pattern=callback_data.CALLBACK_STATISTIC_WEEK_COMMAND),
-            CallbackQueryHandler(button_reaction_callback, pattern=callback_data.CALLBACK_ACTUAL_REQUESTS_COMMAND),
+            CallbackQueryHandler(
+                button_actual_requests_callback, pattern=callback_data.CALLBACK_ACTUAL_REQUESTS_COMMAND
+            ),
             CallbackQueryHandler(button_reaction_callback, pattern=callback_data.CALLBACK_OVERDUE_REQUESTS_COMMAND),
             CallbackQueryHandler(configurate_timezone, pattern=callback_data.CALLBACK_CONFIGURATE_TIMEZONE_COMMAND),
         ],

@@ -39,8 +39,7 @@ class UserActiveConsultations:
     username_trello: str
     active_consultations: int
     expiring_consultations: int
-    expiring_consultation_ids: list[int]
-    expiring_consultation_trello_card_ids: list[int]
+    expiring_consultations_data: list[dict[str, str]]
 
 
 @dataclass
