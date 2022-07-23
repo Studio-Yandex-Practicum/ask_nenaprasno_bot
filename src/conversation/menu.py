@@ -10,7 +10,7 @@ from decorators.logger import async_error_logger
 from service.api_client import APIService
 
 
-@async_error_logger(name="conversation.menu_commands.menu", logger=logger)
+@async_error_logger(name="conversation.menu_commands.menu")
 async def menu(update: Update, context: ContextTypes.DEFAULT_TYPE):
     """
     Displays the menu.
@@ -44,7 +44,7 @@ async def menu(update: Update, context: ContextTypes.DEFAULT_TYPE):
     return states.MENU_STATE
 
 
-@async_error_logger(name="conversation.requests.actual_requests_callback", logger=logger)
+@async_error_logger(name="conversation.requests.actual_requests_callback")
 async def button_reaction_callback(update: Update, context: ContextTypes.DEFAULT_TYPE):
     """
     Sends a list of current requests/requests to the user.
@@ -53,7 +53,7 @@ async def button_reaction_callback(update: Update, context: ContextTypes.DEFAULT
     return states.MENU_STATE
 
 
-@async_error_logger(name="conversation.requests.button_statistic_month_callback", logger=logger)
+@async_error_logger(name="conversation.requests.button_statistic_month_callback")
 async def button_statistic_month_callback(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     """
     Send monthly statistics at the user's request.
