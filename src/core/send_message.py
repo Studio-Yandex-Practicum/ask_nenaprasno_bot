@@ -2,7 +2,7 @@ import logging
 from string import Template
 from typing import List, Optional, Union
 
-from telegram import ReplyKeyboardMarkup
+from telegram import ReplyKeyboardMarkup, Update
 from telegram.constants import ParseMode
 from telegram.error import TelegramError
 from telegram.ext import CallbackContext
@@ -14,14 +14,12 @@ async def send_message(
     context: CallbackContext,
     chat_id: int,
     text: str,
-    parse_mode: str = ParseMode.MARKDOWN,
     reply_markup: Optional[ReplyKeyboardMarkup] = None,
 ) -> bool:
     """
     Send simple text message.
     :param context: CallbackContext
     :param chat_id: int
-    :param parse_mode: Any
     :param text: str
     :param reply_markup: ReplyKeyboardMarkup | None
     """
@@ -29,42 +27,35 @@ async def send_message(
         await context.bot.send_message(
             chat_id=chat_id,
             text=text,
-            parse_mode=parse_mode,
+            parse_mode=ParseMode.MARKDOWN,
             reply_markup=reply_markup,
         )
         return True
-
     except TelegramError as error:
-        logging.exception(("The error sending the message to the chat: %s", chat_id), error)
+        logging.exception(("The error sending the message to the chat: %d", chat_id), error)
         return False
 
 
 async def edit_message(
-    context: CallbackContext,
-    chat_id: int,
-    message_id: int,
+    update: Update,
     new_text: str,
     reply_markup: Optional[ReplyKeyboardMarkup] = None,
 ) -> bool:
     """
     Edit text message.
-    :param context: CallbackContext
-    :param chat_id: int
-    :param message_id: int
+    :param update: Update
     :param new_text: str
     :param reply_markup: ReplyKeyboardMarkup | None
     """
     try:
-        await context.bot.edit_message_text(
-            chat_id=chat_id,
-            message_id=message_id,
+        await update.callback_query.edit_message_text(
             text=new_text,
             parse_mode=ParseMode.MARKDOWN,
             reply_markup=reply_markup,
         )
         return True
     except TelegramError as error:
-        logging.exception(("The error editing the message to the chat: %s", chat_id), error)
+        logging.exception(("The error editing the message to the chat: %d", update.effective_chat.id), error)
         return False
 
 
@@ -93,7 +84,7 @@ async def reply_message(
         )
         return True
     except TelegramError as error:
-        logging.exception(("The error reply on the message to the chat: %s", chat_id), error)
+        logging.exception(("The error reply on the message to the chat: %d", chat_id), error)
         return False
 
 
