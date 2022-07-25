@@ -10,9 +10,9 @@ class UserData:
 
 @dataclass
 class UserMonthStat:
-    closed_consultations: int
-    rating: float
-    average_user_answer_time: float
+    closed_consultations: str
+    rating: str
+    average_user_answer_time: str
 
 
 @dataclass
@@ -46,8 +46,7 @@ class UserActiveConsultations:
 class UserExpiredConsultations:
     username_trello: str
     expired_consultations: int
-    expired_consultation_ids: list[int]
-    expired_consultation_trello_card_ids: list[int]
+    expired_consultations_data: list[dict[str, str]]
 
 
 @dataclass
