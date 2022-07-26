@@ -47,23 +47,27 @@ WEBHOOK_URL = get_string("WEBHOOK_URL")
 PORT = get_int("BOT_PORT")
 TOKEN = get_string("TELEGRAM_TOKEN")
 
-# Параметры еженедельной рассылки
+# Параметры рассылки статистики
 WEEKLY_STAT_TIME = get_datetime("WEEKLY_STAT_TIME")
 WEEKLY_STAT_WEEK_DAYS = get_datetime_tuple(
     "WEEKLY_STAT_WEEK_DAYS"
 )
-
-# Параметры ежемесячной рассылки
 MONTHLY_STAT_TIME = get_datetime("MONTHLY_STAT_TIME")
 MONTHLY_STAT_DAY = get_int("MONTHLY_STAT_DAY")
+
+# Параметры рассылки чеков
 MONTHLY_RECEIPT_REMINDER_TIME = get_datetime(
     "MONTHLY_RECEIPT_REMINDER_TIME"
 )
 MONTHLY_RECEIPT_REMINDER_DAY = get_int("MONTHLY_RECEIPT_REMINDER_DAY")
 
-# Параметры для апи
+# Файл с сохраненными данными бота
 BOT_PERSISTENCE_FILE = get_string("BOT_PERSISTENCE_FILE")
+
+# Настройка отладки
 IS_FAKE_API = get_bool("IS_FAKE_API")
+
+# Параметры api
 SITE_API_URL = get_string("SITE_API_URL")
 SITE_API_BOT_TOKEN = get_string("SITE_API_BOT_TOKEN")
 
