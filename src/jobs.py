@@ -24,7 +24,7 @@ async def weekly_stat_job(context: CallbackContext) -> None:
         "В работе ***active_consultations*** заявок  за неделю\n\n"
         "Истекает срок у ***expiring_consultations заявок***\n"
         "У ***expired_consultations*** заявок срок истек\n\n"
-        f"[Открыть Trello](https://trello.com/{TRELLO_BORD_ID}/?filter=member:{username_trello})\n\n"
+        f"[Открыть Trello](https://trello.com/{TRELLO_BORD_ID})\n\n"
     )
     alias_dict = dict(
         closed_consultations="closed_consultations",
@@ -53,7 +53,7 @@ async def monthly_stat_job(context: CallbackContext) -> None:
         "***Количество закрытых заявок*** - closed_consultations\n"
         "***Рейтинг*** - rating\n"
         "***Среднее время ответа*** - average_user_answer_time\n\n"
-        f"[Открыть Trello](https://trello.com/{TRELLO_BORD_ID}/?filter=member:{username_trello})\n\n"
+        f"[Открыть Trello](https://trello.com/{TRELLO_BORD_ID})\n\n"
         "Мы рады работать в одной команде :)\n"
         "*Так держать!*"
     )
