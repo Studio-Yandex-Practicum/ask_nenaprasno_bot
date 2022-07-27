@@ -40,6 +40,7 @@ class UserActiveConsultations:
     active_consultations: int
     expiring_consultations: int
     expiring_consultations_data: list[dict[str, str]]
+    active_consultations_data: list[dict[str, str]]
 
 
 @dataclass

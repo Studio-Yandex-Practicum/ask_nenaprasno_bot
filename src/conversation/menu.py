@@ -4,7 +4,7 @@ from telegram.ext import CallbackQueryHandler, CommandHandler, ContextTypes, Con
 from constants import callback_data, states
 from conversation.timezone import get_timezone as configurate_timezone
 from conversation.timezone import states_timezone_conversation_dict
-from core.config import TRELLO_BORD_ID, URL_SERVICE_RULES, URL_SITE
+from core.config import URL_SERVICE_RULES, URL_SITE
 from decorators.logger import async_error_logger
 from service.api_client import APIService
 
@@ -17,24 +17,24 @@ async def menu(update: Update, context: ContextTypes.DEFAULT_TYPE):
     menu_buttons = [
         [
             InlineKeyboardButton(
-                text="⌚ Настроить часовой пояс", callback_data=callback_data.CALLBACK_CONFIGURATE_TIMEZONE_COMMAND
+                text="Настроить часовой пояс", callback_data=callback_data.CALLBACK_CONFIGURATE_TIMEZONE_COMMAND
             )
         ],
         [
             InlineKeyboardButton(
-                text="📊 Статистика за месяц", callback_data=callback_data.CALLBACK_STATISTIC_MONTH_COMMAND
+                text="Статистика за месяц", callback_data=callback_data.CALLBACK_STATISTIC_MONTH_COMMAND
             ),
         ],
         [
             InlineKeyboardButton(
-                text="📈 Статистика за неделю", callback_data=callback_data.CALLBACK_STATISTIC_WEEK_COMMAND
+                text="Статистика за неделю", callback_data=callback_data.CALLBACK_STATISTIC_WEEK_COMMAND
             )
         ],
-        [InlineKeyboardButton(text="📌 В работе", callback_data=callback_data.CALLBACK_ACTUAL_REQUESTS_COMMAND)],
-        [InlineKeyboardButton(text="🔥 сроки горят", callback_data=callback_data.CALLBACK_OVERDUE_REQUESTS_COMMAND)],
+        [InlineKeyboardButton(text="В работе", callback_data=callback_data.CALLBACK_ACTUAL_REQUESTS_COMMAND)],
+        [InlineKeyboardButton(text="🔥 Cроки горят", callback_data=callback_data.CALLBACK_OVERDUE_REQUESTS_COMMAND)],
         [
             InlineKeyboardButton(
-                text="📜 Правила сервиса",
+                text="Правила сервиса",
                 url=URL_SERVICE_RULES,
             )
         ],
@@ -60,14 +60,21 @@ async def button_statistic_month_callback(update: Update, context: ContextTypes.
     service = APIService()
     telegram_id = update.effective_user.id
     user_statistics = await service.get_user_month_stat(telegram_id=telegram_id)
-    username_trello = context.user_data["username_trello"]
-    message = (
-        f"❗Cтатистика за месяц❗ \n\n"
-        f"✅Количество закрытых заявок - {user_statistics.closed_consultations}\n"
-        f"✅Рейтинг - {user_statistics.rating:.1f}\n"
-        f"✅Среднее время ответа - {user_statistics.average_user_answer_time:.1f}\n\n"
-        f"[Открыть Trello](https://trello.com/{TRELLO_BORD_ID}/?filter=member:{username_trello})\n\n"
-    )
+    if user_statistics.closed_consultations > 0:
+        message = (
+            f"С начала месяца вы сделали очень много для «Просто спросить» 🔥\n"
+            f"***Количество закрытых заявок*** - {user_statistics.closed_consultations}\n"
+            f"***Рейтинг*** - {user_statistics.rating:.1f}\n"
+            f"***Среднее время ответа*** - {user_statistics.average_user_answer_time:.1f}\n\n"
+            "Мы рады работать в одной команде :)\n"
+            "Так держать!"
+        )
+    else:
+        message = (
+            "К сожалению у вас не было отвеченных завок :(\n"
+            "Мы верим, что в следующем месяце все изменится! :)"
+
+        )
     await update.callback_query.message.reply_text(text=message, parse_mode="Markdown")
 
 
@@ -79,16 +86,13 @@ async def button_actual_requests_callback(update: Update, context: ContextTypes.
     service = APIService()
     telegram_id = update.effective_user.id
     user_active_consultations = await service.get_user_active_consultations(telegram_id=telegram_id)
-    username_trello = user_active_consultations.username_trello
-    consultations_list = user_active_consultations.expiring_consultations_data
+    consultations_list = user_active_consultations.active_consultations_data
     list_for_message = ""
     for consultation in consultations_list:
         list_for_message += f"{URL_SITE}doctor/consultation/{consultation['consultation_id']}\n"
     message = (
         f"У вас в работе {user_active_consultations.active_consultations} заявок.\n"
-        f"У {user_active_consultations.expiring_consultations} истекает срок:\n"
-        f"{list_for_message}"
-        f"\n[Открыть Trello](https://trello.com/{TRELLO_BORD_ID}/?filter=member:{username_trello})\n\n"
+        f"Посмотреть заявки на сайте:\n{list_for_message}"
     )
     await update.callback_query.message.reply_text(text=message, parse_mode="Markdown")
 
@@ -101,22 +105,13 @@ async def button_overdue_requests_callback(update: Update, context: ContextTypes
     service = APIService()
     telegram_id = update.effective_user.id
     expired_consultations = await service.get_user_expired_consultations(telegram_id=telegram_id)
-    expiring_consultations = await service.get_user_active_consultations(telegram_id=telegram_id)
-    username_trello = expired_consultations.username_trello
     expired_consultations_list = expired_consultations.expired_consultations_data
     link_neneprasno = ""
     for consultation in expired_consultations_list:
         link_neneprasno += f"{URL_SITE}doctor/consultation/{consultation['consultation_id']}\n"
     message = (
-        f"Время истекло 😎\n"
-        f"Ваше количество просроченных заявок - {expired_consultations.expired_consultations}\n"
-        f"Верим и ждем.\n\n"
+        f"Ваше количество просроченных заявок: {expired_consultations.expired_consultations}.\n"
         f"Посмотреть заявки на сайте:\n {link_neneprasno}\n"
-        f"----\n"
-        f"В работе количество  заявок - {expiring_consultations.active_consultations}\n"
-        f"Истекает срок у количество заявок - {expiring_consultations.expiring_consultations}\n"
-        f"Открыть [Trello](https://trello.com/{TRELLO_BORD_ID}/?filter=member:"
-        f"{username_trello}/?filter=overdue:true)\n\n"
     )
     await update.callback_query.message.reply_text(text=message)
 
