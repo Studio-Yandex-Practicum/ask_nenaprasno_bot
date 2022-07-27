@@ -10,9 +10,9 @@ class UserData:
 
 @dataclass
 class UserMonthStat:
-    closed_consultations: str
-    rating: str
-    average_user_answer_time: str
+    closed_consultations: int
+    rating: float
+    average_user_answer_time: float
 
 
 @dataclass
