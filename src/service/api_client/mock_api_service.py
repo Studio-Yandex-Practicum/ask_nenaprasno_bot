@@ -68,7 +68,7 @@ class MockAPIService(AbstractAPIService):
             expiring_consultations=2,
             expiring_consultations_data=[{"consultation_id": "test1", "consultation_trello_card_id": "1_tr"}],
         )
-        
+
     async def get_user_expired_consultations(self, telegram_id: int) -> Optional[UserExpiredConsultations]:
         return UserExpiredConsultations(
             username_trello="user1@telegram",
