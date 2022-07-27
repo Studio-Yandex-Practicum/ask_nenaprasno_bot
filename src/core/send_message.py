@@ -31,8 +31,8 @@ async def send_message(
             reply_markup=reply_markup,
         )
         return True
-    except TelegramError as error:
-        logging.exception(("The error sending the message to the chat: %d", chat_id), error)
+    except TelegramError:
+        logging.exception("The error sending the message to the chat: %d", chat_id)
         return False
 
 
@@ -54,37 +54,28 @@ async def edit_message(
             reply_markup=reply_markup,
         )
         return True
-    except TelegramError as error:
-        logging.exception(("The error editing the message to the chat: %d", update.effective_chat.id), error)
+    except TelegramError:
+        logging.exception("The error editing the message to the chat: %d", update.effective_chat.id)
         return False
 
 
 async def reply_message(
-    context: CallbackContext,
-    chat_id: int,
-    reply_to_message_id: int,
+    update: Update,
     text: str,
     reply_markup: Optional[ReplyKeyboardMarkup] = None,
 ) -> bool:
     """
     Reply on the message.
-    :param context: CallbackContext
-    :param chat_id: int
-    :param reply_to_message_id: int
+    :param update: Update
     :param text: str
     :param reply_markup: ReplyKeyboardMarkup | None
     """
     try:
-        await context.bot.send_message(
-            chat_id=chat_id,
-            text=text,
-            reply_to_message_id=reply_to_message_id,
-            parse_mode=ParseMode.MARKDOWN,
-            reply_markup=reply_markup,
-        )
+        message = update.callback_query.message if update.message is None else update.message
+        await message.reply_markdown(text=text, quote=True, reply_markup=reply_markup)
         return True
-    except TelegramError as error:
-        logging.exception(("The error reply on the message to the chat: %d", chat_id), error)
+    except TelegramError:
+        logging.exception("The error reply on the message to the chat: %d", update.effective_chat.id)
         return False
 
 
