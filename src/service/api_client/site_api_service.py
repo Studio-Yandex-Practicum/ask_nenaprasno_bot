@@ -1,5 +1,6 @@
 import json
 from http import HTTPStatus
+from typing import Optional
 
 import httpx
 
@@ -53,7 +54,7 @@ class SiteAPIService(AbstractAPIService):
     async def get_month_stat(self) -> list[MonthStat]:
         ...
 
-    async def get_user_active_consultations(self, telegram_id: int) -> UserActiveConsultations:
+    async def get_user_active_consultations(self, telegram_id: int) -> Optional[UserActiveConsultations]:
         url = f"{self.site_url}/tgbot/stat/active/user/{telegram_id}"
         active_consultations = await self.__get_json_data(url=url)
         try:
@@ -62,7 +63,7 @@ class SiteAPIService(AbstractAPIService):
             logger.error("Failed convert json to dataclass: %s", error)
             return None
 
-    async def get_user_expired_consultations(self, telegram_id: int) -> UserExpiredConsultations:
+    async def get_user_expired_consultations(self, telegram_id: int) -> Optional[UserExpiredConsultations]:
         url = f"{self.site_url}/tgbot/stat/overdue/user/{telegram_id}"
         exp_consultations = await self.__get_json_data(url=url)
         try:
@@ -71,7 +72,7 @@ class SiteAPIService(AbstractAPIService):
             logger.error("Failed convert json to dataclass: %s", error)
             return None
 
-    async def get_user_month_stat(self, telegram_id: int) -> UserMonthStat:
+    async def get_user_month_stat(self, telegram_id: int) -> Optional[UserMonthStat]:
         url = f"{self.site_url}/tgbot/stat/monthly/user/{telegram_id}"
         user_month_stat = await self.__get_json_data(url=url)
         try:
@@ -80,7 +81,7 @@ class SiteAPIService(AbstractAPIService):
             logger.error("Failed convert json to dataclass: %s", error)
             return None
 
-    async def authenticate_user(self, telegram_id: int) -> UserData | None:
+    async def authenticate_user(self, telegram_id: int) -> Optional[UserData]:
         url = f"{self.site_url}/tgbot/user/{telegram_id}"
         user = await self.__get_json_data(url=url)
         try:
@@ -94,10 +95,10 @@ class SiteAPIService(AbstractAPIService):
         headers = {"Authorization": self.bot_token}
         data = {"telegram_id": telegram_id, "time_zone": user_time_zone}
         async with httpx.AsyncClient() as client:
-            response = await client.put(url=url, headers=headers, data=data)
+            response = await client.put(url=url, headers=headers, json=data)
             return response.status_code
 
-    async def __get_json_data(self, url: str) -> dict | None:
+    async def __get_json_data(self, url: str) -> Optional[dict]:
         headers = {"Authorization": self.bot_token}
         async with httpx.AsyncClient() as client:
             try:
