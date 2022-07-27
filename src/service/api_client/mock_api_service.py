@@ -61,33 +61,29 @@ class MockAPIService(AbstractAPIService):
             ),
         ]
 
-    async def get_user_active_consultations(self, telegram_id: int) -> UserActiveConsultations:
+    async def get_user_active_consultations(self, telegram_id: int) -> Optional[UserActiveConsultations]:
         return UserActiveConsultations(
             username_trello="user1@telegram",
             active_consultations=6,
             expiring_consultations=2,
-            expiring_consultations_data=[
-                {"consultation_id": "str", "consultation_trello_card_id": "str"},
-                {"consultation_id": "str", "consultation_trello_card_id": "str"},
-            ],
+            expiring_consultations_data=[{"consultation_id": "test1", "consultation_trello_card_id": "1_tr"}],
         )
 
-    async def get_user_expired_consultations(self, telegram_id: int) -> UserExpiredConsultations:
+    async def get_user_expired_consultations(self, telegram_id: int) -> Optional[UserExpiredConsultations]:
         return UserExpiredConsultations(
             username_trello="user1@telegram",
             expired_consultations=2,
-            expired_consultation_ids=[64, 128],
-            expired_consultation_trello_card_ids=[8888, 52167],
+            expired_consultations_data=[{"consultation_id": "test1", "consultation_trello_card_id": "1_tr"}],
         )
 
-    async def get_user_month_stat(self, telegram_id: int) -> UserMonthStat:
+    async def get_user_month_stat(self, telegram_id: int) -> Optional[UserMonthStat]:
         return UserMonthStat(
             closed_consultations=5,
             rating=2.2,
             average_user_answer_time=5.1,
         )
 
-    async def authenticate_user(self, telegram_id: int) -> Optional[None]:
+    async def authenticate_user(self, telegram_id: int) -> Optional[UserData]:
         return UserData(
             username="Bob",
             timezone="UTC+03:00",
