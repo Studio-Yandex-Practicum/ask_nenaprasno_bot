@@ -2,6 +2,7 @@ from telegram import KeyboardButton, ReplyKeyboardMarkup, ReplyKeyboardRemove, U
 from telegram.ext import CallbackContext, ContextTypes, MessageHandler, filters
 
 from constants import states
+from core.send_message import send_message
 from decorators.logger import async_error_logger
 from get_timezone import get_timezone_from_location, get_timezone_from_text_message
 
@@ -22,11 +23,8 @@ async def get_timezone(update: Update, context: CallbackContext):
         [KeyboardButton("Напишу свою таймзону сам")],
     ]
     markup = ReplyKeyboardMarkup(keyboard, resize_keyboard=True, one_time_keyboard=True)
-    await context.bot.send_message(
-        chat_id=update.effective_chat.id,
-        text="Для начала, давайте настроим часовой пояс, чтобы вы получали уведомления в удобное время",
-        reply_markup=markup,
-    )
+    message = "Для начала, давайте настроим часовой пояс, чтобы вы получали уведомления в удобное время"
+    await send_message(context=context, chat_id=update.effective_chat.id, text=message, reply_markup=markup)
     return states.TIMEZONE_STATE
 
 
@@ -38,13 +36,15 @@ async def check_timezone(update: Update, context: ContextTypes.DEFAULT_TYPE, tim
     """
     chat_id = update.effective_chat.id
     if timezone is None:
-        await context.bot.send_message(
+        await send_message(
+            context=context,
             chat_id=chat_id,
             text="Не удалось определить часовой пояс. Пожалуйста, введите его вручную. Например: UTC+03:00",
         )
         return states.TIMEZONE_STATE
-    await context.bot.send_message(chat_id=chat_id, text=f"Установлен часовой пояс для {timezone}")
-    await context.bot.send_message(
+    await send_message(context=context, chat_id=chat_id, text=f"Установлен часовой пояс для {timezone}")
+    await send_message(
+        context=context,
         chat_id=chat_id,
         text="Вы настроили часовой пояс, теперь уведомления будут приходить в удобное время",
         reply_markup=ReplyKeyboardRemove(),
@@ -69,7 +69,7 @@ async def get_timezone_from_text_message_callback(update: Update, context: Callb
     text = str(update.message.text)
     chat_id = update.effective_chat.id
     if text == "Напишу свою таймзону сам":
-        await context.bot.send_message(chat_id=chat_id, text="Введите таймзону UTC. Например: UTC+03:00")
+        await send_message(context=context, chat_id=chat_id, text="Введите таймзону UTC. Например: UTC+03:00")
         return states.TIMEZONE_STATE
     timezone = await get_timezone_from_text_message(update, context)
     return await check_timezone(update, context, timezone)

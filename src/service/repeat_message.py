@@ -11,6 +11,7 @@ from telegram import InlineKeyboardButton, Update
 from telegram.ext import CallbackContext, ContextTypes
 
 from constants.callback_data import CALLBACK_REPEAT_COMMAND
+from core.send_message import edit_message, send_message
 
 
 async def repeat_message_after_1_hour_callback(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
@@ -20,7 +21,7 @@ async def repeat_message_after_1_hour_callback(update: Update, context: ContextT
     query = update.callback_query
     data = query.message
     context.job_queue.run_once(callback=repeat_message_job, when=timedelta(hours=1), data=data)
-    await query.edit_message_text(text=data.text_markdown_v2_urled)
+    await edit_message(update=update, new_text=data.text_markdown_v2_urled)
     await query.answer()  # close progress bar in chat
 
 
@@ -31,8 +32,8 @@ async def repeat_message_job(context: CallbackContext) -> None:
     Kramorenko
     """
     data = context.job.data
-    await context.bot.send_message(
-        chat_id=data.chat_id, text=data.text_markdown_v2_urled, reply_markup=data.reply_markup
+    await send_message(
+        context=context, chat_id=data.chat_id, text=data.text_markdown_v2_urled, reply_markup=data.reply_markup
     )
 
 
