@@ -40,7 +40,6 @@ async def menu(update: Update, context: ContextTypes.DEFAULT_TYPE):
         ],
     ]
     await update.message.reply_text("Меню", reply_markup=InlineKeyboardMarkup(menu_buttons))
-    return states.MENU_STATE
 
 
 @async_error_logger(name="conversation.requests.actual_requests_callback")
@@ -72,7 +71,7 @@ async def button_statistic_month_callback(update: Update, context: ContextTypes.
         f"[Открыть Trello](https://trello.com/{TRELLO_BORD_ID}/?filter=member:{username_trello})\n\n"
     )
     await update.callback_query.message.reply_text(text=message, parse_mode="Markdown")
-
+    return states.MENU_STATE
 
 @async_error_logger(name="conversation.requests.button_actual_requests_callback")
 async def button_actual_requests_callback(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
@@ -97,7 +96,7 @@ async def button_actual_requests_callback(update: Update, context: ContextTypes.
         f"\n[Открыть Trello](https://trello.com/{TRELLO_BORD_ID}/?filter=member:{username_trello})\n\n"
     )
     await update.callback_query.message.reply_text(text=message, parse_mode="Markdown")
-
+    return states.MENU_STATE
 
 @async_error_logger(name="conversation.requests.button_overdue_requests_callback")
 async def button_overdue_requests_callback(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
@@ -128,7 +127,7 @@ async def button_overdue_requests_callback(update: Update, context: ContextTypes
         f"{username_trello}/?filter=overdue:true)\n\n"
     )
     await update.callback_query.message.reply_text(text=message)
-
+    return states.MENU_STATE
 
 menu_conversation = ConversationHandler(
     allow_reentry=True,
