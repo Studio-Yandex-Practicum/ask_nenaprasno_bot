@@ -73,6 +73,7 @@ async def button_statistic_month_callback(update: Update, context: ContextTypes.
     await update.callback_query.message.reply_text(text=message, parse_mode="Markdown")
     return states.MENU_STATE
 
+
 @async_error_logger(name="conversation.requests.button_actual_requests_callback")
 async def button_actual_requests_callback(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     """
@@ -97,6 +98,7 @@ async def button_actual_requests_callback(update: Update, context: ContextTypes.
     )
     await update.callback_query.message.reply_text(text=message, parse_mode="Markdown")
     return states.MENU_STATE
+
 
 @async_error_logger(name="conversation.requests.button_overdue_requests_callback")
 async def button_overdue_requests_callback(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
