@@ -60,19 +60,18 @@ async def button_statistic_month_callback(update: Update, context: ContextTypes.
     service = APIService()
     telegram_id = update.effective_user.id
     user_statistics = await service.get_user_month_stat(telegram_id=telegram_id)
-    if user_statistics:
-        username_trello = context.user_data["username_trello"]
-        message = (
-            f"❗Cтатистика за месяц❗ \n\n"
-            f"✅Количество закрытых заявок - {user_statistics.closed_consultations}\n"
-            f"✅Рейтинг - {user_statistics.rating:.1f}\n"
-            f"✅Среднее время ответа - {user_statistics.average_user_answer_time:.1f}\n\n"
-            f"[Открыть Trello](https://trello.com/{TRELLO_BORD_ID}/?filter=member:{username_trello})\n\n"
-        )
-        await update.callback_query.message.reply_text(text=message, parse_mode="Markdown")
-    else:
-        await update.callback_query.message.reply_text(text="Данные не доступны!")
+    if user_statistics is None:
+        await update.callback_query.message.reply_text(text="Данные недоступны!")
         return states.MENU_STATE
+    username_trello = context.user_data["username_trello"]
+    message = (
+        f"❗Cтатистика за месяц❗ \n\n"
+        f"✅Количество закрытых заявок - {user_statistics.closed_consultations}\n"
+        f"✅Рейтинг - {user_statistics.rating:.1f}\n"
+        f"✅Среднее время ответа - {user_statistics.average_user_answer_time:.1f}\n\n"
+        f"[Открыть Trello](https://trello.com/{TRELLO_BORD_ID}/?filter=member:{username_trello})\n\n"
+    )
+    await update.callback_query.message.reply_text(text=message, parse_mode="Markdown")
 
 
 @async_error_logger(name="conversation.requests.button_actual_requests_callback")
@@ -83,22 +82,21 @@ async def button_actual_requests_callback(update: Update, context: ContextTypes.
     service = APIService()
     telegram_id = update.effective_user.id
     user_active_consultations = await service.get_user_active_consultations(telegram_id=telegram_id)
-    if user_active_consultations:
-        username_trello = user_active_consultations.username_trello
-        consultations_list = user_active_consultations.expiring_consultations_data
-        list_for_message = ""
-        for consultation in consultations_list:
-            list_for_message += f"{URL_SITE}doctor/consultation/{consultation['consultation_id']}\n"
-        message = (
-            f"У вас в работе {user_active_consultations.active_consultations} заявок.\n"
-            f"У {user_active_consultations.expiring_consultations} истекает срок:\n"
-            f"{list_for_message}"
-            f"\n[Открыть Trello](https://trello.com/{TRELLO_BORD_ID}/?filter=member:{username_trello})\n\n"
-        )
-        await update.callback_query.message.reply_text(text=message, parse_mode="Markdown")
-    else:
-        await update.callback_query.message.reply_text(text="Данные не доступны!")
+    if user_active_consultations is None:
+        await update.callback_query.message.reply_text(text="Данные недоступны!")
         return states.MENU_STATE
+    username_trello = user_active_consultations.username_trello
+    consultations_list = user_active_consultations.expiring_consultations_data
+    list_for_message = ""
+    for consultation in consultations_list:
+        list_for_message += f"{URL_SITE}doctor/consultation/{consultation['consultation_id']}\n"
+    message = (
+        f"У вас в работе {user_active_consultations.active_consultations} заявок.\n"
+        f"У {user_active_consultations.expiring_consultations} истекает срок:\n"
+        f"{list_for_message}"
+        f"\n[Открыть Trello](https://trello.com/{TRELLO_BORD_ID}/?filter=member:{username_trello})\n\n"
+    )
+    await update.callback_query.message.reply_text(text=message, parse_mode="Markdown")
 
 
 @async_error_logger(name="conversation.requests.button_overdue_requests_callback")
@@ -110,27 +108,26 @@ async def button_overdue_requests_callback(update: Update, context: ContextTypes
     telegram_id = update.effective_user.id
     expired_consultations = await service.get_user_expired_consultations(telegram_id=telegram_id)
     expiring_consultations = await service.get_user_active_consultations(telegram_id=telegram_id)
-    if expired_consultations and expiring_consultations:
-        username_trello = expired_consultations.username_trello
-        expired_consultations_list = expired_consultations.expired_consultations_data
-        link_neneprasno = ""
-        for consultation in expired_consultations_list:
-            link_neneprasno += f"{URL_SITE}doctor/consultation/{consultation['consultation_id']}\n"
-        message = (
-            f"Время истекло 😎\n"
-            f"Ваше количество просроченных заявок - {expired_consultations.expired_consultations}\n"
-            f"Верим и ждем.\n\n"
-            f"Посмотреть заявки на сайте:\n {link_neneprasno}\n"
-            f"----\n"
-            f"В работе количество  заявок - {expiring_consultations.active_consultations}\n"
-            f"Истекает срок у количество заявок - {expiring_consultations.expiring_consultations}\n"
-            f"Открыть [Trello](https://trello.com/{TRELLO_BORD_ID}/?filter=member:"
-            f"{username_trello}/?filter=overdue:true)\n\n"
-        )
-        await update.callback_query.message.reply_text(text=message)
-    else:
-        await update.callback_query.message.reply_text(text="Данные не доступны!")
+    if expired_consultations is None or expiring_consultations is None:
+        await update.callback_query.message.reply_text(text="Данные недоступны")
         return states.MENU_STATE
+    username_trello = expired_consultations.username_trello
+    expired_consultations_list = expired_consultations.expired_consultations_data
+    link_neneprasno = ""
+    for consultation in expired_consultations_list:
+        link_neneprasno += f"{URL_SITE}doctor/consultation/{consultation['consultation_id']}\n"
+    message = (
+        f"Время истекло 😎\n"
+        f"Ваше количество просроченных заявок - {expired_consultations.expired_consultations}\n"
+        f"Верим и ждем.\n\n"
+        f"Посмотреть заявки на сайте:\n {link_neneprasno}\n"
+        f"----\n"
+        f"В работе количество  заявок - {expiring_consultations.active_consultations}\n"
+        f"Истекает срок у количество заявок - {expiring_consultations.expiring_consultations}\n"
+        f"Открыть [Trello](https://trello.com/{TRELLO_BORD_ID}/?filter=member:"
+        f"{username_trello}/?filter=overdue:true)\n\n"
+    )
+    await update.callback_query.message.reply_text(text=message)
 
 
 menu_conversation = ConversationHandler(
