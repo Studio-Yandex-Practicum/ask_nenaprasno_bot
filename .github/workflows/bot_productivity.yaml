@@ -53,7 +53,7 @@ jobs:
           BOT_PERSISTENCE_FILE: bot_persistence_file
 
           SITE_API_BOT_TOKEN: ${{ secrets.SITE_API_BOT_TOKEN }}
-          SITE_API_URL: ${{ secrets.SITE_API_URL }}
+          SITE_API_URL: https://api.ask.nenaprasno.ru
           IS_FAKE_API: True
 
           TRELLO_API_KEY: ${{ secrets.TRELLO_API_KEY }}
