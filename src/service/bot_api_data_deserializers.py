@@ -28,4 +28,3 @@ class AssignDeserializerModel:
     trello_card_id: str = field(metadata=config(field_name="trello_card_id"))
     username_trello: str = field(metadata=config(field_name="username_trello"))
     telegram_id: str = field(metadata=config(field_name="telegram_id"))
-
