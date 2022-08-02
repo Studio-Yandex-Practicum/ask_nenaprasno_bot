@@ -64,6 +64,7 @@ async def telegram_webhook_api(request: Request) -> Response:
 
 
 async def nenaprasno_dispatcher(request: Request) -> Response:
+
     is_authorized = await check_token(request)
     if not is_authorized:
         return Response(status_code=httpx.codes.UNAUTHORIZED)

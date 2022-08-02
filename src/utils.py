@@ -13,5 +13,3 @@ async def check_token(request: Request) -> bool:
         f"Unauthorized access attempt {('with token ' + token) if token else 'without token'}"
     )
     return False
-
-
