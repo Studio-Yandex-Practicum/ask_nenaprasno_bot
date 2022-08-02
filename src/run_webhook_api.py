@@ -1,3 +1,4 @@
+from dotenv import load_dotenv
 from json import JSONDecodeError
 
 import httpx
@@ -13,9 +14,12 @@ from bot import init_webhook
 from core import config
 from core.logger import logger
 from service.api_client import APIService
-from service.trello_data_deserializer import TrelloDeserializerModel
+from service.constants import ACTION_TO_DESERIALIZER
 from service.models import HealthCheckResponseModel
-from create_trello_webhook import trello_webhook
+from utils import check_token
+
+
+load_dotenv()
 
 
 async def start_bot() -> None:
@@ -59,31 +63,33 @@ async def telegram_webhook_api(request: Request) -> Response:
     return Response()
 
 
-async def trello_webhook_api(request: Request) -> Response:
-    """
-    Plug func catching trello post request
-    :param request: Trello request
-    :return: Response "ok"
-    """
+async def nenaprasno_dispatcher(request: Request) -> Response:
+    await check_token(request)
+
     try:
-        trello_data: TrelloDeserializerModel = TrelloDeserializerModel.from_dict(await request.json())
-        logger.info(f"Got new trello request: {trello_data}.")
+        deserializer = ACTION_TO_DESERIALIZER[request.path_params["action"]]
+    except KeyError as error:
+        logger.error(f"Got a wrong action: {error}")
+        return Response(status_code=httpx.codes.BAD_REQUEST)
+
+    try:
+        request_data: deserializer = deserializer.from_dict(await request.json())
+        logger.info(f"Got new api request: {request_data}")
         return Response(status_code=httpx.codes.OK)
     except KeyError as error:
         logger.error(f"Got a KeyError: {error}")
         return Response(status_code=httpx.codes.BAD_REQUEST)
     except JSONDecodeError as error:
         logger.error(f"Got a JSONDecodeError: {error}")
-        return Response(status_code=httpx.codes.OK)
-
+        return Response(status_code=httpx.codes.BAD_REQUEST)
 
 routes = [
     Route("/telegramWebhookApi", telegram_webhook_api, methods=["POST"]),
     Route("/healthcheck", healthcheck_api, methods=["GET"]),
-    Route("/trelloWebhookApi", trello_webhook_api, methods=["POST", "HEAD"]),
+    Route("/bot/consultation/{action:str}", nenaprasno_dispatcher, methods=["POST"])
 ]
 
-api = Starlette(routes=routes, on_startup=[start_bot, trello_webhook], on_shutdown=[stop_bot])
+api = Starlette(routes=routes, on_startup=[start_bot], on_shutdown=[stop_bot])
 
 
 if __name__ == "__main__":
