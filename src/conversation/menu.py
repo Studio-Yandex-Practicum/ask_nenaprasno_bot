@@ -93,6 +93,34 @@ async def button_actual_requests_callback(update: Update, context: ContextTypes.
     await update.callback_query.message.reply_text(text=message, parse_mode="Markdown")
 
 
+@async_error_logger(name="conversation.requests.button_overdue_requests_callback")
+async def button_overdue_requests_callback(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
+    """
+    Send information about expiring and overdue consultation
+    """
+    service = APIService()
+    telegram_id = update.effective_user.id
+    expired_consultations = await service.get_user_expired_consultations(telegram_id=telegram_id)
+    expiring_consultations = await service.get_user_active_consultations(telegram_id=telegram_id)
+    username_trello = expired_consultations.username_trello
+    expired_consultations_list = expired_consultations.expired_consultations_data
+    link_neneprasno = ""
+    for consultation in expired_consultations_list:
+        link_neneprasno += f"{URL_SITE}doctor/consultation/{consultation['consultation_id']}\n"
+    message = (
+        f"Время истекло 😎\n"
+        f"Ваше количество просроченных заявок - {expired_consultations.expired_consultations}\n"
+        f"Верим и ждем.\n\n"
+        f"Посмотреть заявки на сайте:\n {link_neneprasno}\n"
+        f"----\n"
+        f"В работе количество  заявок - {expiring_consultations.active_consultations}\n"
+        f"Истекает срок у количество заявок - {expiring_consultations.expiring_consultations}\n"
+        f"Открыть [Trello](https://trello.com/{TRELLO_BORD_ID}/?filter=member:"
+        f"{username_trello}/?filter=overdue:true)\n\n"
+    )
+    await update.callback_query.message.reply_text(text=message)
+
+
 menu_conversation = ConversationHandler(
     allow_reentry=True,
     persistent=True,
@@ -105,9 +133,11 @@ menu_conversation = ConversationHandler(
             ),
             CallbackQueryHandler(button_reaction_callback, pattern=callback_data.CALLBACK_STATISTIC_WEEK_COMMAND),
             CallbackQueryHandler(
+                button_overdue_requests_callback, pattern=callback_data.CALLBACK_OVERDUE_REQUESTS_COMMAND
+            ),
+            CallbackQueryHandler(
                 button_actual_requests_callback, pattern=callback_data.CALLBACK_ACTUAL_REQUESTS_COMMAND
             ),
-            CallbackQueryHandler(button_reaction_callback, pattern=callback_data.CALLBACK_OVERDUE_REQUESTS_COMMAND),
             CallbackQueryHandler(configurate_timezone, pattern=callback_data.CALLBACK_CONFIGURATE_TIMEZONE_COMMAND),
         ],
         **states_timezone_conversation_dict,

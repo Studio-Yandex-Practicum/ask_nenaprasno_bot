@@ -33,8 +33,34 @@ jobs:
 
       - name: Start the bot
         env:
-          TELEGRAM_TOKEN: ${{ env.TELEGRAM_TOKEN }}
+          TELEGRAM_TOKEN: ${{ secrets.TELEGRAM_TOKEN }}
+
           LOG_NAME: bot.log
+
+          BOT_PORT: 8000
+          WEBHOOK_URL: ${{ secrets.WEBHOOK_URL }}
+          HOST: 127.0.0.1
+
+          WEEKLY_STAT_TIME: 13:00
+          WEEKLY_STAT_WEEK_DAYS: 0
+
+          MONTHLY_STAT_TIME: 13:00
+          MONTHLY_STAT_DAY: 19
+
+          MONTHLY_RECEIPT_REMINDER_TIME: 13:00
+          MONTHLY_RECEIPT_REMINDER_DAY: 19
+
+          BOT_PERSISTENCE_FILE: bot_persistence_file
+
+          SITE_API_BOT_TOKEN: ${{ secrets.SITE_API_BOT_TOKEN }}
+          SITE_API_URL: https://api.ask.nenaprasno.ru
+          IS_FAKE_API: True
+
+          TRELLO_API_KEY: ${{ secrets.TRELLO_API_KEY }}
+          TRELLO_ID_MODEL: trello_model_id
+          TRELLO_TOKEN: ${{ secrets.TRELLO_TOKEN }}
+          TRELLO_BORD_ID: 14nNNGRp
+
         run: |
           python3 src/run_bot.py & sleep 15 && pkill -9 python
           python3 src/run_webhook_api.py & sleep 15 && pkill -9 python
