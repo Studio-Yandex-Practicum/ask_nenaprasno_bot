@@ -55,14 +55,21 @@ async def button_statistic_month_callback(update: Update, context: ContextTypes.
     service = APIService()
     telegram_id = update.effective_user.id
     user_statistics = await service.get_user_month_stat(telegram_id=telegram_id)
-    message = (
-        f"С начала месяца вы сделали очень много для \"Просто спросить\" 🔥\n"
-        f"***Количество закрытых заявок*** - {user_statistics.closed_consultations}\n"
-        f"***Рейтинг*** - {user_statistics.rating:.1f}\n"
-        f"***Среднее время ответа*** - {user_statistics.average_user_answer_time:.1f}\n\n"
-        "Мы рады работать в одной команде :)\n"
-        "Так держать!"
-    )
+    if user_statistics.closed_consultations > 0:
+        message = (
+            f"С начала месяца вы сделали очень много для \"Просто спросить\" 🔥\n"
+            f"***Количество закрытых заявок*** - {user_statistics.closed_consultations}\n"
+            f"***Рейтинг*** - {user_statistics.rating:.1f}\n"
+            f"***Среднее время ответа*** - {user_statistics.average_user_answer_time:.1f}\n\n"
+            "Мы рады работать в одной команде :)\n"
+            "Так держать!"
+        )
+    else:
+        message = (
+            "К сожалению у вас не было отвеченных завок :(\n"
+            "Мы верим, что в следующем месяце все изменится! :)"
+
+        )
     await update.callback_query.message.reply_text(text=message, parse_mode="Markdown")
 
 
@@ -74,7 +81,7 @@ async def button_actual_requests_callback(update: Update, context: ContextTypes.
     service = APIService()
     telegram_id = update.effective_user.id
     user_active_consultations = await service.get_user_active_consultations(telegram_id=telegram_id)
-    consultations_list = user_active_consultations.expiring_consultations_data
+    consultations_list = user_active_consultations.active_consultations_data
     list_for_message = ""
     for consultation in consultations_list:
         list_for_message += f"{URL_SITE}doctor/consultation/{consultation['consultation_id']}\n"

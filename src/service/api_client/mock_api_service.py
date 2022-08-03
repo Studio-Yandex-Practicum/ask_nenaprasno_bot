@@ -66,7 +66,11 @@ class MockAPIService(AbstractAPIService):
             username_trello="user1@telegram",
             active_consultations=6,
             expiring_consultations=2,
-            expiring_consultations_data=[
+            active_consultations_data=[
+                {"consultation_id": "str", "consultation_trello_card_id": "str"},
+                {"consultation_id": "str", "consultation_trello_card_id": "str"},
+                {"consultation_id": "str", "consultation_trello_card_id": "str"},
+                {"consultation_id": "str", "consultation_trello_card_id": "str"},
                 {"consultation_id": "str", "consultation_trello_card_id": "str"},
                 {"consultation_id": "str", "consultation_trello_card_id": "str"},
             ],
