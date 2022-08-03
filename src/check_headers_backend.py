@@ -1,5 +1,4 @@
 import os
-from typing import Optional, Tuple
 
 from starlette.authentication import (AuthCredentials,
                                       AuthenticationBackend,
@@ -30,4 +29,4 @@ class CheckHeadersBackend(AuthenticationBackend):
 
         else:
             logger.warning('Unauthorized access attempt without token')
-        return
+        return None
