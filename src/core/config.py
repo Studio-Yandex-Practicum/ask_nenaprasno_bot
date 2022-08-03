@@ -1,7 +1,10 @@
+import os
 from datetime import datetime
 from pathlib import Path
 
 from dotenv import dotenv_values
+
+from decorators.safe_conversion import safe_conversion
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 
@@ -13,34 +16,31 @@ env = dotenv_values()
 
 
 def get_string(setting: str) -> str:
-    """Получить строковое значение из .env файла."""
-    return env.get(setting)
+    return env.get(setting) or os.getenv(setting)
 
 
+@safe_conversion
 def get_int(setting: str) -> int:
-    """Получить числовое значение из .env файла."""
-    return int(env.get(setting))
+    return int(get_string(setting))
 
 
+@safe_conversion
 def get_datetime(setting: str) -> datetime:
-    """Получить значение datetime из .env файла."""
-    return datetime.strptime(env.get(setting), "%H:%M")
+    return datetime.strptime(get_string(setting), "%H:%M")
 
 
+@safe_conversion
 def get_datetime_tuple(setting: str) -> tuple:
-    """Получить кортеж datetime из .env файла."""
-    return tuple(map(int, list(filter(None, env.get(setting).split(",")))))
+    return tuple(map(int, list(filter(None, get_string(setting).split(",")))))
 
 
 def get_bool(setting: str) -> bool:
-    """Получить булевое значение из .env файла."""
-    return env.get(setting) == "True"
+    return get_string(setting) == "True"
 
 
 # Параметры логгера
 LOG_NAME = get_string("LOG_NAME")
 LOG_PATH = BASE_DIR / LOG_NAME
-
 
 # Параметры локального сервера принимающего обновления от телеграм
 HOST = get_string("HOST")
