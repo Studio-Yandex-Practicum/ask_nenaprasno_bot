@@ -1,3 +1,5 @@
+import os
+
 from telegram import Update
 from telegram.ext import Application, ApplicationBuilder, CallbackQueryHandler, ContextTypes, PicklePersistence
 
@@ -57,7 +59,10 @@ async def init_webhook() -> Application:
     """
     bot_app = create_bot()
     bot_app.updater = None
-    await bot_app.bot.set_webhook(url=f"{config.WEBHOOK_URL}/telegramWebhookApi")
+    await bot_app.bot.set_webhook(
+        url=f"{config.WEBHOOK_URL}/telegramWebhookApi",
+        secret_token=os.getenv('SECRET_TOKEN')
+    )
     return bot_app
 
 

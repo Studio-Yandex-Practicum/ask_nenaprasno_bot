@@ -1,9 +1,14 @@
+import os
+
 from dotenv import load_dotenv
 from json import JSONDecodeError
 
 import httpx
 import uvicorn
 from starlette.applications import Starlette
+from starlette.middleware import Middleware
+from starlette.middleware.authentication import AuthenticationMiddleware
+from starlette.middleware.trustedhost import TrustedHostMiddleware
 from starlette.requests import Request
 from starlette.responses import JSONResponse, Response
 from starlette.routing import Route
@@ -11,12 +16,14 @@ from telegram import Bot, Update
 from telegram.error import TelegramError
 
 from bot import init_webhook
+from check_headers_backend import CheckHeadersBackend
 from core import config
 from core.logger import logger
 from service.api_client import APIService
-from service.constants import ACTION_TO_DESERIALIZER
+from service.bot_api_data_deserializers import (AssignDeserializerModel,
+                                                CloseDeserializerModel,
+                                                MessageFeedbackDeserializerModel)
 from service.models import HealthCheckResponseModel
-from utils import check_token
 
 
 load_dotenv()
@@ -63,36 +70,66 @@ async def telegram_webhook_api(request: Request) -> Response:
     return Response()
 
 
-async def nenaprasno_dispatcher(request: Request) -> Response:
-
-    is_authorized = await check_token(request)
-    if not is_authorized:
-        return Response(status_code=httpx.codes.UNAUTHORIZED)
-
-    try:
-        deserializer = ACTION_TO_DESERIALIZER[request.path_params["action"]]
-    except KeyError as error:
-        logger.error(f"Got a wrong action: {error}")
-        return Response(status_code=httpx.codes.BAD_REQUEST)
-
+async def try_to_deserialize(request: Request, deserializer):
     try:
         request_data: deserializer = deserializer.from_dict(await request.json())
         logger.info(f"Got new api request: {request_data}")
-        return Response(status_code=httpx.codes.OK)
+        return Response(status_code=httpx.codes.OK), request_data
     except KeyError as error:
         logger.error(f"Got a KeyError: {error}")
-        return Response(status_code=httpx.codes.BAD_REQUEST)
+        return Response(status_code=httpx.codes.BAD_REQUEST), None
     except JSONDecodeError as error:
         logger.error(f"Got a JSONDecodeError: {error}")
-        return Response(status_code=httpx.codes.BAD_REQUEST)
+        return Response(status_code=httpx.codes.BAD_REQUEST), None
+
+
+async def consultation_assign(request: Request) -> Response:
+    deserializer = AssignDeserializerModel
+    if request.user.is_authenticated:
+        response, request_data = await try_to_deserialize(request, deserializer)
+        return response
+    return Response(status_code=httpx.codes.UNAUTHORIZED)
+
+
+async def consultation_close(request: Request) -> Response:
+    deserializer = CloseDeserializerModel
+    if request.user.is_authenticated:
+        response, request_data = await try_to_deserialize(request, deserializer)
+        return response
+    return Response(status_code=httpx.codes.UNAUTHORIZED)
+
+
+async def consultation_message(request: Request) -> Response:
+    deserializer = MessageFeedbackDeserializerModel
+    if request.user.is_authenticated:
+        response, request_data = await try_to_deserialize(request, deserializer)
+        return response
+    return Response(status_code=httpx.codes.UNAUTHORIZED)
+
+
+async def consultation_feedback(request: Request) -> Response:
+    deserializer = MessageFeedbackDeserializerModel
+    if request.user.is_authenticated:
+        response, request_data = await try_to_deserialize(request, deserializer)
+        return response
+    return Response(status_code=httpx.codes.UNAUTHORIZED)
+
 
 routes = [
     Route("/telegramWebhookApi", telegram_webhook_api, methods=["POST"]),
     Route("/healthcheck", healthcheck_api, methods=["GET"]),
-    Route("/bot/consultation/{action:str}", nenaprasno_dispatcher, methods=["POST"])
+    Route("/bot/consultation/assign", consultation_assign, methods=["POST"]),
+    Route("/bot/consultation/close", consultation_close, methods=["POST"]),
+    Route("/bot/consultation/message", consultation_message, methods=["POST"]),
+    Route("/bot/consultation/feedback", consultation_feedback, methods=["POST"]),
 ]
 
-api = Starlette(routes=routes, on_startup=[start_bot], on_shutdown=[stop_bot])
+middleware = [
+    Middleware(TrustedHostMiddleware, allowed_hosts=[os.getenv('SITE_API_URL'), os.getenv('WEBHOOK_URL')]),
+    Middleware(AuthenticationMiddleware, backend=CheckHeadersBackend())
+]
+
+api = Starlette(routes=routes, on_startup=[start_bot], on_shutdown=[stop_bot], middleware=middleware)
 
 
 if __name__ == "__main__":
