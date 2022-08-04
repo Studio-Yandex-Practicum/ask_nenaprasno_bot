@@ -3,9 +3,9 @@ from json import JSONDecodeError
 import httpx
 import uvicorn
 from starlette.applications import Starlette
+from starlette.authentication import requires
 from starlette.middleware import Middleware
 from starlette.middleware.authentication import AuthenticationMiddleware
-from starlette.middleware.trustedhost import TrustedHostMiddleware
 from starlette.requests import Request
 from starlette.responses import JSONResponse, Response
 from starlette.routing import Route
@@ -13,17 +13,14 @@ from telegram import Bot, Update
 from telegram.error import TelegramError
 
 from bot import init_webhook
-from check_headers_backend import CheckHeadersBackend
 from core import config
 from core.logger import logger
+from middleware import TokenAuthBackend
 from service.api_client import APIService
-from service.bot_api_data_deserializers import (AssignDeserializerModel,
-                                                CloseDeserializerModel,
-                                                MessageFeedbackDeserializerModel)
-from service.models import HealthCheckResponseModel
-
-
-load_dotenv()
+from service.models import (AssignedConsultationModel,
+                            ClosedConsultationModel,
+                            ConsultationModel,
+                            HealthCheckResponseModel)
 
 
 async def start_bot() -> None:
@@ -67,7 +64,7 @@ async def telegram_webhook_api(request: Request) -> Response:
     return Response()
 
 
-async def try_to_deserialize(request: Request, deserializer):
+async def deserialize(request: Request, deserializer):
     try:
         request_data: deserializer = deserializer.from_dict(await request.json())
         logger.info(f"Got new api request: {request_data}")
@@ -80,36 +77,28 @@ async def try_to_deserialize(request: Request, deserializer):
         return Response(status_code=httpx.codes.BAD_REQUEST), None
 
 
+@requires('authenticated', status_code=401)
 async def consultation_assign(request: Request) -> Response:
-    deserializer = AssignDeserializerModel
-    if request.user.is_authenticated:
-        response, request_data = await try_to_deserialize(request, deserializer)
-        return response
-    return Response(status_code=httpx.codes.UNAUTHORIZED)
+    response, request_data = await deserialize(request, AssignedConsultationModel)
+    return response
 
 
+@requires('authenticated', status_code=401)
 async def consultation_close(request: Request) -> Response:
-    deserializer = CloseDeserializerModel
-    if request.user.is_authenticated:
-        response, request_data = await try_to_deserialize(request, deserializer)
-        return response
-    return Response(status_code=httpx.codes.UNAUTHORIZED)
+    response, request_data = await deserialize(request, ClosedConsultationModel)
+    return response
 
 
+@requires('authenticated', status_code=401)
 async def consultation_message(request: Request) -> Response:
-    deserializer = MessageFeedbackDeserializerModel
-    if request.user.is_authenticated:
-        response, request_data = await try_to_deserialize(request, deserializer)
-        return response
-    return Response(status_code=httpx.codes.UNAUTHORIZED)
+    response, request_data = await deserialize(request, ConsultationModel)
+    return response
 
 
+@requires('authenticated', status_code=401)
 async def consultation_feedback(request: Request) -> Response:
-    deserializer = MessageFeedbackDeserializerModel
-    if request.user.is_authenticated:
-        response, request_data = await try_to_deserialize(request, deserializer)
-        return response
-    return Response(status_code=httpx.codes.UNAUTHORIZED)
+    response, request_data = await deserialize(request, ConsultationModel)
+    return response
 
 
 routes = [
@@ -121,10 +110,7 @@ routes = [
     Route("/bot/consultation/feedback", consultation_feedback, methods=["POST"]),
 ]
 
-middleware = [
-    Middleware(TrustedHostMiddleware, allowed_hosts=[os.getenv('SITE_API_URL'), os.getenv('WEBHOOK_URL')]),
-    Middleware(AuthenticationMiddleware, backend=CheckHeadersBackend())
-]
+middleware = [Middleware(AuthenticationMiddleware, backend=TokenAuthBackend())]
 
 api = Starlette(routes=routes, on_startup=[start_bot], on_shutdown=[stop_bot], middleware=middleware)
 

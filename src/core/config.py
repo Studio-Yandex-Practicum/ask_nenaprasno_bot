@@ -48,6 +48,14 @@ WEBHOOK_URL = get_string("WEBHOOK_URL")
 PORT = get_int("BOT_PORT")
 TOKEN = get_string("TELEGRAM_TOKEN")
 
+# Параметры для аутентификации телеграма
+SECRET_TELEGRAM_TOKEN = get_string("SECRET_TELEGRAM_TOKEN")
+TELEGRAM_WEBHOOK_URL = get_string("TELEGRAM_WEBHOOK_URL")
+
+# Парамтеры для аутентификации сайта
+BOT_API_SITE_TOKEN = get_string("BOT_API_SITE_TOKEN")
+BOT_API_SITE_URL = get_string("BOT_API_SITE_URL")
+
 # Параметры рассылки статистики
 WEEKLY_STAT_TIME = get_datetime("WEEKLY_STAT_TIME")
 WEEKLY_STAT_WEEK_DAYS = get_datetime_tuple("WEEKLY_STAT_WEEK_DAYS")
