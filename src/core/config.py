@@ -50,16 +50,12 @@ TOKEN = get_string("TELEGRAM_TOKEN")
 
 # Параметры рассылки статистики
 WEEKLY_STAT_TIME = get_datetime("WEEKLY_STAT_TIME")
-WEEKLY_STAT_WEEK_DAYS = get_datetime_tuple(
-    "WEEKLY_STAT_WEEK_DAYS"
-)
+WEEKLY_STAT_WEEK_DAYS = get_datetime_tuple("WEEKLY_STAT_WEEK_DAYS")
 MONTHLY_STAT_TIME = get_datetime("MONTHLY_STAT_TIME")
 MONTHLY_STAT_DAY = get_int("MONTHLY_STAT_DAY")
 
 # Параметры рассылки чеков
-MONTHLY_RECEIPT_REMINDER_TIME = get_datetime(
-    "MONTHLY_RECEIPT_REMINDER_TIME"
-)
+MONTHLY_RECEIPT_REMINDER_TIME = get_datetime("MONTHLY_RECEIPT_REMINDER_TIME")
 MONTHLY_RECEIPT_REMINDER_DAY = get_int("MONTHLY_RECEIPT_REMINDER_DAY")
 
 # Файл с сохраненными данными бота

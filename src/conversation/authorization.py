@@ -52,11 +52,10 @@ async def start(update: Update, context: CallbackContext):
     """
     user_data = await autorize(update.effective_user.id, context)
     if user_data is not None:
-        await update.message.reply_text(text=BOT_GREETINGS_MESSAGE)
+        await reply_message(update=update, text=BOT_GREETINGS_MESSAGE)
         await menu_button(context, COMMANDS)
         await get_timezone(update, context)
         return states.TIMEZONE_STATE
-
     await menu_button(context, COMMANDS_UNAUTHORIZED)
     keyboard = [
         [
@@ -131,7 +130,6 @@ async def is_expert_callback(update: Update, context: CallbackContext):
     telegram_id = update.effective_user.id
     user_data = await autorize(update.effective_user.id, context)
     await update.callback_query.answer()
-
     if user_data is None:
         message = BOT_OFFER_SEND_TELEGRAM_ID.format(telegram_id=telegram_id)
         await edit_message(update=update, new_text=message)

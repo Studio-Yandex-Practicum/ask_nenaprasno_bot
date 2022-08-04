@@ -89,7 +89,6 @@ async def button_actual_requests_callback(update: Update, context: ContextTypes.
     message = (
         f"У вас в работе {user_active_consultations.active_consultations} заявок.\n"
         f"Посмотреть заявки на сайте:\n{list_for_message}"
-    )
     await reply_message(update=update, text=message)
 
 
@@ -110,7 +109,7 @@ async def button_overdue_requests_callback(update: Update, context: ContextTypes
     message = (
         f"Время истекло 😎\n"
         f"Ваше количество просроченных заявок - {expired_consultations.expired_consultations}\n"
-        f"Верим и ждем.\n\n"
+        f"Верим и ждем\n\n"
         f"Посмотреть заявки на сайте:\n {link_neneprasno}\n"
         f"----\n"
         f"В работе количество  заявок - {expiring_consultations.active_consultations}\n"
