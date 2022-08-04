@@ -40,7 +40,7 @@ BOT_OFFER_FILL_FORM_FOR_FUTURE_EXPERT = (
     "встрече.\n\nЖелаем удачи 😊"
 )
 BOT_OFFER_SEND_TELEGRAM_ID = (
-    "Ваш Telegram-идентификатор - ```%d```\n\n"
+    "Ваш Telegram-идентификатор - ```{telegram_id}```\n\n"
     "Для дальнейшей работы, пожалуйста, перешлите это сообщение кейс-менеджеру, "
     "чтобы начать получать уведомления."
 )
@@ -136,7 +136,7 @@ async def is_expert_callback(update: Update, context: CallbackContext):
     await update.callback_query.answer()
 
     if user_data is None:
-        message = BOT_OFFER_SEND_TELEGRAM_ID % telegram_id
+        message = BOT_OFFER_SEND_TELEGRAM_ID.format(telegram_id=telegram_id)
         await edit_message(update=update, new_text=message)
         return states.UNAUTHORIZED_STATE
 
