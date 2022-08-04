@@ -5,7 +5,7 @@ from constants import callback_data, states
 from conversation.menu import menu_conversation
 from conversation.timezone import get_timezone, states_timezone_conversation_dict
 from core import config
-from core.send_message import edit_message, send_message
+from core.send_message import edit_message, reply_message
 from decorators.logger import async_error_logger
 from menu_button import COMMANDS, COMMANDS_UNAUTHORIZED, menu_button
 from service.api_client import APIService
@@ -34,7 +34,7 @@ BOT_OFFER_ONLINE_CONSULTATION = (
 )
 BOT_OFFER_FILL_FORM_FOR_FUTURE_EXPERT = (
     "Мы всегда рады подключать к проекту новых специалистов!\nЗдорово, что вы хотите работать с нами 🤗.\n"
-    f"Заполните, пожалуйста, эту [анкету]({config.FORM_URL_FUTURE_EXPERT})  (нужно 15 минут).\n\n"
+    f"Заполните, пожалуйста, эту [анкету]({config.FORM_URL_FUTURE_EXPERT}) - нужно 15 минут.\n\n"
     "Команда сервиса подробно изучит вашу заявку и свяжется с вами в течение недели, чтобы договориться о "
     "видеоинтервью.\nПеред интервью мы можем попросить вас ответить на тестовый кейс, чтобы обсудить его на "
     "встрече.\n\nЖелаем удачи 😊"
@@ -54,7 +54,7 @@ async def start(update: Update, context: CallbackContext):
     user_data = await autorize(update.effective_user.id, context)
 
     if user_data is not None:
-        await send_message(context=context, chat_id=update.effective_chat.id, text=BOT_GREETINGS_MESSAGE)
+        await reply_message(update=update, text=BOT_GREETINGS_MESSAGE)
         await menu_button(context, COMMANDS)
         await get_timezone(update, context)
         return states.TIMEZONE_STATE
@@ -67,12 +67,7 @@ async def start(update: Update, context: CallbackContext):
         ]
     ]
     reply_markup = InlineKeyboardMarkup(keyboard)
-    await send_message(
-        context=context,
-        chat_id=update.effective_chat.id,
-        text=BOT_QUESTON_YOU_ARE_EXPERT,
-        reply_markup=reply_markup,
-    )
+    await reply_message(update=update, text=BOT_QUESTON_YOU_ARE_EXPERT, reply_markup=reply_markup)
     return states.UNAUTHORIZED_STATE
 
 
@@ -113,7 +108,7 @@ async def register_as_expert_callback(update: Update, context: CallbackContext):
     """
     Sends a registration form to the user.
     """
-    await send_message(context=context, chat_id=update.effective_chat.id, text=BOT_OFFER_FILL_FORM_FOR_FUTURE_EXPERT)
+    await reply_message(update=update, text=BOT_OFFER_FILL_FORM_FOR_FUTURE_EXPERT)
     return ConversationHandler.END
 
 
@@ -123,6 +118,7 @@ async def autorize(telegram_id: int, context: CallbackContext):
     """
     api_service = APIService()
     user_data = await api_service.authenticate_user(telegram_id=telegram_id)
+
     if user_data is not None:
         context.user_data["username"] = user_data.username
         context.user_data["timezone"] = user_data.timezone
