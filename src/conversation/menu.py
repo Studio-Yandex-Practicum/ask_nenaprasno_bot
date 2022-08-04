@@ -69,7 +69,6 @@ async def button_statistic_month_callback(update: Update, context: ContextTypes.
         message = (
             "К сожалению у вас не было отвеченных завок :(\n"
             "Мы верим, что в следующем месяце все изменится! :)"
-
         )
     await reply_message(update=update, text=message)
 
@@ -89,6 +88,7 @@ async def button_actual_requests_callback(update: Update, context: ContextTypes.
     message = (
         f"У вас в работе {user_active_consultations.active_consultations} заявок.\n"
         f"Посмотреть заявки на сайте:\n{list_for_message}"
+    )
     await reply_message(update=update, text=message)
 
 
