@@ -58,7 +58,7 @@ class SiteAPIService(AbstractAPIService):
         url = f"{self.site_url}/tgbot/stat/active/user/{telegram_id}"
         active_consultations = await self.__get_json_data(url=url)
         try:
-            return UserActiveConsultations(**active_consultations) if active_consultations else None
+            return UserActiveConsultations(**active_consultations)
         except TypeError as error:
             logger.error("Failed convert json to dataclass: %s", error)
             return None
@@ -67,7 +67,7 @@ class SiteAPIService(AbstractAPIService):
         url = f"{self.site_url}/tgbot/stat/overdue/user/{telegram_id}"
         exp_consultations = await self.__get_json_data(url=url)
         try:
-            return UserExpiredConsultations(**exp_consultations) if exp_consultations else None
+            return UserExpiredConsultations(**exp_consultations)
         except TypeError as error:
             logger.error("Failed convert json to dataclass: %s", error)
             return None
@@ -76,7 +76,7 @@ class SiteAPIService(AbstractAPIService):
         url = f"{self.site_url}/tgbot/stat/monthly/user/{telegram_id}"
         user_month_stat = await self.__get_json_data(url=url)
         try:
-            return UserMonthStat(**user_month_stat) if user_month_stat else None
+            return UserMonthStat(**user_month_stat)
         except TypeError as error:
             logger.error("Failed convert json to dataclass: %s", error)
             return None
@@ -85,7 +85,7 @@ class SiteAPIService(AbstractAPIService):
         url = f"{self.site_url}/tgbot/user/{telegram_id}"
         user = await self.__get_json_data(url=url)
         try:
-            return UserData(**user) if user else None
+            return UserData(**user)
         except TypeError as error:
             logger.error("Failed convert json to dataclass: %s", error)
             return None
