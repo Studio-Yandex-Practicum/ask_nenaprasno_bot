@@ -5,6 +5,7 @@ from constants import callback_data, states
 from conversation.timezone import get_timezone as configurate_timezone
 from conversation.timezone import states_timezone_conversation_dict
 from core.config import TRELLO_BORD_ID, URL_SERVICE_RULES, URL_SITE
+from core.send_message import reply_message
 from decorators.logger import async_error_logger
 from service.api_client import APIService
 
@@ -39,7 +40,7 @@ async def menu(update: Update, context: ContextTypes.DEFAULT_TYPE):
             )
         ],
     ]
-    await update.message.reply_text("Меню", reply_markup=InlineKeyboardMarkup(menu_buttons))
+    await reply_message(update=update, text="Меню", reply_markup=InlineKeyboardMarkup(menu_buttons))
     return states.MENU_STATE
 
 
@@ -48,7 +49,7 @@ async def button_reaction_callback(update: Update, context: ContextTypes.DEFAULT
     """
     Sends a list of current requests/requests to the user.
     """
-    await update.callback_query.message.reply_text(text="button_reaction_callback")
+    await reply_message(update=update, text="button reaction callback")
     return states.MENU_STATE
 
 
@@ -68,7 +69,7 @@ async def button_statistic_month_callback(update: Update, context: ContextTypes.
         f"✅Среднее время ответа - {user_statistics.average_user_answer_time:.1f}\n\n"
         f"[Открыть Trello](https://trello.com/{TRELLO_BORD_ID}/?filter=member:{username_trello})\n\n"
     )
-    await update.callback_query.message.reply_text(text=message, parse_mode="Markdown")
+    await reply_message(update=update, text=message)
 
 
 @async_error_logger(name="conversation.requests.button_actual_requests_callback")
@@ -85,12 +86,12 @@ async def button_actual_requests_callback(update: Update, context: ContextTypes.
     for consultation in consultations_list:
         list_for_message += f"{URL_SITE}doctor/consultation/{consultation['consultation_id']}\n"
     message = (
-        f"У вас в работе {user_active_consultations.active_consultations} заявок.\n"
+        f"У вас в работе {user_active_consultations.active_consultations} заявок\n"
         f"У {user_active_consultations.expiring_consultations} истекает срок:\n"
         f"{list_for_message}"
         f"\n[Открыть Trello](https://trello.com/{TRELLO_BORD_ID}/?filter=member:{username_trello})\n\n"
     )
-    await update.callback_query.message.reply_text(text=message, parse_mode="Markdown")
+    await reply_message(update=update, text=message)
 
 
 @async_error_logger(name="conversation.requests.button_overdue_requests_callback")
@@ -110,7 +111,7 @@ async def button_overdue_requests_callback(update: Update, context: ContextTypes
     message = (
         f"Время истекло 😎\n"
         f"Ваше количество просроченных заявок - {expired_consultations.expired_consultations}\n"
-        f"Верим и ждем.\n\n"
+        f"Верим и ждем\n\n"
         f"Посмотреть заявки на сайте:\n {link_neneprasno}\n"
         f"----\n"
         f"В работе количество  заявок - {expiring_consultations.active_consultations}\n"
@@ -118,7 +119,7 @@ async def button_overdue_requests_callback(update: Update, context: ContextTypes
         f"Открыть [Trello](https://trello.com/{TRELLO_BORD_ID}/?filter=member:"
         f"{username_trello}/?filter=overdue:true)\n\n"
     )
-    await update.callback_query.message.reply_text(text=message)
+    await reply_message(update=update, text=message)
 
 
 menu_conversation = ConversationHandler(
