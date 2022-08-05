@@ -53,7 +53,7 @@ async def monthly_stat_job(context: CallbackContext) -> None:
         "***Рейтинг*** - rating\n"
         "***Среднее время ответа*** - average_user_answer_time\n\n"
         f"\n[Открыть Trello](https://trello.com/{config.TRELLO_BORD_ID})\n\n"
-        "Мы рады работать в одной команде :)\n"
+        "Мы рады работать в одной команде :\\)\n"
         "Так держать!"
     )
     alias_dict = dict(
