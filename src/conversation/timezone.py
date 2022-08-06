@@ -1,4 +1,11 @@
-from telegram import InlineKeyboardButton, InlineKeyboardMarkup, KeyboardButton, ReplyKeyboardMarkup, Update
+from telegram import (
+    InlineKeyboardButton,
+    InlineKeyboardMarkup,
+    KeyboardButton,
+    ReplyKeyboardMarkup,
+    ReplyKeyboardRemove,
+    Update,
+)
 from telegram.ext import CallbackContext, ContextTypes, MessageHandler, filters
 
 from core.config import URL_SERVICE_RULES
@@ -56,6 +63,11 @@ async def check_timezone(update: Update, context: ContextTypes.DEFAULT_TYPE, tim
             )
         ],
     ]
+    await reply_message(
+        update=update,
+        text="Вы настроили часовой пояс, теперь уведомления будут приходить в удобное время.",
+        reply_markup=ReplyKeyboardRemove(),
+    )
     reply_markup = InlineKeyboardMarkup(buttons_after_timezone)
     await reply_message(
         update=update,
