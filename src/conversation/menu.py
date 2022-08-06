@@ -81,6 +81,7 @@ async def button_actual_requests_callback(update: Update, context: ContextTypes.
     service = APIService()
     telegram_id = update.effective_user.id
     user_active_consultations = await service.get_user_active_consultations(telegram_id=telegram_id)
+    username_trello = user_active_consultations.username_trello
     consultations_list = user_active_consultations.active_consultations_data
     list_for_message = ""
     for consultation in consultations_list:
@@ -88,6 +89,8 @@ async def button_actual_requests_callback(update: Update, context: ContextTypes.
     message = (
         f"У вас в работе {user_active_consultations.active_consultations} заявок.\n"
         f"Посмотреть заявки на сайте:\n{list_for_message}"
+        f"\n[Открыть Trello](https://trello.com/{TRELLO_BORD_ID}/?filter=member:"
+        f"{username_trello}/?filter=overdue:true)\n\n"
     )
     await reply_message(update=update, text=message)
 
