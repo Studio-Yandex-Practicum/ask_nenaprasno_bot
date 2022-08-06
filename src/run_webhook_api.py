@@ -3,6 +3,9 @@ from json import JSONDecodeError
 import httpx
 import uvicorn
 from starlette.applications import Starlette
+from starlette.authentication import requires
+from starlette.middleware import Middleware
+from starlette.middleware.authentication import AuthenticationMiddleware
 from starlette.requests import Request
 from starlette.responses import JSONResponse, Response
 from starlette.routing import Route
@@ -12,10 +15,12 @@ from telegram.error import TelegramError
 from bot import init_webhook
 from core import config
 from core.logger import logger
+from middleware import TokenAuthBackend
 from service.api_client import APIService
-from service.trello_data_deserializer import TrelloDeserializerModel
-from service.models import HealthCheckResponseModel
-from create_trello_webhook import trello_webhook
+from service.models import (AssignedConsultationModel,
+                            ClosedConsultationModel,
+                            ConsultationModel,
+                            HealthCheckResponseModel)
 
 
 async def start_bot() -> None:
@@ -59,31 +64,55 @@ async def telegram_webhook_api(request: Request) -> Response:
     return Response()
 
 
-async def trello_webhook_api(request: Request) -> Response:
-    """
-    Plug func catching trello post request
-    :param request: Trello request
-    :return: Response "ok"
-    """
+async def deserialize(request: Request, deserializer):
     try:
-        trello_data: TrelloDeserializerModel = TrelloDeserializerModel.from_dict(await request.json())
-        logger.info(f"Got new trello request: {trello_data}.")
-        return Response(status_code=httpx.codes.OK)
+        request_data: deserializer = deserializer.from_dict(await request.json())
+        logger.info(f"Got new api request: {request_data}")
+        return Response(status_code=httpx.codes.OK), request_data
     except KeyError as error:
         logger.error(f"Got a KeyError: {error}")
-        return Response(status_code=httpx.codes.BAD_REQUEST)
+        return Response(status_code=httpx.codes.BAD_REQUEST), None
     except JSONDecodeError as error:
         logger.error(f"Got a JSONDecodeError: {error}")
-        return Response(status_code=httpx.codes.OK)
+        return Response(status_code=httpx.codes.BAD_REQUEST), None
+
+
+@requires('authenticated', status_code=401)
+async def consultation_assign(request: Request) -> Response:
+    response, request_data = await deserialize(request, AssignedConsultationModel)
+    return response
+
+
+@requires('authenticated', status_code=401)
+async def consultation_close(request: Request) -> Response:
+    response, request_data = await deserialize(request, ClosedConsultationModel)
+    return response
+
+
+@requires('authenticated', status_code=401)
+async def consultation_message(request: Request) -> Response:
+    response, request_data = await deserialize(request, ConsultationModel)
+    return response
+
+
+@requires('authenticated', status_code=401)
+async def consultation_feedback(request: Request) -> Response:
+    response, request_data = await deserialize(request, ConsultationModel)
+    return response
 
 
 routes = [
     Route("/telegramWebhookApi", telegram_webhook_api, methods=["POST"]),
     Route("/healthcheck", healthcheck_api, methods=["GET"]),
-    Route("/trelloWebhookApi", trello_webhook_api, methods=["POST", "HEAD"]),
+    Route("/bot/consultation/assign", consultation_assign, methods=["POST"]),
+    Route("/bot/consultation/close", consultation_close, methods=["POST"]),
+    Route("/bot/consultation/message", consultation_message, methods=["POST"]),
+    Route("/bot/consultation/feedback", consultation_feedback, methods=["POST"]),
 ]
 
-api = Starlette(routes=routes, on_startup=[start_bot, trello_webhook], on_shutdown=[stop_bot])
+middleware = [Middleware(AuthenticationMiddleware, backend=TokenAuthBackend())]
+
+api = Starlette(routes=routes, on_startup=[start_bot], on_shutdown=[stop_bot], middleware=middleware)
 
 
 if __name__ == "__main__":

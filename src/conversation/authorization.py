@@ -1,11 +1,11 @@
 from telegram import InlineKeyboardButton, InlineKeyboardMarkup, Update
-from telegram.constants import ParseMode
 from telegram.ext import CallbackContext, CallbackQueryHandler, CommandHandler, ConversationHandler
 
 from constants import callback_data, states
 from conversation.menu import menu_conversation
 from conversation.timezone import get_timezone, states_timezone_conversation_dict
 from core import config
+from core.send_message import edit_message, reply_message
 from decorators.logger import async_error_logger
 from menu_button import COMMANDS, COMMANDS_UNAUTHORIZED, menu_button
 from service.api_client import APIService
@@ -20,6 +20,30 @@ BOT_GREETINGS_MESSAGE = (
     "Для начала, давайте настроим часовой пояс, чтобы вы получали "
     "уведомления в удобное время."
 )
+BOT_QUESTON_YOU_ARE_EXPERT = (
+    "Привет! Этот бот предназначен только для экспертов справочной службы Просто спросить. Вы являетесь экспертом?"
+)
+BOT_QUESTON_WANT_BE_EXPERT = (
+    "Этот бот предназначен только для экспертов справочной службы ***'Просто спросить'***.\n"
+    "Хотите стать *нашим экспертом* 👨‍⚕️ и отвечать на заявки от пациентов и их близких?"
+)
+BOT_OFFER_ONLINE_CONSULTATION = (
+    'Этот бот предназначен только для экспертов справочной службы ***"Просто спросить"***.\n'
+    "Если у вас возникли вопросы об онкологическом заболевании, "
+    'заполните заявку на странице справочной службы ***"Просто спросить"***.'
+)
+BOT_OFFER_FILL_FORM_FOR_FUTURE_EXPERT = (
+    "Мы всегда рады подключать к проекту новых специалистов!\nЗдорово, что вы хотите работать с нами 🤗.\n"
+    f"Заполните, пожалуйста, эту [анкету]({config.FORM_URL_FUTURE_EXPERT}) - нужно 15 минут.\n\n"
+    "Команда сервиса подробно изучит вашу заявку и свяжется с вами в течение недели, чтобы договориться о "
+    "видеоинтервью.\nПеред интервью мы можем попросить вас ответить на тестовый кейс, чтобы обсудить его на "
+    "встрече.\n\nЖелаем удачи 😊"
+)
+BOT_OFFER_SEND_TELEGRAM_ID = (
+    "Ваш Telegram-идентификатор - ```{telegram_id}```\n\n"
+    "Для дальнейшей работы, пожалуйста, перешлите это сообщение кейс-менеджеру, "
+    "чтобы начать получать уведомления."
+)
 
 
 @async_error_logger(name="conversation.authorization.start")
@@ -30,7 +54,7 @@ async def start(update: Update, context: CallbackContext):
     user_data = await autorize(update.effective_user.id, context)
 
     if user_data is not None:
-        await update.message.reply_text(text=BOT_GREETINGS_MESSAGE)
+        await reply_message(update=update, text=BOT_GREETINGS_MESSAGE)
         await menu_button(context, COMMANDS)
         await get_timezone(update, context)
         return states.TIMEZONE_STATE
@@ -43,11 +67,7 @@ async def start(update: Update, context: CallbackContext):
         ]
     ]
     reply_markup = InlineKeyboardMarkup(keyboard)
-    await update.message.reply_text(
-        text="Привет! Этот бот предназначен только для экспертов справочной службы Просто спросить. "
-        "Вы являетесь экспертом?",
-        reply_markup=reply_markup,
-    )
+    await reply_message(update=update, text=BOT_QUESTON_YOU_ARE_EXPERT, reply_markup=reply_markup)
     return states.UNAUTHORIZED_STATE
 
 
@@ -63,12 +83,7 @@ async def not_expert_callback(update: Update, context: CallbackContext):
         ]
     ]
     reply_markup = InlineKeyboardMarkup(keyboard)
-    await update.callback_query.edit_message_text(
-        text="Этот бот предназначен только для экспертов справочной службы ***'Просто спросить'***.\n"
-        "Хотите стать *нашим экспертом* 👨‍⚕️ и отвечать на заявки от пациентов и их близких?",
-        reply_markup=reply_markup,
-        parse_mode=ParseMode.MARKDOWN,
-    )
+    await edit_message(update=update, new_text=BOT_QUESTON_WANT_BE_EXPERT, reply_markup=reply_markup)
     return states.REGISTRATION_STATE
 
 
@@ -84,13 +99,7 @@ async def support_or_consult_callback(update: Update, context: CallbackContext):
         ]
     ]
     reply_markup = InlineKeyboardMarkup(keyboard)
-    await update.callback_query.edit_message_text(
-        text='Этот бот предназначен только для экспертов справочной службы ***"Просто спросить"***.\n'
-        "Если у вас возникли вопросы об онкологическом заболевании, "
-        'заполните заявку на странице справочной службы ***"Просто спросить"***.',
-        reply_markup=reply_markup,
-        parse_mode=ParseMode.MARKDOWN,
-    )
+    await edit_message(update=update, new_text=BOT_OFFER_ONLINE_CONSULTATION, reply_markup=reply_markup)
     return ConversationHandler.END
 
 
@@ -99,14 +108,7 @@ async def register_as_expert_callback(update: Update, context: CallbackContext):
     """
     Sends a registration form to the user.
     """
-    await update.callback_query.message.reply_text(
-        text="Мы всегда рады подключать к проекту новых специалистов!\nЗдорово, что вы хотите работать с нами 🤗.\n"
-        f"Заполните, пожалуйста, эту [анкету]({config.FORM_URL_FUTURE_EXPERT})  (нужно 15 минут).\n\n"
-        "Команда сервиса подробно изучит вашу заявку и свяжется с вами в течение недели, чтобы договориться о "
-        "видеоинтервью.\nПеред интервью мы можем попросить вас ответить на тестовый кейс, чтобы обсудить его на "
-        "встрече.\n\nЖелаем удачи 😊",
-        parse_mode=ParseMode.MARKDOWN,
-    )
+    await reply_message(update=update, text=BOT_OFFER_FILL_FORM_FOR_FUTURE_EXPERT)
     return ConversationHandler.END
 
 
@@ -116,6 +118,7 @@ async def autorize(telegram_id: int, context: CallbackContext):
     """
     api_service = APIService()
     user_data = await api_service.authenticate_user(telegram_id=telegram_id)
+
     if user_data is not None:
         context.user_data["username"] = user_data.username
         context.user_data["timezone"] = user_data.timezone
@@ -133,15 +136,11 @@ async def is_expert_callback(update: Update, context: CallbackContext):
     await update.callback_query.answer()
 
     if user_data is None:
-        message = (
-            f"Ваш Telegram-идентификатор - ```{telegram_id}```\n\n"
-            f"Для дальнейшей работы, пожалуйста, перешлите это сообщение кейс-менеджеру, "
-            f"чтобы начать получать уведомления."
-        )
-        await update.callback_query.edit_message_text(text=message, parse_mode=ParseMode.MARKDOWN)
+        message = BOT_OFFER_SEND_TELEGRAM_ID.format(telegram_id=telegram_id)
+        await edit_message(update=update, new_text=message)
         return states.UNAUTHORIZED_STATE
 
-    await update.callback_query.edit_message_text(text=BOT_GREETINGS_MESSAGE)
+    await edit_message(update=update, new_text=BOT_GREETINGS_MESSAGE)
     await menu_button(context, COMMANDS)
     await get_timezone(update, context)
     return states.TIMEZONE_STATE

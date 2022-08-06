@@ -1,5 +1,6 @@
 from abc import ABC, abstractmethod
 from http import HTTPStatus
+from typing import Optional
 
 from service.api_client.models import (
     BillStat,
@@ -26,19 +27,19 @@ class AbstractAPIService(ABC):
         pass
 
     @abstractmethod
-    async def get_user_active_consultations(self, telegram_id: int) -> UserActiveConsultations:
+    async def get_user_active_consultations(self, telegram_id: int) -> Optional[UserActiveConsultations]:
         pass
 
     @abstractmethod
-    async def get_user_expired_consultations(self, telegram_id: int) -> UserExpiredConsultations:
+    async def get_user_expired_consultations(self, telegram_id: int) -> Optional[UserExpiredConsultations]:
         pass
 
     @abstractmethod
-    async def get_user_month_stat(self, telegram_id: int) -> UserMonthStat:
+    async def get_user_month_stat(self, telegram_id: int) -> Optional[UserMonthStat]:
         pass
 
     @abstractmethod
-    async def authenticate_user(self, telegram_id: int) -> UserData:
+    async def authenticate_user(self, telegram_id: int) -> Optional[UserData]:
         pass
 
     @abstractmethod
