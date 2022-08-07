@@ -2,12 +2,14 @@ import logging
 from string import Template
 from typing import List, Optional, Union
 
-from telegram import ReplyKeyboardMarkup, Update
+from telegram import Bot, ReplyKeyboardMarkup, Update
 from telegram.constants import ParseMode
 from telegram.error import TelegramError
 from telegram.ext import CallbackContext
 
+from core.config import TRELLO_BORD_ID
 from service.api_client.models import MonthStat, WeekStat
+from service.models import ConsultationModel
 
 
 def text_to_markdown(text: str) -> str:
@@ -109,3 +111,19 @@ async def send_statistics(
             {key: getattr(user_statistic, attribute) for key, attribute in template_attribute_aliases.items()}
         )
         await send_message(context=context, chat_id=user_statistic.telegram_id, text=message, reply_markup=reply_markup)
+
+
+async def send_new_message_notification(bot: Bot, request_data: ConsultationModel) -> None:
+    """Sends message about new comment in consultation at site"""
+    chat_id = request_data.telegram_id
+    text = (
+        f"Получено новое сообщение в чате заявки №{request_data.consultation_id}\n"
+        f"[Открыть заявку на сайте]({request_data.consultation_url})\n"
+        f"[Открыть Trello](https://trello.com/{TRELLO_BORD_ID}/?filter=member:{request_data.username_trello})\n\n"
+    )
+    try:
+        await bot.send_message(
+            chat_id=chat_id, parse_mode=ParseMode.MARKDOWN_V2, text=text, disable_web_page_preview=True
+        )
+    except TelegramError:
+        logging.exception("The error sending the message to the chat: %d", chat_id)
