@@ -1,4 +1,6 @@
-from dataclasses import dataclass
+from dataclasses import dataclass, field
+
+from dataclasses_json import config, dataclass_json
 
 
 @dataclass
@@ -15,23 +17,28 @@ class UserMonthStat:
     average_user_answer_time: float
 
 
-@dataclass
-class MonthStat(UserMonthStat):
-    telegram_id: int
-    timezone: str
+@dataclass_json
+@dataclass(frozen=True)
+class MonthStat:
+    telegram_id: int = field(metadata=config(field_name="telegram_name"))
+    timezone: str = field(metadata=config(field_name="timezone"))
+    closed_consultations: int = field(metadata=config(field_name="closed_consultations"))
+    rating: float = field(metadata=config(field_name="rating"))
+    average_user_answer_time: float = field(metadata=config(field_name="average_user_answer_time"))
 
 
-@dataclass
+@dataclass_json
+@dataclass(frozen=True)
 class WeekStat:
-    telegram_id: int
-    timezone: str
-    username_trello: str
-    closed_consultations: int
-    not_expiring_consultations: int
-    expiring_consultations: int
-    expired_consultations: int
-    active_consultations: int
-    all_consultations: int
+    telegram_id: int = field(metadata=config(field_name="telegram_name"))
+    timezone: str = field(metadata=config(field_name="timezone"))
+    username_trello: str = field(metadata=config(field_name="username_trello"))
+    closed_consultations: int = field(metadata=config(field_name="closed_consultations"))
+    not_expiring_consultations: int = field(metadata=config(field_name="not_expiring_consultations"))
+    expiring_consultations: int = field(metadata=config(field_name="expiring_consultations"))
+    expired_consultations: int = field(metadata=config(field_name="expired_consultations"))
+    active_consultations: int = field(metadata=config(field_name="active_consultations"))
+    all_consultations: int = field(metadata=config(field_name="all_consultations"))
 
 
 @dataclass

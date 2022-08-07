@@ -24,7 +24,7 @@ async def weekly_stat_job(context: CallbackContext) -> None:
         "Истекает срок у *$expiring_consultations заявок*\n"
         "У *$expired_consultations* заявок срок истек\n\n"
         "Открыть [Trello](https://trello.com)\n\n"
-        "Мы рады работать в одной команде :)\n"
+        "Мы рады работать в одной команде :\\)\n"
         "*Так держать!*"
     )
     alias_dict = dict(
@@ -55,7 +55,7 @@ async def monthly_stat_job(context: CallbackContext) -> None:
         "Рейтинг - *$rating*\n"
         "Среднее время ответа - *$average_user_answer_time*\n\n"
         "Открыть [Trello](https://trello.com)\n\n"
-        "Мы рады работать в одной команде :)\n"
+        "Мы рады работать в одной команде :\\)\n"
         "*Так держать!*"
     )
     alias_dict = dict(
