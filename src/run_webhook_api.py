@@ -14,8 +14,9 @@ from telegram.error import TelegramError
 
 from bot import init_webhook
 from core import config
+from core.config import TRELLO_BORD_ID, URL_SITE
 from core.logger import logger
-from core.send_message import send_new_message_notification
+from core.send_message import send_message
 from middleware import TokenAuthBackend
 from service.api_client import APIService
 from service.models import (
@@ -96,8 +97,15 @@ async def consultation_close(request: Request) -> Response:
 @requires("authenticated", status_code=401)
 async def consultation_message(request: Request) -> Response:
     response, request_data = await deserialize(request, ConsultationModel)
-    bot: Bot = api.state.bot_app.bot
-    await send_new_message_notification(bot, request_data)
+    if request_data is not None:
+        bot = api.state.bot_app.bot
+        chat_id = request_data.telegram_id
+        text = (
+            f"Получено новое сообщение в чате заявки №{request_data.consultation_id}\n"
+            f"[Открыть заявку на сайте]({URL_SITE}doctor/consultation/{request_data.consultation_url})\n"
+            f"[Открыть Trello](https://trello.com/{TRELLO_BORD_ID}/?filter=member:{request_data.username_trello})\n\n"
+        )
+        await send_message(bot=bot, chat_id=chat_id, text=text)
     return response
 
 
