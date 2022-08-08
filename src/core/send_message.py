@@ -7,7 +7,7 @@ from telegram.constants import ParseMode
 from telegram.error import TelegramError
 from telegram.ext import CallbackContext
 
-from core.config import TRELLO_BORD_ID
+from core.config import TRELLO_BORD_ID, URL_SITE
 from service.api_client.models import MonthStat, WeekStat
 from service.models import ConsultationModel
 
@@ -118,7 +118,7 @@ async def send_new_message_notification(bot: Bot, request_data: ConsultationMode
     chat_id = request_data.telegram_id
     text = (
         f"Получено новое сообщение в чате заявки №{request_data.consultation_id}\n"
-        f"[Открыть заявку на сайте]({request_data.consultation_url})\n"
+        f"[Открыть заявку на сайте]({URL_SITE}doctor/consultation/{request_data.consultation_url})\n"
         f"[Открыть Trello](https://trello.com/{TRELLO_BORD_ID}/?filter=member:{request_data.username_trello})\n\n"
     )
     try:
