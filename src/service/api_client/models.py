@@ -37,6 +37,7 @@ class WeekStat:
     username_trello: str
     closed_consultations: int
     not_expiring_consultations: int
+    expiring_consultations: int
     expired_consultations: int
     active_consultations: int
     all_consultations: int
