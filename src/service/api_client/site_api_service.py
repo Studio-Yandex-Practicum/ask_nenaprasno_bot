@@ -1,6 +1,7 @@
+# pylint: disable=no-member
 import json
 from http import HTTPStatus
-from typing import Optional, Union
+from typing import Optional
 
 import httpx
 
@@ -30,46 +31,58 @@ class SiteAPIService(AbstractAPIService):
     async def get_bill(self) -> BillStat:
         ...
 
-    async def get_week_stat(self) -> list[WeekStat]:
-        return await self.__get_list_with_data(WeekStat, f"{self.site_url}/tgbot/stat/weekly")
+    async def get_week_stat(self) -> Optional[list[WeekStat]]:
+        url = f"{self.site_url}/tgbot/stat/weekly"
+        list_week_stat = await self.__get_json_data(url=url)
+        try:
+            return [WeekStat.from_dict(one_week_stat) for one_week_stat in list_week_stat]
+        except TypeError as error:
+            logger.error("Failed convert json to dataclass: %s, error: %s", WeekStat, error)
+            return None
 
-    async def get_month_stat(self) -> list[MonthStat]:
-        return await self.__get_list_with_data(MonthStat, f"{self.site_url}/tgbot/stat/monthly")
+    async def get_month_stat(self) -> Optional[list[MonthStat]]:
+        url = f"{self.site_url}/tgbot/stat/monthly"
+        list_month_stat = await self.__get_json_data(url=url)
+        try:
+            return [MonthStat.from_dict(one_month_stat) for one_month_stat in list_month_stat]
+        except TypeError as error:
+            logger.error("Failed convert json to dataclass: %s, error: %s", MonthStat, error)
+            return None
 
     async def get_user_active_consultations(self, telegram_id: int) -> Optional[UserActiveConsultations]:
         url = f"{self.site_url}/tgbot/stat/active/user/{telegram_id}"
         active_consultations = await self.__get_json_data(url=url)
         try:
-            return UserActiveConsultations(**active_consultations)
+            return UserActiveConsultations.from_dict(active_consultations)
         except TypeError as error:
-            logger.error("Failed convert json to dataclass: %s", error)
+            logger.error("Failed convert json to dataclass: %s, error: %s", UserActiveConsultations, error)
             return None
 
     async def get_user_expired_consultations(self, telegram_id: int) -> Optional[UserExpiredConsultations]:
         url = f"{self.site_url}/tgbot/stat/overdue/user/{telegram_id}"
         exp_consultations = await self.__get_json_data(url=url)
         try:
-            return UserExpiredConsultations(**exp_consultations)
+            return UserExpiredConsultations.from_dict(exp_consultations)
         except TypeError as error:
-            logger.error("Failed convert json to dataclass: %s", error)
+            logger.error("Failed convert json to dataclass: %s, error: %s", UserExpiredConsultations, error)
             return None
 
     async def get_user_month_stat(self, telegram_id: int) -> Optional[UserMonthStat]:
         url = f"{self.site_url}/tgbot/stat/monthly/user/{telegram_id}"
         user_month_stat = await self.__get_json_data(url=url)
         try:
-            return UserMonthStat(**user_month_stat)
+            return UserMonthStat.from_dict(user_month_stat)
         except TypeError as error:
-            logger.error("Failed convert json to dataclass: %s", error)
+            logger.error("Failed convert json to dataclass: %s, error: %s", UserMonthStat, error)
             return None
 
     async def authenticate_user(self, telegram_id: int) -> Optional[UserData]:
         url = f"{self.site_url}/tgbot/user/{telegram_id}"
         user = await self.__get_json_data(url=url)
         try:
-            return UserData(**user)
+            return UserData.from_dict(user)
         except TypeError as error:
-            logger.error("Failed convert json to dataclass: %s", error)
+            logger.error("Failed convert json to dataclass: %s, error: %s", UserData, error)
             return None
 
     async def set_user_timezone(self, telegram_id: int, user_time_zone: str) -> HTTPStatus:
@@ -93,12 +106,4 @@ class SiteAPIService(AbstractAPIService):
                 logger.error(
                     "Got a JSONDecodeError in responce decode - %s, url - %s, error - %s", response.text, url, error
                 )
-            return None
-
-    async def __get_list_with_data(self, current_class: Union[WeekStat, MonthStat], url: str) -> Optional[list]:
-        data = await self.__get_json_data(url=url)
-        try:
-            return [current_class.from_dict(stats) for stats in data]
-        except TypeError as error:
-            logger.error("Failed convert json to dataclass: %s, error: %s", current_class, error)
             return None
