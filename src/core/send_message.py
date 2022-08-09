@@ -2,7 +2,7 @@ import logging
 from string import Template
 from typing import List, Optional, Union
 
-from telegram import ReplyKeyboardMarkup, Update
+from telegram import Bot, ReplyKeyboardMarkup, Update
 from telegram.constants import ParseMode
 from telegram.error import TelegramError
 from telegram.ext import CallbackContext
@@ -18,20 +18,20 @@ def text_to_markdown(text: str) -> str:
 
 
 async def send_message(
-    context: CallbackContext,
+    bot: Bot,
     chat_id: int,
     text: str,
     reply_markup: Optional[ReplyKeyboardMarkup] = None,
 ) -> bool:
     """
     Send simple text message.
-    :param context: CallbackContext
+    :param bot: Bot
     :param chat_id: int
     :param text: str
     :param reply_markup: ReplyKeyboardMarkup | None
     """
     try:
-        await context.bot.send_message(
+        await bot.send_message(
             chat_id=chat_id,
             text=text_to_markdown(text),
             parse_mode=ParseMode.MARKDOWN_V2,
@@ -108,4 +108,4 @@ async def send_statistics(
         message = template_message.substitute(
             {key: getattr(user_statistic, attribute) for key, attribute in template_attribute_aliases.items()}
         )
-        await send_message(context=context, chat_id=user_statistic.telegram_id, text=message, reply_markup=reply_markup)
+        await send_message(bot=context.bot, chat_id=user_statistic.telegram_id, text=message, reply_markup=reply_markup)
