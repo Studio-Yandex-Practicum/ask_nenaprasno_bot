@@ -82,8 +82,16 @@ async def deserialize(request: Request, deserializer):
 
 @requires("authenticated", status_code=401)
 async def consultation_assign(request: Request) -> Response:
-    response, _ = await deserialize(request, AssignedConsultationModel)
-    # add second variable as in consultation_message when will work with it
+    response, request_data = await deserialize(request, AssignedConsultationModel)
+    if request_data is not None:
+        bot = api.state.bot_app.bot
+        chat_id = request_data.telegram_id
+        text = (
+            f"Получена новая заявка №{request_data.consultation_id}\n"
+            f"[Открыть заявку на сайте]({URL_SITE}doctor/consultation/{request_data.consultation_url})\n"
+            f"[Открыть Trello](https://trello.com/{TRELLO_BORD_ID}/?filter=member:{request_data.username_trello})\n\n"
+        )
+        await send_message(bot=bot, chat_id=chat_id, text=text)
     return response
 
 
