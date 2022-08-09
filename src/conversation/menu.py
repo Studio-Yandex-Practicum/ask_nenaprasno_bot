@@ -60,14 +60,14 @@ async def button_statistic_month_callback(update: Update, context: ContextTypes.
         await update.callback_query.message.reply_text(text="Данные недоступны!")
     else:
         if user_statistics.closed_consultations > 0:
-        message = (
-            f"С начала месяца вы сделали очень много для \"Просто спросить\" 🔥\n"
-            f"***Количество закрытых заявок*** - {user_statistics.closed_consultations}\n"
-            f"***Рейтинг*** - {user_statistics.rating:.1f}\n"
-            f"***Среднее время ответа*** - {user_statistics.average_user_answer_time:.1f}\n\n"
-            "Мы рады работать в одной команде :\\)\n"
-            "Так держать!"
-        )
+            message = (
+                f"С начала месяца вы сделали очень много для \"Просто спросить\" 🔥\n"
+                f"***Количество закрытых заявок*** - {user_statistics.closed_consultations}\n"
+                f"***Рейтинг*** - {user_statistics.rating:.1f}\n"
+                f"***Среднее время ответа*** - {user_statistics.average_user_answer_time:.1f}\n\n"
+                "Мы рады работать в одной команде :\\)\n"
+                "Так держать!"
+            )
         else:
             message = (
                 "К сожалению у вас не было отвеченных завок :\\(\n"
@@ -88,15 +88,15 @@ async def button_actual_requests_callback(update: Update, context: ContextTypes.
         await update.callback_query.message.reply_text(text="Данные недоступны!")
     else:
         username_trello = user_active_consultations.username_trello
-        consultations_list = user_active_consultations.expiring_consultations_data
+        consultations_list = user_active_consultations.active_consultations_data
         list_for_message = ""
         for consultation in consultations_list:
             list_for_message += f"{URL_SITE}doctor/consultation/{consultation['consultation_id']}\n"
         message = (
             f"У вас в работе {user_active_consultations.active_consultations} заявок.\n"
-            f"У {user_active_consultations.expiring_consultations} истекает срок:\n"
-            f"{list_for_message}"
-            f"\n[Открыть Trello](https://trello.com/{TRELLO_BORD_ID}/?filter=member:{username_trello})\n\n"
+            f"Посмотреть заявки на сайте:\n{list_for_message}"
+            f"\n[Открыть Trello](https://trello.com/{TRELLO_BORD_ID}/?filter=member:"
+            f"{username_trello}/?filter=overdue:true)\n\n"
         )
         await reply_message(update=update, text=message)
 
