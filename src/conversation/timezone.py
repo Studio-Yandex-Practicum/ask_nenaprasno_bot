@@ -1,7 +1,15 @@
-from telegram import KeyboardButton, ReplyKeyboardMarkup, ReplyKeyboardRemove, Update
+from telegram import (
+    InlineKeyboardButton,
+    InlineKeyboardMarkup,
+    KeyboardButton,
+    ReplyKeyboardMarkup,
+    ReplyKeyboardRemove,
+    Update,
+)
 from telegram.ext import CallbackContext, ContextTypes, MessageHandler, filters
 
-from constants import states
+from core.config import URL_SERVICE_RULES
+from constants import callback_data, states
 from core.send_message import reply_message
 from decorators.logger import async_error_logger
 from get_timezone import get_timezone_from_location, get_timezone_from_text_message
@@ -40,11 +48,31 @@ async def check_timezone(update: Update, context: ContextTypes.DEFAULT_TYPE, tim
             text="Не удалось определить часовой пояс. Пожалуйста, введите его вручную. Например: UTC+03:00",
         )
         return states.TIMEZONE_STATE
-    await reply_message(update=update, text=f"Установлен часовой пояс для {timezone}")
+    buttons_after_timezone = [
+        [
+            InlineKeyboardButton(
+                text="Статистика за месяц", callback_data=callback_data.CALLBACK_STATISTIC_MONTH_COMMAND
+            ),
+        ],
+        [InlineKeyboardButton(text="В работе", callback_data=callback_data.CALLBACK_ACTUAL_REQUESTS_COMMAND)],
+        [InlineKeyboardButton(text="🔥 Cроки горят", callback_data=callback_data.CALLBACK_OVERDUE_REQUESTS_COMMAND)],
+        [
+            InlineKeyboardButton(
+                text="Правила сервиса",
+                url=URL_SERVICE_RULES,
+            )
+        ],
+    ]
     await reply_message(
         update=update,
-        text="Вы настроили часовой пояс, теперь уведомления будут приходить в удобное время",
+        text="Вы настроили часовой пояс, теперь уведомления будут приходить в удобное время.",
         reply_markup=ReplyKeyboardRemove(),
+    )
+    reply_markup = InlineKeyboardMarkup(buttons_after_timezone)
+    await reply_message(
+        update=update,
+        text="А еще с помощью меня вы можете узнать про:",
+        reply_markup=reply_markup,
     )
     return states.MENU_STATE
 
