@@ -1,3 +1,6 @@
+# pylint: disable=W0703
+# pylint: disable=E1101
+# pylint: disable=W0612
 from json import JSONDecodeError
 
 import httpx
@@ -12,21 +15,25 @@ from starlette.routing import Route
 from telegram import Bot, Update
 from telegram.error import TelegramError
 
-from bot import init_webhook
+from bot import NAME_OVERDUE_REMINDER_JOB, init_webhook
 from core import config
 from core.logger import logger
 from middleware import TokenAuthBackend
 from service.api_client import APIService
-from service.models import (AssignedConsultationModel,
-                            ClosedConsultationModel,
-                            ConsultationModel,
-                            HealthCheckResponseModel)
+from service.models import (
+    AssignedConsultationModel,
+    ClosedConsultationModel,
+    ConsultationModel,
+    HealthCheckResponseModel,
+)
 
 
 async def start_bot() -> None:
     bot_app = await init_webhook()
     await bot_app.initialize()
     await bot_app.start()
+    overdue_reminder = bot_app.job_queue.get_jobs_by_name(NAME_OVERDUE_REMINDER_JOB)[0]
+    await overdue_reminder.run(bot_app)
 
     # provide bot started bot application to server via global state variable
     # https://www.starlette.io/applications/#storing-state-on-the-app-instance
@@ -45,7 +52,7 @@ async def healthcheck_api(request: Request) -> JSONResponse:
         await bot.get_me()
         health.bot_is_avaliable = True
     except TelegramError as error:
-        logger.error(f"Failed to connect to bot: {error}")
+        logger.error("Failed to connect to bot: %s", error)
 
     try:
         api_service = APIService()
@@ -53,7 +60,7 @@ async def healthcheck_api(request: Request) -> JSONResponse:
         if bill is not None:
             health.site_api_is_avaliable = True
     except Exception as error:
-        logger.error(f"Failed to connect to database: {error}")
+        logger.error("Failed to connect to database: %s", error)
 
     return JSONResponse(content=health.to_dict())
 
@@ -67,35 +74,35 @@ async def telegram_webhook_api(request: Request) -> Response:
 async def deserialize(request: Request, deserializer):
     try:
         request_data: deserializer = deserializer.from_dict(await request.json())
-        logger.info(f"Got new api request: {request_data}")
+        logger.info("Got new api request: %s", request_data)
         return Response(status_code=httpx.codes.OK), request_data
     except KeyError as error:
-        logger.error(f"Got a KeyError: {error}")
+        logger.error("Got a KeyError: %s", error)
         return Response(status_code=httpx.codes.BAD_REQUEST), None
     except JSONDecodeError as error:
-        logger.error(f"Got a JSONDecodeError: {error}")
+        logger.error("Got a JSONDecodeError: %s", error)
         return Response(status_code=httpx.codes.BAD_REQUEST), None
 
 
-@requires('authenticated', status_code=401)
+@requires("authenticated", status_code=401)
 async def consultation_assign(request: Request) -> Response:
     response, request_data = await deserialize(request, AssignedConsultationModel)
     return response
 
 
-@requires('authenticated', status_code=401)
+@requires("authenticated", status_code=401)
 async def consultation_close(request: Request) -> Response:
     response, request_data = await deserialize(request, ClosedConsultationModel)
     return response
 
 
-@requires('authenticated', status_code=401)
+@requires("authenticated", status_code=401)
 async def consultation_message(request: Request) -> Response:
     response, request_data = await deserialize(request, ConsultationModel)
     return response
 
 
-@requires('authenticated', status_code=401)
+@requires("authenticated", status_code=401)
 async def consultation_feedback(request: Request) -> Response:
     response, request_data = await deserialize(request, ConsultationModel)
     return response

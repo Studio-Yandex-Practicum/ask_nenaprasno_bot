@@ -9,7 +9,9 @@ from core.logger import logger
 from service.api_client.base import AbstractAPIService
 from service.api_client.models import (
     BillStat,
+    DueConsultation,
     MonthStat,
+    OverdueConsultation,
     UserActiveConsultations,
     UserData,
     UserExpiredConsultations,
@@ -97,6 +99,24 @@ class SiteAPIService(AbstractAPIService):
         async with httpx.AsyncClient() as client:
             response = await client.put(url=url, headers=headers, json=data)
             return response.status_code
+
+    async def get_overdue_consultation(self) -> Optional[list[OverdueConsultation]]:
+        url = f"{self.site_url}/tgbot/consultations"
+        consultations = self.__get_json_data(url=url)
+        try:
+            return [OverdueConsultation(**consultation) for consultation in consultations]
+        except TypeError as error:
+            logger.error("Failed convert json to dataclass: %s", error)
+            return None
+
+    async def get_due_consultation(self, consultation_id: int) -> Optional[DueConsultation]:
+        url = f"{self.site_url}/tgbot/consultations/{consultation_id}"
+        consultation = self.__get_json_data(url=url)
+        try:
+            return DueConsultation(**consultation)
+        except TypeError as error:
+            logger.error("Failed convert json to dataclass: %s", error)
+            return None
 
     async def __get_json_data(self, url: str) -> Optional[dict]:
         headers = {"Authorization": self.bot_token}

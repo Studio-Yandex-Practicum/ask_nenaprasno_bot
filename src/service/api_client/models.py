@@ -1,4 +1,6 @@
+# pylint: disable=C0103
 from dataclasses import dataclass
+from typing import Optional
 
 
 @dataclass
@@ -52,3 +54,16 @@ class UserExpiredConsultations:
 @dataclass
 class BillStat:
     telegram_ids: list[int]
+
+
+@dataclass
+class OverdueConsultation:
+    id: int
+    due: str
+    telegram_id: int
+    username_trello: str
+
+
+@dataclass
+class DueConsultation:
+    due: Optional[str]

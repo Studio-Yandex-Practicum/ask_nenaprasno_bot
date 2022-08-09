@@ -1,3 +1,5 @@
+from datetime import time
+
 from telegram import Update
 from telegram.ext import Application, ApplicationBuilder, CallbackQueryHandler, ContextTypes, PicklePersistence
 
@@ -5,8 +7,10 @@ from constants import callback_data
 from conversation import start_conversation
 from core import config
 from core.send_message import edit_message
-from jobs import monthly_bill_reminder_job, monthly_stat_job, weekly_stat_job
+from jobs import monthly_bill_reminder_job, monthly_stat_job, overdue_consult_reminder_job, weekly_stat_job
 from service.repeat_message import repeat_message_after_1_hour_callback
+
+NAME_OVERDUE_REMINDER_JOB = "overdue_reminder"
 
 
 async def skip_bill_callback_handler(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
@@ -48,6 +52,7 @@ def create_bot():
         monthly_bill_reminder_job, when=config.MONTHLY_RECEIPT_REMINDER_TIME, day=config.MONTHLY_RECEIPT_REMINDER_DAY
     )
     bot_app.job_queue.run_monthly(monthly_stat_job, when=config.MONTHLY_STAT_TIME, day=config.MONTHLY_STAT_DAY)
+    bot_app.job_queue.run_daily(overdue_consult_reminder_job, time=time(0, 0), name=NAME_OVERDUE_REMINDER_JOB)
     return bot_app
 
 
@@ -59,8 +64,7 @@ async def init_webhook() -> Application:
     bot_app = create_bot()
     bot_app.updater = None
     await bot_app.bot.set_webhook(
-        url=f"{config.WEBHOOK_URL}/telegramWebhookApi",
-        secret_token=config.SECRET_TELEGRAM_TOKEN
+        url=f"{config.WEBHOOK_URL}/telegramWebhookApi", secret_token=config.SECRET_TELEGRAM_TOKEN
     )
     return bot_app
 

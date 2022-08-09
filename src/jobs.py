@@ -1,4 +1,4 @@
-from datetime import timedelta
+from datetime import date, datetime, timedelta
 from string import Template
 
 from telegram import InlineKeyboardButton, InlineKeyboardMarkup
@@ -9,6 +9,8 @@ from core import config
 from core.send_message import send_message, send_statistics
 from service.api_client import APIService
 from service.repeat_message import repeat_after_one_hour_button
+
+DATETIME_FORMAT = "%Y-%m-%dT%H:%M:%S"
 
 
 async def weekly_stat_job(context: CallbackContext) -> None:
@@ -107,3 +109,59 @@ async def daily_bill_remind_job(context: CallbackContext) -> None:
         user_id=job.user_id,
         name=f"send_{job.user_id}_bill_until_complete",
     )
+
+
+async def check_and_send_reminder_about_overdue(context: CallbackContext) -> None:
+    """
+    Check time overdue consultation and create new job or
+    send message to user.
+    """
+    consultation_id, telegram_id = context.job.data
+    consultation = await APIService().get_due_consultation(consultation_id)
+    if consultation is None:
+        return
+    if consultation.due is not None:
+        due_time = datetime.strptime(consultation.due, DATETIME_FORMAT)
+        if due_time.date() > date.today():
+            return
+        if due_time > datetime.now() - timedelta(hours=1):
+            context.job_queue.run_once(
+                check_and_send_reminder_about_overdue,
+                when=due_time + timedelta(hours=1),
+                data=(
+                    consultation_id,
+                    telegram_id,
+                ),
+            )
+        else:
+            user_active = await APIService().get_user_active_consultations(telegram_id)
+            user_expired = await APIService().get_user_expired_consultations(telegram_id)
+            message = (
+                "Час прошел, а наша надежда - нет 😃\n"
+                f"Ответьте пожалуйста на заявку {consultation_id}\n"
+                "[Открыть заявку на сайте](https://ask.nenaprasno.ru/)\n\n"
+                "----\n"
+                f"В работе **{user_active.active_consultations}** заявок\n"
+                f"Истекает срок у **{user_expired.expired_consultations}** заявок\n"
+                "[Открыть Trello](https://trello.com/)"
+            )
+            await send_message(chat_id=telegram_id, text=message, context=context)
+
+
+async def overdue_consult_reminder_job(context: CallbackContext) -> None:
+    """
+    Makes jobs reminder for overdue consultation today.
+    """
+    overdue_consultations = await APIService().get_overdue_consultation()
+    for consultation in overdue_consultations:
+        due_time = datetime.strptime(consultation.due, DATETIME_FORMAT)
+        if due_time.date() == date.today():
+            time_remind = due_time + timedelta(hours=1)
+            context.job_queue.run_once(
+                check_and_send_reminder_about_overdue,
+                when=time_remind,
+                data=(
+                    consultation.id,
+                    consultation.telegram_id,
+                ),
+            )
