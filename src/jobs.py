@@ -18,12 +18,12 @@ async def weekly_stat_job(context: CallbackContext) -> None:
     week_statistics = await APIService().get_week_stat()
     template_message = Template(
         "Вы делали добрые дела 7 дней!\n"
-        "Посмотрите, как прошла ваша неделя  в \"Просто спросить\"\n"
-        "Закрыто заявок - ***closed_consultations***\n"
-        "В работе ***active_consultations*** заявок  за неделю\n\n"
-        "Истекает срок у ***expiring_consultations заявок***\n"
-        "У ***expired_consultations*** заявок срок истек\n\n"
-        f"\n[Открыть Trello](https://trello.com/{config.TRELLO_BORD_ID})\n\n"
+        "Посмотрите, как прошла ваша неделя  в *\"Просто спросить\"*\n"
+        "Закрыто заявок - *$closed_consultations*\n"
+        "В работе *$active_consultations* заявок  за неделю\n\n"
+        "Истекает срок у *$expiring_consultations заявок*\n"
+        "У *$expired_consultations* заявок срок истек\n\n"
+        f"[Открыть Trello](https://trello.com/{config.TRELLO_BORD_ID})\n\n"
     )
     alias_dict = dict(
         closed_consultations="closed_consultations",
@@ -48,13 +48,11 @@ async def monthly_stat_job(context: CallbackContext) -> None:
     month_statistics = await APIService().get_month_stat()
     template_message = Template(
         "Это был отличный месяц!\n"
-        "Посмотрите, как он прошел в \"Просто спросить\" 🔥\n\n"
-        "***Количество закрытых заявок*** - closed_consultations\n"
-        "***Рейтинг*** - rating\n"
-        "***Среднее время ответа*** - average_user_answer_time\n\n"
-        f"\n[Открыть Trello](https://trello.com/{config.TRELLO_BORD_ID})\n\n"
-        "Мы рады работать в одной команде :\\)\n"
-        "Так держать!"
+        "Посмотрите, как он прошел в *\"Просто спросить\"* 🔥\n\n"
+        "Количество закрытых заявок - *$closed_consultations*\n"
+        "Рейтинг - *$rating*\n"
+        "Среднее время ответа - *$average_user_answer_time*\n\n"
+        f"[Открыть Trello](https://trello.com/{config.TRELLO_BORD_ID})\n\n"
     )
     alias_dict = dict(
         closed_consultations="closed_consultations",
