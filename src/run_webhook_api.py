@@ -14,13 +14,17 @@ from telegram.error import TelegramError
 
 from bot import init_webhook
 from core import config
+from core.config import TRELLO_BORD_ID, URL_SITE
 from core.logger import logger
+from core.send_message import send_message
 from middleware import TokenAuthBackend
 from service.api_client import APIService
-from service.models import (AssignedConsultationModel,
-                            ClosedConsultationModel,
-                            ConsultationModel,
-                            HealthCheckResponseModel)
+from service.models import (
+    AssignedConsultationModel,
+    ClosedConsultationModel,
+    ConsultationModel,
+    HealthCheckResponseModel,
+)
 
 
 async def start_bot() -> None:
@@ -45,17 +49,16 @@ async def healthcheck_api(request: Request) -> JSONResponse:
         await bot.get_me()
         health.bot_is_avaliable = True
     except TelegramError as error:
-        logger.error(f"Failed to connect to bot: {error}")
+        logger.error("Failed to connect to bot: %s", error)
 
     try:
         api_service = APIService()
         bill = await api_service.get_bill()
         if bill is not None:
             health.site_api_is_avaliable = True
-    except Exception as error:
-        logger.error(f"Failed to connect to database: {error}")
-
-    return JSONResponse(content=health.to_dict())
+    except httpx.RequestError as error:
+        logger.error("Failed to connect to database: %s", error)
+    return JSONResponse(content=health.__dict__)
 
 
 async def telegram_webhook_api(request: Request) -> Response:
@@ -67,37 +70,49 @@ async def telegram_webhook_api(request: Request) -> Response:
 async def deserialize(request: Request, deserializer):
     try:
         request_data: deserializer = deserializer.from_dict(await request.json())
-        logger.info(f"Got new api request: {request_data}")
+        logger.info("Got new api request: %s", request_data)
         return Response(status_code=httpx.codes.OK), request_data
     except KeyError as error:
-        logger.error(f"Got a KeyError: {error}")
+        logger.error("Got a KeyError: %s", error)
         return Response(status_code=httpx.codes.BAD_REQUEST), None
     except JSONDecodeError as error:
-        logger.error(f"Got a JSONDecodeError: {error}")
+        logger.error("Got a JSONDecodeError: %s", error)
         return Response(status_code=httpx.codes.BAD_REQUEST), None
 
 
-@requires('authenticated', status_code=401)
+@requires("authenticated", status_code=401)
 async def consultation_assign(request: Request) -> Response:
-    response, request_data = await deserialize(request, AssignedConsultationModel)
+    response, _ = await deserialize(request, AssignedConsultationModel)
+    # add second variable as in consultation_message when will work with it
     return response
 
 
-@requires('authenticated', status_code=401)
+@requires("authenticated", status_code=401)
 async def consultation_close(request: Request) -> Response:
-    response, request_data = await deserialize(request, ClosedConsultationModel)
+    response, _ = await deserialize(request, ClosedConsultationModel)
+    # add second variable as in consultation_message when will work with it
     return response
 
 
-@requires('authenticated', status_code=401)
+@requires("authenticated", status_code=401)
 async def consultation_message(request: Request) -> Response:
     response, request_data = await deserialize(request, ConsultationModel)
+    if request_data is not None:
+        bot = api.state.bot_app.bot
+        chat_id = request_data.telegram_id
+        text = (
+            f"Получено новое сообщение в чате заявки №{request_data.consultation_id}\n"
+            f"[Открыть заявку на сайте]({URL_SITE}doctor/consultation/{request_data.consultation_url})\n"
+            f"[Открыть Trello](https://trello.com/{TRELLO_BORD_ID}/?filter=member:{request_data.username_trello})\n\n"
+        )
+        await send_message(bot=bot, chat_id=chat_id, text=text)
     return response
 
 
-@requires('authenticated', status_code=401)
+@requires("authenticated", status_code=401)
 async def consultation_feedback(request: Request) -> Response:
-    response, request_data = await deserialize(request, ConsultationModel)
+    response, _ = await deserialize(request, ConsultationModel)
+    # add second variable as in consultation_message when will work with it
     return response
 
 
