@@ -119,7 +119,7 @@ async def consultation_feedback(request: Request) -> Response:
             f"Вы получили новый отзыв по заявке №{request_data.consultation_id}\n"
             f"{request_data.consultation_response})\n"
             f"[Открыть Trello](https://trello.com/{TRELLO_BORD_ID}"
-            f"/?filter=member:{request_data.username_trello},overdue:true)\n\n"
+            f"/?filter=member:{request_data.username_trello},dueComplete:true)\n\n"
         )
     await send_message(bot=bot, chat_id=chat_id, text=text)
     return response
