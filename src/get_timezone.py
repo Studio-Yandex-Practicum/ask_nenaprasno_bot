@@ -1,4 +1,5 @@
 import datetime
+import re
 
 import pytz
 from telegram import Update
@@ -40,4 +41,8 @@ async def get_timezone_from_text_message(update: Update, context: CallbackContex
     Sets timezone based on a text message from the user.
     Return None if error, any else (string with timezone will be best).
     """
-    return str(update.message.text)
+    timezone = re.search(r"([Uu][Tt][Cc])?([-+]?)(\d{1,2}):\d{1,2}", update.message.text)
+    if timezone is None:
+        return None
+    znak = "+" if timezone[2] == "" else timezone[2]
+    return f"UTC{znak}{format(timezone[3], '0>2')}:00"

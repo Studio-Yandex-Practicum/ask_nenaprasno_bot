@@ -8,8 +8,8 @@ from telegram import (
 )
 from telegram.ext import CallbackContext, ContextTypes, MessageHandler, filters
 
-from core.config import URL_SERVICE_RULES
 from constants import callback_data, states
+from core.config import URL_SERVICE_RULES
 from core.send_message import reply_message
 from decorators.logger import async_error_logger
 from get_timezone import get_timezone_from_location, get_timezone_from_text_message
@@ -45,7 +45,10 @@ async def check_timezone(update: Update, context: ContextTypes.DEFAULT_TYPE, tim
     if timezone is None:
         await reply_message(
             update=update,
-            text="Не удалось определить часовой пояс. Пожалуйста, введите его вручную. Например: UTC+03:00",
+            text=(
+                "Не удалось определить часовой пояс. "
+                "Пожалуйста, введите его вручную. Например: UTC+03:00, UTC-03:00, utc3:0 и даже 3:0"
+            ),
         )
         return states.TIMEZONE_STATE
     buttons_after_timezone = [
@@ -65,7 +68,7 @@ async def check_timezone(update: Update, context: ContextTypes.DEFAULT_TYPE, tim
     ]
     await reply_message(
         update=update,
-        text="Вы настроили часовой пояс, теперь уведомления будут приходить в удобное время.",
+        text=f"Вы настроили часовой пояс *{timezone}*, теперь уведомления будут приходить в удобное время.",
         reply_markup=ReplyKeyboardRemove(),
     )
     reply_markup = InlineKeyboardMarkup(buttons_after_timezone)
@@ -93,7 +96,9 @@ async def get_timezone_from_text_message_callback(update: Update, context: Callb
     """
     text = str(update.message.text)
     if text == "Напишу свою таймзону сам":
-        await reply_message(update=update, text="Введите таймзону UTC. Например: UTC+03:00")
+        await reply_message(
+            update=update, text="Введите таймзону UTC. Например: UTC+03:00, UTC-03:00, utc3:0 и даже 3:0"
+        )
         return states.TIMEZONE_STATE
     timezone = await get_timezone_from_text_message(update, context)
     return await check_timezone(update, context, timezone)
