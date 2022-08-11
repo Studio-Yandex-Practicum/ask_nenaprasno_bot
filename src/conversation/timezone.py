@@ -47,7 +47,8 @@ async def check_timezone(update: Update, context: ContextTypes.DEFAULT_TYPE, tim
             update=update,
             text=(
                 "Не удалось определить часовой пояс. "
-                "Пожалуйста, введите его вручную. Например: UTC+03:00, UTC-03:00, utc3:0 и даже 3:0"
+                "Пожалуйста, введите его вручную. Например: UTC+03:00, UTC-03:00, utc3:0 и даже 3:0\n"
+                "[Википедия](https://ru.wikipedia.org/wiki/Время_в_России)"
             ),
         )
         return states.TIMEZONE_STATE
@@ -97,7 +98,11 @@ async def get_timezone_from_text_message_callback(update: Update, context: Callb
     text = str(update.message.text)
     if text == "Напишу свою таймзону сам":
         await reply_message(
-            update=update, text="Введите таймзону UTC. Например: UTC+03:00, UTC-03:00, utc3:0 и даже 3:0"
+            update=update,
+            text=(
+                "Введите таймзону UTC. Например: UTC+03:00, UTC-03:00, utc3:0 и даже 3:0\n"
+                "[Википедия](https://ru.wikipedia.org/wiki/Время_в_России)"
+            ),
         )
         return states.TIMEZONE_STATE
     timezone = await get_timezone_from_text_message(update, context)
