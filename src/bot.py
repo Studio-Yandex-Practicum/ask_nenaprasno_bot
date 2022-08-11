@@ -4,13 +4,12 @@ from telegram import Update
 from telegram.ext import Application, ApplicationBuilder, CallbackQueryHandler, ContextTypes, PicklePersistence
 
 from constants import callback_data
+from constants.jobs import NAME_OVERDUE_REMINDER_JOB
 from conversation import start_conversation
 from core import config
 from core.send_message import edit_message
 from jobs import monthly_bill_reminder_job, monthly_stat_job, overdue_consult_reminder_job, weekly_stat_job
 from service.repeat_message import repeat_message_after_1_hour_callback
-
-NAME_OVERDUE_REMINDER_JOB = "overdue_reminder"
 
 
 async def skip_bill_callback_handler(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
