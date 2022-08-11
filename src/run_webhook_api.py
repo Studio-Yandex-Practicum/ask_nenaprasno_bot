@@ -119,8 +119,17 @@ async def consultation_message(request: Request) -> Response:
 
 @requires("authenticated", status_code=401)
 async def consultation_feedback(request: Request) -> Response:
-    response, _ = await deserialize(request, ConsultationModel)
-    # add second variable as in consultation_message when will work with it
+    response, request_data = await deserialize(request, ClosedConsultationModel)
+    if request_data is not None:
+        bot = api.state.bot_app.bot
+        chat_id = request_data.telegram_id
+        text = (
+            f"Вы получили новый отзыв по заявке №{request_data.consultation_id}\n"
+            f"{request_data.consultation_response})\n"
+            f"[Открыть Trello](https://trello.com/{TRELLO_BORD_ID}"
+            f"/?filter=member:{request_data.username_trello},dueComplete:true)\n\n"
+        )
+    await send_message(bot=bot, chat_id=chat_id, text=text)
     return response
 
 

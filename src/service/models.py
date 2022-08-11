@@ -1,4 +1,5 @@
 from dataclasses import dataclass, field
+
 from dataclasses_json import config, dataclass_json
 
 
@@ -13,6 +14,9 @@ class HealthCheckResponseModel:
 @dataclass(frozen=True)
 class ClosedConsultationModel:
     consultation_id: str = field(metadata=config(field_name="consultation_id"))
+    consultation_response: str = field(metadata=config(field_name="consultation_response"))
+    username_trello: str = field(metadata=config(field_name="username_trello"))
+    telegram_id: str = field(metadata=config(field_name="telegram_id"))
 
 
 @dataclass_json
