@@ -6,7 +6,7 @@ from telegram import (
     ReplyKeyboardRemove,
     Update,
 )
-from telegram.ext import CallbackContext, ContextTypes, MessageHandler, filters
+from telegram.ext import CallbackContext, ContextTypes
 
 from core.config import URL_SERVICE_RULES
 from constants import callback_data, states
@@ -97,11 +97,3 @@ async def get_timezone_from_text_message_callback(update: Update, context: Callb
         return states.TIMEZONE_STATE
     timezone = await get_timezone_from_text_message(update, context)
     return await check_timezone(update, context, timezone)
-
-
-states_timezone_conversation_dict = {
-    states.TIMEZONE_STATE: [
-        MessageHandler(filters.LOCATION, get_timezone_from_location_callback),
-        MessageHandler(filters.TEXT & ~filters.COMMAND, get_timezone_from_text_message_callback),
-    ],
-}

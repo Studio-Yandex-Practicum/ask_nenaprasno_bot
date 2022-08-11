@@ -1,9 +1,10 @@
 from telegram import InlineKeyboardButton, InlineKeyboardMarkup, Update
-from telegram.ext import CallbackQueryHandler, CommandHandler, ContextTypes, ConversationHandler
+from telegram.ext import (CallbackQueryHandler, CommandHandler, ContextTypes, ConversationHandler, MessageHandler,
+                          filters)
 
 from constants import callback_data, states
 from conversation.timezone import get_timezone as configurate_timezone
-from conversation.timezone import states_timezone_conversation_dict
+from conversation.timezone import get_timezone_from_location_callback, get_timezone_from_text_message_callback
 from core.config import TRELLO_BORD_ID, URL_SERVICE_RULES, URL_SITE
 from core.send_message import reply_message
 from decorators.logger import async_error_logger
@@ -132,11 +133,15 @@ async def button_overdue_requests_callback(update: Update, context: ContextTypes
         await reply_message(update=update, text=message)
 
 
-menu_conversation = ConversationHandler(
+dialogs_conversation = ConversationHandler(
     allow_reentry=True,
     persistent=True,
-    name="menu_conversation",
-    entry_points=[CommandHandler("menu", menu)],
+    name="dialogs_conversation",
+    entry_points=[
+        CommandHandler("menu", menu),
+        MessageHandler(filters.Regex("Напишу свою таймзону сам"), callback=get_timezone_from_text_message_callback),
+        MessageHandler(filters.LOCATION, callback=get_timezone_from_location_callback)
+    ],
     states={
         states.MENU_STATE: [
             CallbackQueryHandler(
@@ -151,7 +156,10 @@ menu_conversation = ConversationHandler(
             ),
             CallbackQueryHandler(configurate_timezone, pattern=callback_data.CALLBACK_CONFIGURATE_TIMEZONE_COMMAND),
         ],
-        **states_timezone_conversation_dict,
+        states.TIMEZONE_STATE: [
+            MessageHandler(filters.LOCATION, get_timezone_from_location_callback),
+            MessageHandler(filters.TEXT & ~filters.COMMAND, get_timezone_from_text_message_callback),
+        ],
     },
     fallbacks=[],
 )

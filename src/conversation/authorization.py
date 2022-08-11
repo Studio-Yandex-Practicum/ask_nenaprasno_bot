@@ -2,8 +2,8 @@ from telegram import InlineKeyboardButton, InlineKeyboardMarkup, Update
 from telegram.ext import CallbackContext, CallbackQueryHandler, CommandHandler, ConversationHandler
 
 from constants import callback_data, states
-from conversation.menu import menu_conversation
-from conversation.timezone import get_timezone, states_timezone_conversation_dict
+from conversation.menu import dialogs_conversation
+from conversation.timezone import get_timezone
 from core import config
 from core.send_message import edit_message, reply_message
 from decorators.logger import async_error_logger
@@ -55,7 +55,7 @@ async def start(update: Update, context: CallbackContext):
         await reply_message(update=update, text=BOT_GREETINGS_MESSAGE)
         await menu_button(context, COMMANDS)
         await get_timezone(update, context)
-        return states.TIMEZONE_STATE
+        return states.DIALOG_STATE
     await menu_button(context, COMMANDS_UNAUTHORIZED)
     keyboard = [
         [
@@ -137,7 +137,7 @@ async def is_expert_callback(update: Update, context: CallbackContext):
     await edit_message(update=update, new_text=BOT_GREETINGS_MESSAGE)
     await menu_button(context, COMMANDS)
     await get_timezone(update, context)
-    return states.TIMEZONE_STATE
+    return states.DIALOG_STATE
 
 
 authorization_conversation = ConversationHandler(
@@ -160,8 +160,7 @@ authorization_conversation = ConversationHandler(
                 support_or_consult_callback, pattern=callback_data.CALLBACK_SUPPORT_OR_CONSULT_COMMAND
             ),
         ],
-        states.MENU_STATE: [menu_conversation],
-        **states_timezone_conversation_dict,
+        states.DIALOG_STATE: [dialogs_conversation],
     },
     fallbacks=[],
 )
