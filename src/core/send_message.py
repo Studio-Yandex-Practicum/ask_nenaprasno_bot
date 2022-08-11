@@ -18,8 +18,7 @@ def text_to_markdown(text: str) -> str:
     Automatic detection of construction: [name](link)
     """
     new_text = re.sub(r"\\?([-.!+)(])", r"\\\1", text)
-    new_text = re.sub(r"(\[[^\[\]]*?\])(\\\()(.*?)(\\\))", r"\1(\3)", new_text)
-    return new_text
+    return re.sub(r"(\[[^\[\]]*?\])(\\\()(.*?)(\\\))", r"\1(\3)", new_text)
 
 
 async def send_message(
