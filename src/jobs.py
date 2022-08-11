@@ -19,14 +19,12 @@ async def weekly_stat_job(context: CallbackContext) -> None:
     week_statistics = await APIService().get_week_stat()
     template_message = Template(
         "Вы делали добрые дела 7 дней!\n"
-        'Посмотрите, как прошла ваша неделя  в *""Просто спросить""*\n'
+        "Посмотрите, как прошла ваша неделя  в *\"Просто спросить\"*\n"
         "Закрыто заявок - *$closed_consultations*\n"
         "В работе *$active_consultations* заявок  за неделю\n\n"
         "Истекает срок у *$expiring_consultations заявок*\n"
         "У *$expired_consultations* заявок срок истек\n\n"
-        "Открыть [Trello](https://trello.com)\n\n"
-        "Мы рады работать в одной команде :)\n"
-        "*Так держать!*"
+        f"[Открыть Trello](https://trello.com/{config.TRELLO_BORD_ID})\n\n"
     )
     alias_dict = dict(
         closed_consultations="closed_consultations",
@@ -51,13 +49,11 @@ async def monthly_stat_job(context: CallbackContext) -> None:
     month_statistics = await APIService().get_month_stat()
     template_message = Template(
         "Это был отличный месяц!\n"
-        'Посмотрите, как он прошел в *""Просто спросить""* 🔥\n\n'
+        "Посмотрите, как он прошел в *\"Просто спросить\"* 🔥\n\n"
         "Количество закрытых заявок - *$closed_consultations*\n"
         "Рейтинг - *$rating*\n"
         "Среднее время ответа - *$average_user_answer_time*\n\n"
-        "Открыть [Trello](https://trello.com)\n\n"
-        "Мы рады работать в одной команде :)\n"
-        "*Так держать!*"
+        f"[Открыть Trello](https://trello.com/{config.TRELLO_BORD_ID})\n\n"
     )
     alias_dict = dict(
         closed_consultations="closed_consultations",
@@ -94,7 +90,7 @@ async def daily_bill_remind_job(context: CallbackContext) -> None:
     bill_done_button = InlineKeyboardButton(text="✅ Уже отправил(а)", callback_data=CALLBACK_DONE_BILL_COMMAND)
     bill_skip_button = InlineKeyboardButton(text="🕑 Скоро отправлю", callback_data=CALLBACK_SKIP_BILL_COMMAND)
     menu = InlineKeyboardMarkup([[repeat_after_one_hour_button], [bill_done_button], [bill_skip_button]])
-    await send_message(chat_id=job.user_id, text=message, reply_markup=menu, context=context)
+    await send_message(chat_id=job.user_id, text=message, reply_markup=menu, bot=context.bot)
     send_time = config.MONTHLY_RECEIPT_REMINDER_TIME
     # user_utc = context.user_data.get("UTC")
     # Не смог понять, в каком виде хранятся данные о часовом поясе юзера. Здесь надо переопределить информацию о
