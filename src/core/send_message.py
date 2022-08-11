@@ -1,4 +1,5 @@
 import logging
+import re
 from string import Template
 from typing import List, Optional, Union
 
@@ -12,9 +13,13 @@ from service.api_client.models import MonthStat, WeekStat
 
 def text_to_markdown(text: str) -> str:
     """
-    Escaping some service characters of MarkdownV2
+    Formatting text by Telegram Markdown v.2 - not completely
+    Auto-escaping simbols: - . ! + ) (
+    Automatic detection of construction: [name](link)
     """
-    return text.replace(".", r"\.").replace("-", r"\-").replace("+", r"\+").replace("!", r"\!")
+    new_text = re.sub(r"\\?([-.!+)(])", r"\\\1", text)
+    new_text = re.sub(r"(\[[^\[\]]*?\])(\\\()(.*?)(\\\))", r"\1(\3)", new_text)
+    return new_text
 
 
 async def send_message(
