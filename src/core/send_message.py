@@ -10,13 +10,6 @@ from telegram.ext import CallbackContext
 from service.api_client.models import MonthStat, WeekStat
 
 
-def text_to_markdown(text: str) -> str:
-    """
-    Escaping some service characters of MarkdownV2
-    """
-    return text.replace(".", r"\.").replace("-", r"\-").replace("+", r"\+").replace("!", r"\!")
-
-
 async def send_message(
     bot: Bot,
     chat_id: int,
@@ -33,8 +26,8 @@ async def send_message(
     try:
         await bot.send_message(
             chat_id=chat_id,
-            text=text_to_markdown(text),
-            parse_mode=ParseMode.MARKDOWN_V2,
+            text=text,
+            parse_mode=ParseMode.MARKDOWN,
             reply_markup=reply_markup,
         )
         return True
@@ -56,8 +49,8 @@ async def edit_message(
     """
     try:
         await update.callback_query.edit_message_text(
-            text=text_to_markdown(new_text),
-            parse_mode=ParseMode.MARKDOWN_V2,
+            text=new_text,
+            parse_mode=ParseMode.MARKDOWN,
             reply_markup=reply_markup,
         )
         return True
@@ -79,7 +72,7 @@ async def reply_message(
     """
     try:
         message = update.callback_query.message if update.message is None else update.message
-        await message.reply_markdown_v2(text=text_to_markdown(text), reply_markup=reply_markup)
+        await message.reply_markdown(text=text, reply_markup=reply_markup)
         return True
     except TelegramError:
         logging.exception("The error reply on the message to the chat: %d", update.effective_chat.id)
