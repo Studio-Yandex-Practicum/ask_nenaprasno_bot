@@ -37,7 +37,7 @@ async def menu(update: Update, context: ContextTypes.DEFAULT_TYPE):
         ],
     ]
     await reply_message(update=update, text="Меню", reply_markup=InlineKeyboardMarkup(menu_buttons))
-    return states.MENU_STATE
+    return states.STATISTICS_STATE
 
 
 @async_error_logger(name="conversation.requests.actual_requests_callback")
@@ -46,7 +46,7 @@ async def button_reaction_callback(update: Update, context: ContextTypes.DEFAULT
     Sends a list of current requests/requests to the user.
     """
     await reply_message(update=update, text="button reaction callback")
-    return states.MENU_STATE
+    return states.STATISTICS_STATE
 
 
 @async_error_logger(name="conversation.requests.button_statistic_month_callback")
@@ -133,7 +133,7 @@ async def button_overdue_requests_callback(update: Update, context: ContextTypes
         await reply_message(update=update, text=message)
 
 
-dialogs_conversation = ConversationHandler(
+menu_conversation = ConversationHandler(
     allow_reentry=True,
     persistent=True,
     name="dialogs_conversation",
@@ -143,11 +143,10 @@ dialogs_conversation = ConversationHandler(
         MessageHandler(filters.LOCATION, callback=get_timezone_from_location_callback)
     ],
     states={
-        states.MENU_STATE: [
+        states.STATISTICS_STATE: [
             CallbackQueryHandler(
                 button_statistic_month_callback, pattern=callback_data.CALLBACK_STATISTIC_MONTH_COMMAND
             ),
-            CallbackQueryHandler(button_reaction_callback, pattern=callback_data.CALLBACK_STATISTIC_WEEK_COMMAND),
             CallbackQueryHandler(
                 button_overdue_requests_callback, pattern=callback_data.CALLBACK_OVERDUE_REQUESTS_COMMAND
             ),

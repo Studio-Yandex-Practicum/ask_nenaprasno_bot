@@ -74,7 +74,7 @@ async def check_timezone(update: Update, context: ContextTypes.DEFAULT_TYPE, tim
         text="А еще с помощью меня вы можете узнать про:",
         reply_markup=reply_markup,
     )
-    return states.MENU_STATE
+    return states.STATISTICS_STATE
 
 
 @async_error_logger(name="conversation.timezone.get_timezone_from_location_callback")
