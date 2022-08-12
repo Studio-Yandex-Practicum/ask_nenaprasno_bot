@@ -136,7 +136,7 @@ async def button_overdue_requests_callback(update: Update, context: ContextTypes
 menu_conversation = ConversationHandler(
     allow_reentry=True,
     persistent=True,
-    name="dialogs_conversation",
+    name="menu_conversation",
     entry_points=[
         CommandHandler("menu", menu),
         MessageHandler(filters.Regex("Напишу свою таймзону сам"), callback=get_timezone_from_text_message_callback),
