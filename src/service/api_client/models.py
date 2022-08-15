@@ -68,7 +68,8 @@ class BillStat:
     telegram_ids: list[int]
 
 
-@dataclass
+@dataclass_json
+@dataclass(frozen=True)
 class OverdueConsultation:
     id: int
     due: str
@@ -76,6 +77,7 @@ class OverdueConsultation:
     username_trello: str
 
 
-@dataclass
+@dataclass_json
+@dataclass(frozen=True)
 class DueConsultation:
     due: Optional[str]

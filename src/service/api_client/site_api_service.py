@@ -95,20 +95,20 @@ class SiteAPIService(AbstractAPIService):
             response = await client.put(url=url, headers=headers, json=data)
             return response.status_code
 
-    async def get_overdue_consultation(self) -> Optional[list[OverdueConsultation]]:
+    async def get_daily_consultations(self) -> Optional[list[OverdueConsultation]]:
         url = f"{self.site_url}/tgbot/consultations"
         consultations = self.__get_json_data(url=url)
         try:
-            return [OverdueConsultation(**consultation) for consultation in consultations]
+            return [OverdueConsultation.from_dict(consultation) for consultation in consultations]
         except TypeError as error:
             logger.error("Failed convert json to dataclass: %s", error)
             return None
 
-    async def get_due_consultation(self, consultation_id: int) -> Optional[DueConsultation]:
+    async def get_consultation(self, consultation_id: int) -> Optional[DueConsultation]:
         url = f"{self.site_url}/tgbot/consultations/{consultation_id}"
         consultation = self.__get_json_data(url=url)
         try:
-            return DueConsultation(**consultation)
+            return DueConsultation.from_dict(consultation)
         except TypeError as error:
             logger.error("Failed convert json to dataclass: %s", error)
             return None

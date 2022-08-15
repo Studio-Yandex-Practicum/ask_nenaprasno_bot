@@ -49,9 +49,9 @@ class AbstractAPIService(ABC):
         pass
 
     @abstractmethod
-    async def get_overdue_consultation(self) -> list[OverdueConsultation]:
+    async def get_daily_consultations(self) -> list[OverdueConsultation]:
         pass
 
     @abstractmethod
-    async def get_due_consultation(self, consultation_id: int) -> DueConsultation:
+    async def get_consultation(self, consultation_id: int) -> DueConsultation:
         pass

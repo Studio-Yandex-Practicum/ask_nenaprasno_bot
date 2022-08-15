@@ -102,19 +102,19 @@ class MockAPIService(AbstractAPIService):
     async def set_user_timezone(self, telegram_id: int, user_time_zone: str) -> HTTPStatus:
         return HTTPStatus.OK
 
-    async def get_overdue_consultation(self) -> list[OverdueConsultation]:
+    async def get_daily_consultations(self) -> list[OverdueConsultation]:
         return [
             OverdueConsultation(
-                id=345, due="2022-08-09T15:36:00", telegram_id=123456789, username_trello="user1@telegram"
+                id=345, due="2022-08-15T09:56:00", telegram_id=123456789, username_trello="user12345678"
             ),
             OverdueConsultation(
-                id=455, due="2022-08-09T16:37:00", telegram_id=123456789, username_trello="user2@telegram"
+                id=455, due="2022-08-15T09:57:00", telegram_id=123456789, username_trello="user12345678"
             ),
         ]
 
-    async def get_due_consultation(self, consultation_id: int) -> DueConsultation:
+    async def get_consultation(self, consultation_id: int) -> DueConsultation:
         consultations = {
-            345: "2022-08-09T15:36:00",
-            455: "2022-08-09T16:37:00",
+            345: "2022-08-15T09:56:00",
+            455: "2022-08-15T09:57:00",
         }
         return DueConsultation(consultations.get(consultation_id, None))
