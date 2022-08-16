@@ -64,13 +64,12 @@ async def button_statistic_month_callback(update: Update, context: ContextTypes.
                 f"***Количество закрытых заявок*** - {user_statistics.closed_consultations}\n"
                 f"***Рейтинг*** - {user_statistics.rating:.1f}\n"
                 f"***Среднее время ответа*** - {user_statistics.average_user_answer_time:.1f}\n\n"
-                "Мы рады работать в одной команде :\\)\n"
+                "Мы рады работать в одной команде :)\n"
                 "Так держать!"
             )
         else:
             message = (
-                "К сожалению у вас не было отвеченных завок :\\(\n"
-                "Мы верим, что в следующем месяце все изменится! :\\)"
+                "К сожалению у вас не было отвеченных завок :(\nМы верим, что в следующем месяце все изменится! :)"
             )
         await reply_message(update=update, text=message)
 

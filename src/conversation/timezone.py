@@ -15,8 +15,8 @@ from telegram.ext import (
     filters
 )
 
-from core.config import URL_SERVICE_RULES
 from constants import callback_data, states
+from core.config import URL_SERVICE_RULES
 from core.send_message import reply_message
 from decorators.logger import async_error_logger
 from get_timezone import get_timezone_from_location, get_timezone_from_text_message
@@ -52,9 +52,11 @@ async def check_timezone(update: Update, context: ContextTypes.DEFAULT_TYPE, tim
     if timezone is None:
         await reply_message(
             update=update,
-            text="Не удалось определить часовой пояс. "
-                 "Пожалуйста, введите его вручную. Например: UTC+03:00, UTC-03:00, utc3:0 и даже 3:0\n"
-                 "[Википедия](https://ru.wikipedia.org/wiki/Время_в_России)",
+            text=(
+                "Не удалось определить часовой пояс. "
+                "Пожалуйста, введите его вручную. Например: UTC+03:00, UTC-03:00, utc3:0 и даже 3:0\n"
+                "[Википедия](https://ru.wikipedia.org/wiki/Время_в_России)"
+            ),
         )
         return states.TIMEZONE_STATE
     buttons_after_timezone = [
