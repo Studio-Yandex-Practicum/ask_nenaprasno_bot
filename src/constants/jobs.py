@@ -1,2 +1,1 @@
-DATETIME_FORMAT_FOR_CONSULTATION = "%Y-%m-%dT%H:%M:%S"
 DAILY_CONSULTATIONS_REMINDER_JOB = "daily_consulations_reminder_job"

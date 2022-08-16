@@ -70,7 +70,7 @@ class BillStat:
 
 @dataclass_json
 @dataclass(frozen=True)
-class OverdueConsultation:
+class Consultation:
     id: int
     due: str
     telegram_id: int
@@ -79,5 +79,5 @@ class OverdueConsultation:
 
 @dataclass_json
 @dataclass(frozen=True)
-class DueConsultation:
+class ConsultationDueDate:
     due: Optional[str]

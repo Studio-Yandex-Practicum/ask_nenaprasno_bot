@@ -4,9 +4,9 @@ from typing import Optional
 
 from service.api_client.models import (
     BillStat,
-    DueConsultation,
+    Consultation,
+    ConsultationDueDate,
     MonthStat,
-    OverdueConsultation,
     UserActiveConsultations,
     UserData,
     UserExpiredConsultations,
@@ -49,9 +49,9 @@ class AbstractAPIService(ABC):
         pass
 
     @abstractmethod
-    async def get_daily_consultations(self) -> list[OverdueConsultation]:
+    async def get_daily_consultations(self) -> list[Consultation]:
         pass
 
     @abstractmethod
-    async def get_consultation(self, consultation_id: int) -> DueConsultation:
+    async def get_consultation(self, consultation_id: int) -> ConsultationDueDate:
         pass

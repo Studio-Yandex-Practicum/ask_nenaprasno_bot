@@ -1,4 +1,3 @@
-# pylint: disable=W0703
 # pylint: disable=W0612
 from json import JSONDecodeError
 

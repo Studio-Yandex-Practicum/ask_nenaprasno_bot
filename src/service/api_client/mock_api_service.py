@@ -4,9 +4,9 @@ from typing import Optional
 from service.api_client.base import AbstractAPIService
 from service.api_client.models import (
     BillStat,
-    DueConsultation,
+    Consultation,
+    ConsultationDueDate,
     MonthStat,
-    OverdueConsultation,
     UserActiveConsultations,
     UserData,
     UserExpiredConsultations,
@@ -102,19 +102,15 @@ class MockAPIService(AbstractAPIService):
     async def set_user_timezone(self, telegram_id: int, user_time_zone: str) -> HTTPStatus:
         return HTTPStatus.OK
 
-    async def get_daily_consultations(self) -> list[OverdueConsultation]:
+    async def get_daily_consultations(self) -> list[Consultation]:
         return [
-            OverdueConsultation(
-                id=345, due="2022-08-15T09:56:00", telegram_id=123456789, username_trello="user12345678"
-            ),
-            OverdueConsultation(
-                id=455, due="2022-08-15T09:57:00", telegram_id=123456789, username_trello="user12345678"
-            ),
+            Consultation(id=345, due="2022-08-15T21:03:00", telegram_id=211399878, username_trello="user12345678"),
+            Consultation(id=455, due="2022-08-15T21:04:00", telegram_id=211399878, username_trello="user12345678"),
         ]
 
-    async def get_consultation(self, consultation_id: int) -> DueConsultation:
+    async def get_consultation(self, consultation_id: int) -> ConsultationDueDate:
         consultations = {
-            345: "2022-08-15T09:56:00",
-            455: "2022-08-15T09:57:00",
+            345: "2022-08-15T21:03:00",
+            455: "2022-08-15T21:04:00",
         }
-        return DueConsultation(consultations.get(consultation_id, None))
+        return ConsultationDueDate(consultations.get(consultation_id, None))
