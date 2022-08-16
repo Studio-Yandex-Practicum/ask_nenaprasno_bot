@@ -3,33 +3,33 @@ from telegram.ext import CallbackContext, CallbackQueryHandler, CommandHandler, 
 
 from constants import callback_data, states
 from conversation.menu import menu_conversation
-from conversation.timezone import get_timezone
+from conversation.timezone import set_timezone_from_keyboard
 from core import config
 from core.send_message import edit_message, reply_message
 from decorators.logger import async_error_logger
-from menu_button import COMMANDS, COMMANDS_UNAUTHORIZED, menu_button
+from menu_button import COMMANDS_UNAUTHORIZED, menu_button
 from service.api_client import APIService
 
 BOT_GREETINGS_MESSAGE = (
     "Вы успешно начали работу с ботом. Меня зовут Женя Краб, "
     "я telegram-bot для экспертов справочной службы "
-    "\"Просто спросить\". \nЯ буду сообщать вам о новых заявках, "
+    '"Просто спросить". \nЯ буду сообщать вам о новых заявках, '
     "присылать уведомления о новых сообщениях в чате от пациентов "
     "и их близких и напоминать о просроченных заявках. \n"
     "Нам нравится, что вы с нами. Не терпится увидеть вас в деле! "
 )
 BOT_QUESTON_YOU_ARE_EXPERT = (
-    "Привет! Этот бот предназначен только для экспертов справочной службы \"Просто спросить\". "
+    'Привет! Этот бот предназначен только для экспертов справочной службы "Просто спросить".\n'
     "Вы являетесь экспертом?"
 )
 BOT_QUESTON_WANT_BE_EXPERT = (
-    "Этот бот предназначен только для экспертов справочной службы \"Просто спросить\".\n"
+    'Этот бот предназначен только для экспертов справочной службы "Просто спросить".\n'
     "Хотите стать нашим экспертом и отвечать на заявки от пациентов и их близких?"
 )
 BOT_OFFER_ONLINE_CONSULTATION = (
-    "Этот бот предназначен только для экспертов справочной службы \"Просто спросить\".\n"
+    'Этот бот предназначен только для экспертов справочной службы "Просто спросить".\n'
     "Если у вас возникли вопросы об онкологическом заболевании, "
-    "заполните заявку на странице справочной службы \"Просто спросить\"."
+    'заполните заявку на странице справочной службы "Просто спросить".'
 )
 BOT_OFFER_FILL_FORM_FOR_FUTURE_EXPERT = (
     "Мы всегда рады подключать к проекту новых специалистов!\nЗдорово, что вы хотите работать с нами.\n"
@@ -53,8 +53,7 @@ async def start(update: Update, context: CallbackContext):
     user_data = await autorize(update.effective_user.id, context)
     if user_data is not None:
         await reply_message(update=update, text=BOT_GREETINGS_MESSAGE)
-        await menu_button(context, COMMANDS)
-        await get_timezone(update, context)
+        await set_timezone_from_keyboard(update, context)
         return states.MENU_STATE
     await menu_button(context, COMMANDS_UNAUTHORIZED)
     keyboard = [
@@ -111,7 +110,7 @@ async def register_as_expert_callback(update: Update, context: CallbackContext):
 
 async def autorize(telegram_id: int, context: CallbackContext):
     """
-    try to authenticate telegram user on site API
+    Try to authenticate telegram user on site API.
     """
     api_service = APIService()
     user_data = await api_service.authenticate_user(telegram_id=telegram_id)
@@ -125,7 +124,7 @@ async def autorize(telegram_id: int, context: CallbackContext):
 @async_error_logger(name="conversation.authorization.is_expert_callback")
 async def is_expert_callback(update: Update, context: CallbackContext):
     """
-    try to authenticate telegram user on site API and write trello_id to persistence file
+    Try to authenticate telegram user on site API and write trello_id to persistence file.
     """
     telegram_id = update.effective_user.id
     user_data = await autorize(update.effective_user.id, context)
@@ -135,8 +134,7 @@ async def is_expert_callback(update: Update, context: CallbackContext):
         await edit_message(update=update, new_text=message)
         return states.UNAUTHORIZED_STATE
     await edit_message(update=update, new_text=BOT_GREETINGS_MESSAGE)
-    await menu_button(context, COMMANDS)
-    await get_timezone(update, context)
+    await set_timezone_from_keyboard(update, context)
     return states.MENU_STATE
 
 
@@ -161,6 +159,7 @@ authorization_conversation = ConversationHandler(
             ),
         ],
         states.MENU_STATE: [menu_conversation],
+
     },
     fallbacks=[],
 )

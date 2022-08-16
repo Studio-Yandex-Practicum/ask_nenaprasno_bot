@@ -1,10 +1,8 @@
 from telegram import InlineKeyboardButton, InlineKeyboardMarkup, Update
-from telegram.ext import (CallbackQueryHandler, CommandHandler, ContextTypes, ConversationHandler, MessageHandler,
-                          filters)
+from telegram.ext import CallbackQueryHandler, CommandHandler, ContextTypes, ConversationHandler
 
 from constants import callback_data, states
-from conversation.timezone import get_timezone as configurate_timezone
-from conversation.timezone import get_timezone_from_location_callback, get_timezone_from_text_message_callback
+from conversation.timezone import set_timezone_from_keyboard, timezone_conversation
 from core.config import TRELLO_BORD_ID, URL_SERVICE_RULES, URL_SITE
 from core.send_message import reply_message
 from decorators.logger import async_error_logger
@@ -37,7 +35,7 @@ async def menu(update: Update, context: ContextTypes.DEFAULT_TYPE):
         ],
     ]
     await reply_message(update=update, text="Меню", reply_markup=InlineKeyboardMarkup(menu_buttons))
-    return states.STATISTICS_STATE
+    return states.MENU_STATE
 
 
 @async_error_logger(name="conversation.requests.actual_requests_callback")
@@ -46,7 +44,7 @@ async def button_reaction_callback(update: Update, context: ContextTypes.DEFAULT
     Sends a list of current requests/requests to the user.
     """
     await reply_message(update=update, text="button reaction callback")
-    return states.STATISTICS_STATE
+    return states.MENU_STATE
 
 
 @async_error_logger(name="conversation.requests.button_statistic_month_callback")
@@ -62,7 +60,7 @@ async def button_statistic_month_callback(update: Update, context: ContextTypes.
     else:
         if user_statistics.closed_consultations > 0:
             message = (
-                f"С начала месяца вы сделали очень много для \"Просто спросить\" 🔥\n"
+                f'С начала месяца вы сделали очень много для "Просто спросить" 🔥\n'
                 f"***Количество закрытых заявок*** - {user_statistics.closed_consultations}\n"
                 f"***Рейтинг*** - {user_statistics.rating:.1f}\n"
                 f"***Среднее время ответа*** - {user_statistics.average_user_answer_time:.1f}\n\n"
@@ -105,7 +103,7 @@ async def button_actual_requests_callback(update: Update, context: ContextTypes.
 @async_error_logger(name="conversation.requests.button_overdue_requests_callback")
 async def button_overdue_requests_callback(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     """
-    Send information about expiring and overdue consultation
+    Send information about expiring and overdue consultation.
     """
     service = APIService()
     telegram_id = update.effective_user.id
@@ -138,12 +136,10 @@ menu_conversation = ConversationHandler(
     persistent=True,
     name="menu_conversation",
     entry_points=[
-        CommandHandler("menu", menu),
-        MessageHandler(filters.Regex("Напишу свою таймзону сам"), callback=get_timezone_from_text_message_callback),
-        MessageHandler(filters.LOCATION, callback=get_timezone_from_location_callback)
+        CommandHandler("menu", menu)
     ],
     states={
-        states.STATISTICS_STATE: [
+        states.MENU_STATE: [
             CallbackQueryHandler(
                 button_statistic_month_callback, pattern=callback_data.CALLBACK_STATISTIC_MONTH_COMMAND
             ),
@@ -153,11 +149,9 @@ menu_conversation = ConversationHandler(
             CallbackQueryHandler(
                 button_actual_requests_callback, pattern=callback_data.CALLBACK_ACTUAL_REQUESTS_COMMAND
             ),
-            CallbackQueryHandler(configurate_timezone, pattern=callback_data.CALLBACK_CONFIGURATE_TIMEZONE_COMMAND),
-        ],
-        states.TIMEZONE_STATE: [
-            MessageHandler(filters.LOCATION, get_timezone_from_location_callback),
-            MessageHandler(filters.TEXT & ~filters.COMMAND, get_timezone_from_text_message_callback),
+            CallbackQueryHandler(
+                set_timezone_from_keyboard, pattern=callback_data.CALLBACK_CONFIGURATE_TIMEZONE_COMMAND),
+            timezone_conversation,
         ],
     },
     fallbacks=[],
