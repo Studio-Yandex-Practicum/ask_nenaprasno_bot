@@ -62,8 +62,8 @@ class SiteAPIService(AbstractAPIService):
         url = f"{self.site_url}/tgbot/stat/overdue/user/{telegram_id}"
         exp_consultations = await self.__get_json_data(url=url)
         try:
-            return UserExpiredConsultations.from_dict(exp_consultations)
-        except TypeError as error:
+            return None if exp_consultations is None else UserExpiredConsultations.from_dict(exp_consultations)
+        except (TypeError, AttributeError, KeyError) as error:
             logger.error("Failed convert json to dataclass: %s, error: %s", UserExpiredConsultations, error)
             return None
 
@@ -71,8 +71,8 @@ class SiteAPIService(AbstractAPIService):
         url = f"{self.site_url}/tgbot/stat/monthly/user/{telegram_id}"
         user_month_stat = await self.__get_json_data(url=url)
         try:
-            return UserMonthStat.from_dict(user_month_stat)
-        except TypeError as error:
+            return None if user_month_stat is None else UserMonthStat.from_dict(user_month_stat)
+        except (TypeError, AttributeError, KeyError) as error:
             logger.error("Failed convert json to dataclass: %s, error: %s", UserMonthStat, error)
             return None
 
@@ -80,15 +80,15 @@ class SiteAPIService(AbstractAPIService):
         url = f"{self.site_url}/tgbot/user/{telegram_id}"
         user = await self.__get_json_data(url=url)
         try:
-            return UserData.from_dict(user)
-        except TypeError as error:
+            return None if user is None else UserData.from_dict(user)
+        except (TypeError, AttributeError, KeyError) as error:
             logger.error("Failed convert json to dataclass: %s, error: %s", UserData, error)
             return None
 
     async def set_user_timezone(self, telegram_id: int, user_time_zone: str) -> HTTPStatus:
         url = f"{self.site_url}/tgbot/user"
         headers = {"Authorization": self.bot_token}
-        data = {"telegram_id": telegram_id, "time_zone": user_time_zone}
+        data = {"telegram_id": telegram_id, "timezone": user_time_zone}
         async with httpx.AsyncClient() as client:
             response = await client.put(url=url, headers=headers, json=data)
             return response.status_code

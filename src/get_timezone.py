@@ -45,4 +45,6 @@ async def get_timezone_from_text_message(update: Update, context: CallbackContex
     if timezone is None:
         return None
     timezone_sign = "+" if timezone[2] == "" else timezone[2]
-    return f"UTC{timezone_sign}{format(timezone[3], '0>2')}:00"
+    text_utc = f"UTC{timezone_sign}{format(timezone[3], '0>2')}:00"
+    await set_timezone(update.effective_chat.id, text_utc, context)
+    return text_utc

@@ -87,10 +87,11 @@ async def button_actual_requests_callback(update: Update, context: ContextTypes.
         await update.callback_query.message.reply_text(text="Данные недоступны!")
     else:
         username_trello = user_active_consultations.username_trello
-        consultations_list = user_active_consultations.active_consultations_data
-        list_for_message = ""
+        consultations_list = user_active_consultations.active_consultations_ids
+        list_for_message, num = "", 1
         for consultation in consultations_list:
-            list_for_message += f"{URL_SITE}doctor/consultation/{consultation['consultation_id']}\n"
+            list_for_message += f"[{num} завка]({URL_SITE}doctor/consultation/{consultation})\n"
+            num += 1
         message = (
             f"У вас в работе {user_active_consultations.active_consultations} заявок.\n"
             f"Посмотреть заявки на сайте:\n{list_for_message}"
@@ -108,23 +109,23 @@ async def button_overdue_requests_callback(update: Update, context: ContextTypes
     service = APIService()
     telegram_id = update.effective_user.id
     expired_consultations = await service.get_user_expired_consultations(telegram_id=telegram_id)
-    expiring_consultations = await service.get_user_active_consultations(telegram_id=telegram_id)
-    if expired_consultations is None or expiring_consultations is None:
+    active_consultations = await service.get_user_active_consultations(telegram_id=telegram_id)
+    if expired_consultations is None or active_consultations is None:
         await update.callback_query.message.reply_text(text="Данные недоступны")
     else:
         username_trello = expired_consultations.username_trello
-        expired_consultations_list = expired_consultations.expired_consultations_data
-        link_neneprasno = ""
+        expired_consultations_list = expired_consultations.expired_consultations_ids
+        link_neneprasno, num = "", 1
         for consultation in expired_consultations_list:
-            link_neneprasno += f"{URL_SITE}doctor/consultation/{consultation['consultation_id']}\n"
+            link_neneprasno += f"[{num} просроченная заявка]({URL_SITE}doctor/consultation/{consultation})\n"
+            num += 1
         message = (
             f"Время истекло 😎\n"
             f"Ваше количество просроченных заявок - {expired_consultations.expired_consultations}\n"
             f"Верим и ждем.\n\n"
             f"Посмотреть заявки на сайте:\n {link_neneprasno}\n"
             f"----\n"
-            f"В работе количество  заявок - {expiring_consultations.active_consultations}\n"
-            f"Истекает срок у количество заявок - {expiring_consultations.expiring_consultations}\n"
+            f"В работе количество  заявок - {active_consultations.active_consultations}\n"
             f"Открыть [Trello](https://trello.com/{TRELLO_BORD_ID}/?filter=member:"
             f"{username_trello}/?filter=overdue:true)\n\n"
         )
