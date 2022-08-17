@@ -22,6 +22,7 @@ from decorators.logger import async_error_logger
 from get_timezone import get_timezone_from_location, get_timezone_from_text_message
 from menu_button import COMMANDS, menu_button
 
+ASK_FLAG = 'ask_flag'
 DEFAULT_TIME = "UTC+03:00"
 
 
@@ -59,32 +60,40 @@ async def check_timezone(update: Update, context: ContextTypes.DEFAULT_TYPE, tim
             ),
         )
         return states.TIMEZONE_STATE
-    buttons_after_timezone = [
-        [
-            InlineKeyboardButton(
-                text="Статистика за месяц", callback_data=callback_data.CALLBACK_STATISTIC_MONTH_COMMAND
-            ),
-        ],
-        [InlineKeyboardButton(text="В работе", callback_data=callback_data.CALLBACK_ACTUAL_REQUESTS_COMMAND)],
-        [InlineKeyboardButton(text="🔥 Cроки горят", callback_data=callback_data.CALLBACK_OVERDUE_REQUESTS_COMMAND)],
-        [
-            InlineKeyboardButton(
-                text="Правила сервиса",
-                url=URL_SERVICE_RULES,
-            )
-        ],
-    ]
-    await reply_message(
-        update=update,
-        text=f"Вы настроили часовой пояс *{timezone}*, теперь уведомления будут приходить в удобное время.",
-        reply_markup=ReplyKeyboardRemove(),
-    )
-    reply_markup = InlineKeyboardMarkup(buttons_after_timezone)
-    await reply_message(
-        update=update,
-        text="А еще с помощью меня вы можете узнать про:",
-        reply_markup=reply_markup,
-    )
+    if context.user_data.get(ASK_FLAG):
+        buttons_after_timezone = [
+            [
+                InlineKeyboardButton(
+                    text="Статистика за месяц", callback_data=callback_data.CALLBACK_STATISTIC_MONTH_COMMAND
+                ),
+            ],
+            [InlineKeyboardButton(text="В работе", callback_data=callback_data.CALLBACK_ACTUAL_REQUESTS_COMMAND)],
+            [InlineKeyboardButton(text="🔥 Cроки горят", callback_data=callback_data.CALLBACK_OVERDUE_REQUESTS_COMMAND)],
+            [
+                InlineKeyboardButton(
+                    text="Правила сервиса",
+                    url=URL_SERVICE_RULES,
+                )
+            ],
+        ]
+        reply_markup = InlineKeyboardMarkup(buttons_after_timezone)
+        await reply_message(
+            update=update,
+            text=f"Вы настроили часовой пояс *{timezone}*, теперь уведомления будут приходить в удобное время.",
+            reply_markup=ReplyKeyboardRemove(),
+        )
+        await reply_message(
+            update=update,
+            text="А еще с помощью меня вы можете узнать про:",
+            reply_markup=reply_markup,
+        )
+        del context.user_data[ASK_FLAG]
+    else:
+        await reply_message(
+            update=update,
+            text=f"Вы настроили часовой пояс *{timezone}*, теперь уведомления будут приходить в удобное время.",
+            reply_markup=ReplyKeyboardRemove(),
+        )
     return states.MENU_STATE
 
 
@@ -122,14 +131,16 @@ async def set_timezone_from_keyboard(update: Update, context: CallbackContext):
     keyboard = [
         [
             InlineKeyboardButton(
-                "Установить таймзону по умолчанию UTC+03:00 (Москва).",
+                "Таймзона по умолчанию UTC+03:00 (Москва).",
                 callback_data=callback_data.CALLBACK_SET_DEFAULT_TIMEZONE,
             ),
+        ],
+        [
             InlineKeyboardButton(
-                "Настроить таймзону по локации или вручную.",
+                "Таймзона по локации или вручную.",
                 callback_data=callback_data.CALLBACK_SET_TIMEZONE
             ),
-        ]
+        ],
     ]
     message = ("Для начала, давайте настроим часовой пояс,"
                "чтобы вы получали уведомления в удобное время.")
