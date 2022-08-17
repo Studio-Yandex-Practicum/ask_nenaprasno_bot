@@ -17,11 +17,6 @@ async def menu(update: Update, context: ContextTypes.DEFAULT_TYPE):
     menu_buttons = [
         [
             InlineKeyboardButton(
-                text="Настроить часовой пояс", callback_data=callback_data.CALLBACK_CONFIGURATE_TIMEZONE_COMMAND
-            )
-        ],
-        [
-            InlineKeyboardButton(
                 text="Статистика за месяц", callback_data=callback_data.CALLBACK_STATISTIC_MONTH_COMMAND
             ),
         ],
@@ -31,6 +26,11 @@ async def menu(update: Update, context: ContextTypes.DEFAULT_TYPE):
             InlineKeyboardButton(
                 text="Правила сервиса",
                 url=URL_SERVICE_RULES,
+            )
+        ],
+        [
+            InlineKeyboardButton(
+                text="Настроить часовой пояс", callback_data=callback_data.CALLBACK_CONFIGURATE_TIMEZONE_COMMAND
             )
         ],
     ]
