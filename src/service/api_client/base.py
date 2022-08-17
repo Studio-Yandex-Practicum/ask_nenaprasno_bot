@@ -4,6 +4,8 @@ from typing import Optional
 
 from service.api_client.models import (
     BillStat,
+    Consultation,
+    ConsultationDueDate,
     MonthStat,
     UserActiveConsultations,
     UserData,
@@ -44,4 +46,12 @@ class AbstractAPIService(ABC):
 
     @abstractmethod
     async def set_user_timezone(self, telegram_id: int, user_time_zone: str) -> HTTPStatus:
+        pass
+
+    @abstractmethod
+    async def get_daily_consultations(self) -> list[Consultation]:
+        pass
+
+    @abstractmethod
+    async def get_consultation(self, consultation_id: int) -> ConsultationDueDate:
         pass

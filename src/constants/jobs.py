@@ -1,0 +1,1 @@
+DAILY_CONSULTATIONS_REMINDER_JOB = "daily_consulations_reminder_job"

@@ -1,4 +1,6 @@
+# pylint: disable=C0103
 from dataclasses import dataclass
+from typing import Optional
 
 from dataclasses_json import dataclass_json
 
@@ -64,3 +66,18 @@ class UserExpiredConsultations:
 @dataclass(frozen=True)
 class BillStat:
     telegram_ids: list[int]
+
+
+@dataclass_json
+@dataclass(frozen=True)
+class Consultation:
+    id: int
+    due: str
+    telegram_id: int
+    username_trello: str
+
+
+@dataclass_json
+@dataclass(frozen=True)
+class ConsultationDueDate:
+    due: Optional[str]
