@@ -88,10 +88,9 @@ async def button_actual_requests_callback(update: Update, context: ContextTypes.
     else:
         username_trello = user_active_consultations.username_trello
         consultations_list = user_active_consultations.active_consultations_ids
-        list_for_message, num = "", 1
-        for consultation in consultations_list:
-            list_for_message += f"[{num} завка]({URL_SITE}doctor/consultation/{consultation})\n"
-            num += 1
+        list_for_message = ""
+        for num, consultation in enumerate(consultations_list):
+            list_for_message += f"[{num+1} завка]({URL_SITE}doctor/consultation/{consultation})\n"
         message = (
             f"У вас в работе {user_active_consultations.active_consultations} заявок.\n"
             f"Посмотреть заявки на сайте:\n{list_for_message}"
@@ -115,10 +114,9 @@ async def button_overdue_requests_callback(update: Update, context: ContextTypes
     else:
         username_trello = expired_consultations.username_trello
         expired_consultations_list = expired_consultations.expired_consultations_ids
-        link_neneprasno, num = "", 1
-        for consultation in expired_consultations_list:
-            link_neneprasno += f"[{num} просроченная заявка]({URL_SITE}doctor/consultation/{consultation})\n"
-            num += 1
+        link_neneprasno = ""
+        for num, consultation in enumerate(expired_consultations_list):
+            link_neneprasno += f"[{num+1} просроченная заявка]({URL_SITE}doctor/consultation/{consultation})\n"
         message = (
             f"Время истекло 😎\n"
             f"Ваше количество просроченных заявок - {expired_consultations.expired_consultations}\n"
