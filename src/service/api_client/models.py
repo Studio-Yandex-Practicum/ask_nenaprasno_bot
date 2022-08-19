@@ -1,6 +1,6 @@
 # pylint: disable=C0103
 from dataclasses import dataclass
-from typing import Optional
+from typing import Optional, Union
 
 from dataclasses_json import dataclass_json
 
@@ -9,7 +9,7 @@ from dataclasses_json import dataclass_json
 @dataclass(frozen=True)
 class UserData:
     username: str
-    timezone: str
+    timezone: Union[str, None]
     username_trello: str
 
 
@@ -17,8 +17,8 @@ class UserData:
 @dataclass(frozen=True)
 class UserMonthStat:
     closed_consultations: int
-    rating: float
-    average_user_answer_time: float
+    rating: Union[float, None]
+    average_user_answer_time: Union[float, None]
 
 
 @dataclass_json
@@ -50,8 +50,7 @@ class WeekStat:
 class UserActiveConsultations:
     username_trello: str
     active_consultations: int
-    expiring_consultations: int
-    active_consultations_data: list[dict[str, str]]
+    active_consultations_ids: list[int]
 
 
 @dataclass_json
@@ -59,7 +58,7 @@ class UserActiveConsultations:
 class UserExpiredConsultations:
     username_trello: str
     expired_consultations: int
-    expired_consultations_data: list[dict[str, str]]
+    expired_consultations_ids: list[int]
 
 
 @dataclass_json

@@ -66,23 +66,15 @@ class MockAPIService(AbstractAPIService):
     async def get_user_active_consultations(self, telegram_id: int) -> Optional[UserActiveConsultations]:
         return UserActiveConsultations(
             username_trello="user1@telegram",
-            active_consultations=6,
-            expiring_consultations=2,
-            active_consultations_data=[
-                {"consultation_id": "str", "consultation_trello_card_id": "str"},
-                {"consultation_id": "str", "consultation_trello_card_id": "str"},
-                {"consultation_id": "str", "consultation_trello_card_id": "str"},
-                {"consultation_id": "str", "consultation_trello_card_id": "str"},
-                {"consultation_id": "str", "consultation_trello_card_id": "str"},
-                {"consultation_id": "str", "consultation_trello_card_id": "str"},
-            ],
+            active_consultations=3,
+            active_consultations_ids=["consultation_1", "consultation_2", "consultation_3"],
         )
 
     async def get_user_expired_consultations(self, telegram_id: int) -> Optional[UserExpiredConsultations]:
         return UserExpiredConsultations(
             username_trello="user1@telegram",
             expired_consultations=2,
-            expired_consultations_data=[{"consultation_id": "test1", "consultation_trello_card_id": "1_tr"}],
+            expired_consultations_ids=["consultation_1", "consultation_2"],
         )
 
     async def get_user_month_stat(self, telegram_id: int) -> Optional[UserMonthStat]:
