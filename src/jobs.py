@@ -1,6 +1,5 @@
-from datetime import date, datetime, timedelta
+from datetime import date, datetime, time, timedelta
 from string import Template
-from typing import Callable
 
 from telegram import InlineKeyboardButton, InlineKeyboardMarkup
 from telegram.ext import CallbackContext
@@ -110,26 +109,12 @@ async def check_consultation(context: CallbackContext) -> bool:
     """
     Check time overdue consultation and create new job if necessary.
     """
-    consultation_id, telegram_id, trello_name, time_delta = context.job.data
+    consultation_id, telegram_id, trello_name = context.job.data  # , time_delta
     consultation = await APIService().get_consultation(consultation_id)
     if consultation is None or consultation.due is None:
         return False
-
     due_time = datetime.strptime(consultation.due, "%Y-%m-%dT%H:%M:%S")
     if due_time.date() > date.today():
-        return False
-
-    if due_time > datetime.now() - time_delta:
-        context.job_queue.run_once(
-            send_reminder_about_overdue,
-            when=due_time + time_delta,
-            data=(
-                consultation_id,
-                telegram_id,
-                trello_name,
-                time_delta,
-            ),
-        )
         return False
     return True
 
@@ -143,7 +128,7 @@ async def send_reminder_about_overdue(context: CallbackContext) -> None:
         user_active = await APIService().get_user_active_consultations(telegram_id)
         user_expired = await APIService().get_user_expired_consultations(telegram_id)
         message = (
-            "Час прошел, а наша надежда - нет 😃\n"
+            # "Час прошел, а наша надежда - нет 😃\n"
             f"Ответьте пожалуйста на заявку {consultation_id}\n"
             "[Открыть заявку на сайте](https://ask.nenaprasno.ru/)\n\n"
             "----\n"
@@ -155,22 +140,30 @@ async def send_reminder_about_overdue(context: CallbackContext) -> None:
         await send_message(bot=context.bot, chat_id=telegram_id, text=message)
 
 
-async def daily_consulations_reminder_job(
-    context: CallbackContext, sub_job_func: Callable, time_delta: timedelta
-) -> None:
+async def daily_consulations_reminder_job(context: CallbackContext) -> None:
     """
     Makes jobs reminder for overdue consultation today.
     """
     overdue_consultations = await APIService().get_daily_consultations()
     for consultation in overdue_consultations:
-        time_remind = datetime.strptime(consultation.due, "%Y-%m-%dT%H:%M:%S") + time_delta
-        context.job_queue.run_once(
-            sub_job_func,
-            when=time_remind,
-            data=(
-                consultation.id,
-                consultation.telegram_id,
-                consultation.username_trello,
-                time_delta,
-            ),
-        )
+        time_remind = datetime.strptime(consultation.due, "%Y-%m-%dT%H:%M:%S")
+        if time_remind.date() == date.today():
+            context.job_queue.run_once(
+                send_reminder_about_overdue,
+                when=time_remind + timedelta(hours=1),
+                data=(
+                    consultation.id,
+                    consultation.telegram_id,
+                    consultation.username_trello,
+                ),
+            )
+        if time_remind.date() < date.today():
+            context.job_queue.run_once(
+                send_reminder_about_overdue,
+                when=datetime.time(config.DAILY_REMINDER_FOR_OVERDUE_CONSULTATIONS),
+                data=(
+                    consultation.id,
+                    consultation.telegram_id,
+                    consultation.username_trello,
+                ),
+            )
