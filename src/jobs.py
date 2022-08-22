@@ -1,4 +1,4 @@
-from datetime import date, datetime, time, timedelta
+from datetime import date, datetime, timedelta
 from string import Template
 
 from telegram import InlineKeyboardButton, InlineKeyboardMarkup
@@ -109,7 +109,7 @@ async def check_consultation(context: CallbackContext) -> bool:
     """
     Check time overdue consultation and create new job if necessary.
     """
-    consultation_id, telegram_id, trello_name = context.job.data  # , time_delta
+    consultation_id = context.job.data
     consultation = await APIService().get_consultation(consultation_id)
     if consultation is None or consultation.due is None:
         return False
