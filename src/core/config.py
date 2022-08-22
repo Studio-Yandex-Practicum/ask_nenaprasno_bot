@@ -51,9 +51,6 @@ TOKEN = get_string("TELEGRAM_TOKEN")
 # Параметры для аутентификации телеграма
 SECRET_TELEGRAM_TOKEN = get_string("SECRET_TELEGRAM_TOKEN")
 
-# Парамтеры для аутентификации сайта
-BOT_API_SITE_TOKEN = get_string("BOT_API_SITE_TOKEN")
-
 # Параметры рассылки статистики
 WEEKLY_STAT_TIME = get_datetime("WEEKLY_STAT_TIME")
 WEEKLY_STAT_WEEK_DAYS = get_datetime_tuple("WEEKLY_STAT_WEEK_DAYS")
