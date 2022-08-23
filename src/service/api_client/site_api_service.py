@@ -1,6 +1,5 @@
 # pylint: disable=no-member
 import json
-from http import HTTPStatus
 from typing import Optional
 from urllib.parse import urljoin
 
@@ -88,7 +87,7 @@ class SiteAPIService(AbstractAPIService):
             logger.error("Failed convert json to dataclass: %s, error: %s", UserData, error)
             return None
 
-    async def set_user_timezone(self, telegram_id: int, user_time_zone: str) -> HTTPStatus:
+    async def set_user_timezone(self, telegram_id: int, user_time_zone: str) -> Optional[int]:
         url = urljoin(self.site_url, "/tgbot/user")
         headers = {"Authorization": self.bot_token}
         data = {"telegram_id": telegram_id, "timezone": user_time_zone}
