@@ -134,7 +134,7 @@ menu_conversation = ConversationHandler(
     persistent=True,
     name="menu_conversation",
     entry_points=[
-        CommandHandler("menu", menu)
+        CommandHandler("menu", menu), timezone_conversation
     ],
     states={
         states.MENU_STATE: [

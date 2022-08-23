@@ -167,16 +167,16 @@ async def daily_consulations_reminder_job(
     """
     overdue_consultations = await APIService().get_daily_consultations()
     for consultation in overdue_consultations:
-        time_remind = datetime.strptime(consultation.due, DATE_FORMAT) + time_delta
-        if time_remind > datetime.utcnow():
-            data = (
-                consultation.id,
-                consultation.telegram_id,
-                consultation.username_trello,
-                time_delta,
-            )
+        due_time = datetime.strptime(consultation.due, DATE_FORMAT)
+        if due_time > datetime.utcnow() and due_time.date() == date.today():
+            time_remind = due_time + time_delta
             context.job_queue.run_once(
                 sub_job_func,
                 when=time_remind,
-                data=data,
+                data=(
+                    consultation.id,
+                    consultation.telegram_id,
+                    consultation.username_trello,
+                    time_delta,
+                ),
             )

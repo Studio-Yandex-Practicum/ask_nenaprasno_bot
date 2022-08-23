@@ -134,7 +134,6 @@ dmypy.json
 
 # .idea
 .idea
-.vscode/
 
 # Media && static
 media_value
@@ -144,4 +143,4 @@ static_value
 bot_persistence_file
 
 # Log file
-*.log
+*.log.*

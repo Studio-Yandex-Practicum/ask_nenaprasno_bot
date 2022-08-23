@@ -35,7 +35,7 @@ class SiteAPIService(AbstractAPIService):
         ...
 
     async def get_week_stat(self) -> Optional[list[WeekStat]]:
-        url = f"{self.site_url}/tgbot/stat/weekly"
+        url = urljoin(self.site_url, "/tgbot/stat/weekly")
         list_week_stat = await self.__get_json_data(url=url)
         try:
             return [WeekStat.from_dict(one_week_stat) for one_week_stat in list_week_stat]
@@ -44,7 +44,7 @@ class SiteAPIService(AbstractAPIService):
             return None
 
     async def get_month_stat(self) -> Optional[list[MonthStat]]:
-        url = f"{self.site_url}/tgbot/stat/monthly"
+        url = urljoin(self.site_url, "/tgbot/stat/monthly")
         list_month_stat = await self.__get_json_data(url=url)
         try:
             return [MonthStat.from_dict(one_month_stat) for one_month_stat in list_month_stat]
@@ -71,7 +71,7 @@ class SiteAPIService(AbstractAPIService):
             return None
 
     async def get_user_month_stat(self, telegram_id: int) -> Optional[UserMonthStat]:
-        url = f"{self.site_url}/tgbot/stat/monthly/user/{telegram_id}"
+        url = urljoin(self.site_url, f"/tgbot/stat/monthly/user/{telegram_id}")
         user_month_stat = await self.__get_json_data(url=url)
         try:
             return UserMonthStat.from_dict(user_month_stat)
@@ -80,7 +80,7 @@ class SiteAPIService(AbstractAPIService):
             return None
 
     async def authenticate_user(self, telegram_id: int) -> Optional[UserData]:
-        url = f"{self.site_url}/tgbot/user/{telegram_id}"
+        url = urljoin(self.site_url, f"/tgbot/user/{telegram_id}")
         user = await self.__get_json_data(url=url)
         try:
             return UserData.from_dict(user)
@@ -89,7 +89,7 @@ class SiteAPIService(AbstractAPIService):
             return None
 
     async def set_user_timezone(self, telegram_id: int, user_time_zone: str) -> HTTPStatus:
-        url = f"{self.site_url}/tgbot/user"
+        url = urljoin(self.site_url, "/tgbot/user")
         headers = {"Authorization": self.bot_token}
         data = {"telegram_id": telegram_id, "timezone": user_time_zone}
         async with httpx.AsyncClient() as client:
