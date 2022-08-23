@@ -40,7 +40,7 @@ def get_bool(setting: str) -> bool:
 
 # Параметры логгера
 LOG_NAME = get_string("LOG_NAME")
-LOG_PATH = BASE_DIR / LOG_NAME
+LOG_PATH = BASE_DIR / "logs" / LOG_NAME
 
 # Параметры локального сервера принимающего обновления от телеграм
 HOST = get_string("HOST")
