@@ -65,9 +65,17 @@ async def healthcheck_api(request: Request) -> JSONResponse:
 
 
 async def telegram_webhook_api(request: Request) -> Response:
-    bot_app = request.app.state.bot_app
-    await bot_app.update_queue.put(Update.de_json(data=await request.json(), bot=bot_app.bot))
-    return Response()
+    response = {}
+
+    try:
+        request_json = await request.json()
+        bot_app = request.app.state.bot_app
+        await bot_app.update_queue.put(Update.de_json(data=request_json, bot=bot_app.bot))
+    except JSONDecodeError as error:
+        logger.error("Got a JSONDecodeError: %s", error)
+        response = {"status_code": httpx.codes.BAD_REQUEST}
+
+    return Response(**response)
 
 
 async def deserialize(request: Request, deserializer):
@@ -132,7 +140,8 @@ async def consultation_feedback(request: Request) -> Response:
             f"[Открыть Trello](https://trello.com/{TRELLO_BORD_ID}"
             f"/?filter=member:{request_data.username_trello},dueComplete:true)\n\n"
         )
-    await send_message(bot=bot, chat_id=chat_id, text=text)
+        await send_message(bot=bot, chat_id=chat_id, text=text)
+
     return response
 
 
