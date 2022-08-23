@@ -11,6 +11,8 @@ from core.send_message import send_message, send_statistics
 from service.api_client import APIService
 from service.repeat_message import repeat_after_one_hour_button
 
+DATE_FORMAT = "%Y-%m-%dT%H:%M:%S.%fZ"
+
 
 async def weekly_stat_job(context: CallbackContext) -> None:
     """
@@ -115,7 +117,7 @@ async def check_consultation(context: CallbackContext) -> bool:
     if consultation is None or consultation.due is None:
         return False
 
-    due_time = datetime.strptime(consultation.due, "%Y-%m-%dT%H:%M:%S")
+    due_time = datetime.strptime(consultation.due, DATE_FORMAT)
     if due_time.date() > date.today():
         return False
 
@@ -145,7 +147,9 @@ async def send_reminder_about_overdue(context: CallbackContext) -> None:
         message = (
             "Час прошел, а наша надежда - нет 😃\n"
             f"Ответьте пожалуйста на заявку {consultation_id}\n"
-            "[Открыть заявку на сайте](https://ask.nenaprasno.ru/)\n\n"
+            "[Открыть заявку на сайте]"
+            "(https://ask.nenaprasno.ru/doctor/consultation/"
+            f"{consultation_id})\n\n"
             "----\n"
             f"В работе **{user_active.active_consultations}** заявок\n"
             f"Истекает срок у **{user_expired.expired_consultations}** заявок\n"
@@ -163,14 +167,16 @@ async def daily_consulations_reminder_job(
     """
     overdue_consultations = await APIService().get_daily_consultations()
     for consultation in overdue_consultations:
-        time_remind = datetime.strptime(consultation.due, "%Y-%m-%dT%H:%M:%S") + time_delta
-        context.job_queue.run_once(
-            sub_job_func,
-            when=time_remind,
-            data=(
-                consultation.id,
-                consultation.telegram_id,
-                consultation.username_trello,
-                time_delta,
-            ),
-        )
+        due_time = datetime.strptime(consultation.due, DATE_FORMAT)
+        if due_time > datetime.utcnow() and due_time.date() == date.today():
+            time_remind = due_time + time_delta
+            context.job_queue.run_once(
+                sub_job_func,
+                when=time_remind,
+                data=(
+                    consultation.id,
+                    consultation.telegram_id,
+                    consultation.username_trello,
+                    time_delta,
+                ),
+            )

@@ -63,7 +63,7 @@ def create_bot():
         daily_consulations_reminder_job, sub_job_func=send_reminder_about_overdue, time_delta=timedelta(hours=1)
     )
     bot_app.job_queue.run_daily(
-        overdue_reminder_job, time=config.DAYLY_COLLECT_CONSULTATIONS_TIME, name=DAILY_CONSULTATIONS_REMINDER_JOB
+        overdue_reminder_job, time=config.DAILY_CONSULTATIONS_REMINDER_TIME, name=DAILY_CONSULTATIONS_REMINDER_JOB
     )
     return bot_app
 

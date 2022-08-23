@@ -1,5 +1,5 @@
 import os
-from datetime import datetime
+from datetime import datetime, time, timezone
 from pathlib import Path
 
 from dotenv import dotenv_values
@@ -62,7 +62,7 @@ MONTHLY_RECEIPT_REMINDER_TIME = get_datetime("MONTHLY_RECEIPT_REMINDER_TIME")
 MONTHLY_RECEIPT_REMINDER_DAY = get_int("MONTHLY_RECEIPT_REMINDER_DAY")
 
 # Параметры рассылки напоминаний
-DAYLY_COLLECT_CONSULTATIONS_TIME = get_datetime("DAYLY_COLLECT_CONSULTATIONS_TIME")
+DAILY_CONSULTATIONS_REMINDER_TIME = time(hour=0, minute=0, tzinfo=timezone.utc)
 
 # Файл с сохраненными данными бота
 BOT_PERSISTENCE_FILE = get_string("BOT_PERSISTENCE_FILE")

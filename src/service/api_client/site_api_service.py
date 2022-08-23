@@ -52,7 +52,7 @@ class SiteAPIService(AbstractAPIService):
             return None
 
     async def get_user_active_consultations(self, telegram_id: int) -> Optional[UserActiveConsultations]:
-        url = urljoin(self.site_url, f"/tgbot/stat/active/user/{telegram_id}")
+        url = urljoin(self.site_url, f"tgbot/stat/active/user/{telegram_id}")
         active_consultations = await self.__get_json_data(url=url)
         try:
             return UserActiveConsultations.from_dict(active_consultations)
@@ -96,7 +96,7 @@ class SiteAPIService(AbstractAPIService):
             return response.status_code
 
     async def get_daily_consultations(self) -> Optional[list[Consultation]]:
-        url = urljoin(self.site_url, "/tgbot/consultations")
+        url = urljoin(self.site_url, "tgbot/consultations/")
         consultations = await self.__get_json_data(url=url)
         try:
             return [Consultation.from_dict(consultation) for consultation in consultations]
@@ -104,8 +104,8 @@ class SiteAPIService(AbstractAPIService):
             logger.error("Failed convert json to dataclass: %s", error)
             return None
 
-    async def get_consultation(self, consultation_id: int) -> Optional[ConsultationDueDate]:
-        url = urljoin(self.site_url, f"/tgbot/consultations/{consultation_id}")
+    async def get_consultation(self, consultation_id: str) -> Optional[ConsultationDueDate]:
+        url = urljoin(self.site_url, f"tgbot/consultations/{consultation_id}")
         consultation = await self.__get_json_data(url=url)
         try:
             return ConsultationDueDate.from_dict(consultation)
