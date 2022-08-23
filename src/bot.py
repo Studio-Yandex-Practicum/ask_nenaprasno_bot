@@ -1,4 +1,4 @@
-from datetime import time, timedelta, timezone
+from datetime import timedelta
 from functools import partial
 
 from telegram import Update
@@ -63,7 +63,7 @@ def create_bot():
         daily_consulations_reminder_job, sub_job_func=send_reminder_about_overdue, time_delta=timedelta(hours=1)
     )
     bot_app.job_queue.run_daily(
-        overdue_reminder_job, time=time(hour=0, minute=0, tzinfo=timezone.utc), name=DAILY_CONSULTATIONS_REMINDER_JOB
+        overdue_reminder_job, time=config.DAILY_CONSULTATIONS_REMINDER_TIME, name=DAILY_CONSULTATIONS_REMINDER_JOB
     )
     return bot_app
 
