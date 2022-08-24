@@ -117,7 +117,7 @@ async def check_consultation(context: CallbackContext) -> bool:
         return False
     due_time = datetime.strptime(consultation.due, DATE_FORMAT)
     if due_time.date() > date.today():
-        return False
+        return due_time.date() <= date.today()
     return True
 
 
@@ -126,11 +126,11 @@ async def send_reminder_about_overdue(context: CallbackContext) -> None:
     Send reminder to user.
     """
     if await check_consultation(context=context):
-        consultation_id, telegram_id, trello_name = context.job.data[:3]
+        consultation_id, telegram_id, trello_name, duration_message = context.job.data[:4]
         user_active = await APIService().get_user_active_consultations(telegram_id)
         user_expired = await APIService().get_user_expired_consultations(telegram_id)
         message = (
-            # "Час прошел, а наша надежда - нет 😃\n"
+            f"{duration_message}\n"
             f"Ответьте пожалуйста на заявку {consultation_id}\n"
             "[Открыть заявку на сайте]"
             "(https://ask.nenaprasno.ru/doctor/consultation/"
@@ -150,18 +150,21 @@ async def daily_consulations_reminder_job(context: CallbackContext) -> None:
     """
     overdue_consultations = await APIService().get_daily_consultations()
     for consultation in overdue_consultations:
-        time_remind = datetime.strptime(consultation.due, DATE_FORMAT)
-        if time_remind > datetime.utcnow() and time_remind.date() == date.today():
+        due_time = datetime.strptime(consultation.due, DATE_FORMAT)
+        if due_time > datetime.utcnow() and due_time.date() == date.today():
+            duration_message = "Час прошел, а наша надежда - нет 😃\n"
             context.job_queue.run_once(
                 send_reminder_about_overdue,
-                when=time_remind + timedelta(hours=1),
+                when=due_time + timedelta(hours=1),
                 data=(
                     consultation.id,
                     consultation.telegram_id,
                     consultation.username_trello,
+                    duration_message
                 ),
             )
-        if time_remind.date() < date.today():
+        if due_time.date() < date.today():
+            duration_message = "Заявка давно истекла!"
             context.job_queue.run_once(
                 send_reminder_about_overdue,
                 when=datetime.time(config.DAILY_REMINDER_FOR_OVERDUE_CONSULTATIONS),
@@ -169,5 +172,6 @@ async def daily_consulations_reminder_job(context: CallbackContext) -> None:
                     consultation.id,
                     consultation.telegram_id,
                     consultation.username_trello,
+                    duration_message
                 ),
             )
