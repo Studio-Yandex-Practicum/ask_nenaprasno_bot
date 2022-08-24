@@ -9,7 +9,7 @@ from core.send_message import edit_message, reply_message
 from decorators.logger import async_error_logger
 from menu_button import COMMANDS_UNAUTHORIZED, menu_button
 from service.api_client import APIService
-
+from service.api_client.models import UserData
 
 BOT_GREETINGS_MESSAGE = (
     "Вы успешно начали работу с ботом. Меня зовут Женя Краб, "
@@ -47,7 +47,7 @@ BOT_OFFER_SEND_TELEGRAM_ID = (
 
 
 @async_error_logger(name="conversation.authorization.start")
-async def start(update: Update, context: CallbackContext):
+async def start(update: Update, context: CallbackContext) -> str:
     """
     Responds to the start command. The entry point to telegram bot.
     """
@@ -70,7 +70,7 @@ async def start(update: Update, context: CallbackContext):
 
 
 @async_error_logger(name="conversation.authorization.not_expert_callback")
-async def not_expert_callback(update: Update, context: CallbackContext):
+async def not_expert_callback(update: Update, context: CallbackContext) -> str:
     """
     Invites the user to become an expert.
     """
@@ -86,7 +86,7 @@ async def not_expert_callback(update: Update, context: CallbackContext):
 
 
 @async_error_logger(name="conversation.authorization.support_or_consult_callback")
-async def support_or_consult_callback(update: Update, context: CallbackContext):
+async def support_or_consult_callback(update: Update, context: CallbackContext) -> int:
     """
     Offers to support the project.
     """
@@ -102,7 +102,7 @@ async def support_or_consult_callback(update: Update, context: CallbackContext):
 
 
 @async_error_logger(name="conversation.authorization.register_as_expert_callback")
-async def register_as_expert_callback(update: Update, context: CallbackContext):
+async def register_as_expert_callback(update: Update, context: CallbackContext) -> int:
     """
     Sends a registration form to the user.
     """
@@ -110,7 +110,7 @@ async def register_as_expert_callback(update: Update, context: CallbackContext):
     return ConversationHandler.END
 
 
-async def autorize(telegram_id: int, context: CallbackContext):
+async def autorize(telegram_id: int, context: CallbackContext) -> UserData:
     """
     Try to authenticate telegram user on site API.
     """
@@ -124,7 +124,7 @@ async def autorize(telegram_id: int, context: CallbackContext):
 
 
 @async_error_logger(name="conversation.authorization.is_expert_callback")
-async def is_expert_callback(update: Update, context: CallbackContext):
+async def is_expert_callback(update: Update, context: CallbackContext) -> str:
     """
     Try to authenticate telegram user on site API and write trello_id to persistence file.
     """
@@ -162,7 +162,6 @@ authorization_conversation = ConversationHandler(
             ),
         ],
         states.MENU_STATE: [menu_conversation, timezone_conversation],
-
     },
     fallbacks=[],
 )

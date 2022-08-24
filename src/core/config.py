@@ -1,5 +1,5 @@
 import os
-from datetime import datetime
+from datetime import datetime, time, timezone
 from pathlib import Path
 
 from dotenv import dotenv_values
@@ -40,7 +40,7 @@ def get_bool(setting: str) -> bool:
 
 # Параметры логгера
 LOG_NAME = get_string("LOG_NAME")
-LOG_PATH = BASE_DIR / LOG_NAME
+LOG_PATH = BASE_DIR / "logs" / LOG_NAME
 
 # Параметры локального сервера принимающего обновления от телеграм
 HOST = get_string("HOST")
@@ -50,9 +50,6 @@ TOKEN = get_string("TELEGRAM_TOKEN")
 
 # Параметры для аутентификации телеграма
 SECRET_TELEGRAM_TOKEN = get_string("SECRET_TELEGRAM_TOKEN")
-
-# Парамтеры для аутентификации сайта
-BOT_API_SITE_TOKEN = get_string("BOT_API_SITE_TOKEN")
 
 # Параметры рассылки статистики
 WEEKLY_STAT_TIME = get_datetime("WEEKLY_STAT_TIME")
@@ -65,7 +62,8 @@ MONTHLY_RECEIPT_REMINDER_TIME = get_datetime("MONTHLY_RECEIPT_REMINDER_TIME")
 MONTHLY_RECEIPT_REMINDER_DAY = get_int("MONTHLY_RECEIPT_REMINDER_DAY")
 
 # Параметры рассылки напоминаний
-DAYLY_COLLECT_CONSULTATIONS_TIME = get_datetime("DAYLY_COLLECT_CONSULTATIONS_TIME")
+# DAYLY_COLLECT_CONSULTATIONS_TIME = get_datetime("DAYLY_COLLECT_CONSULTATIONS_TIME")
+DAYLY_COLLECT_CONSULTATIONS_TIME = time(hour=0, minute=0, tzinfo=timezone.utc)
 DAILY_REMINDER_FOR_OVERDUE_CONSULTATIONS = get_datetime("DAILY_REMINDER_FOR_OVERDUE_CONSULTATIONS")
 
 # Файл с сохраненными данными бота

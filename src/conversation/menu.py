@@ -10,7 +10,7 @@ from service.api_client import APIService
 
 
 @async_error_logger(name="conversation.menu_commands.menu")
-async def menu(update: Update, context: ContextTypes.DEFAULT_TYPE):
+async def menu(update: Update, context: ContextTypes.DEFAULT_TYPE) -> str:
     """
     Displays the menu.
     """
@@ -39,7 +39,7 @@ async def menu(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
 
 @async_error_logger(name="conversation.requests.actual_requests_callback")
-async def button_reaction_callback(update: Update, context: ContextTypes.DEFAULT_TYPE):
+async def button_reaction_callback(update: Update, context: ContextTypes.DEFAULT_TYPE) -> str:
     """
     Sends a list of current requests/requests to the user.
     """
@@ -57,21 +57,20 @@ async def button_statistic_month_callback(update: Update, context: ContextTypes.
     user_statistics = await service.get_user_month_stat(telegram_id=telegram_id)
     if user_statistics is None:
         await update.callback_query.message.reply_text(text="Данные недоступны!")
+        return
+
+    if user_statistics.closed_consultations > 0:
+        message = (
+            f'С начала месяца вы сделали очень много для "Просто спросить" 🔥\n'
+            f"***Количество закрытых заявок*** - {user_statistics.closed_consultations}\n"
+            f"***Рейтинг*** - {user_statistics.rating:.1f}\n"
+            f"***Среднее время ответа*** - {user_statistics.average_user_answer_time:.1f}\n\n"
+            "Мы рады работать в одной команде :)\n"
+            "Так держать!"
+        )
     else:
-        if user_statistics.closed_consultations > 0:
-            message = (
-                f'С начала месяца вы сделали очень много для "Просто спросить" 🔥\n'
-                f"***Количество закрытых заявок*** - {user_statistics.closed_consultations}\n"
-                f"***Рейтинг*** - {user_statistics.rating:.1f}\n"
-                f"***Среднее время ответа*** - {user_statistics.average_user_answer_time:.1f}\n\n"
-                "Мы рады работать в одной команде :)\n"
-                "Так держать!"
-            )
-        else:
-            message = (
-                "К сожалению у вас не было отвеченных завок :(\nМы верим, что в следующем месяце все изменится! :)"
-            )
-        await reply_message(update=update, text=message)
+        message = "К сожалению у вас не было отвеченных завок :(\nМы верим, что в следующем месяце все изменится! :)"
+    await reply_message(update=update, text=message)
 
 
 @async_error_logger(name="conversation.requests.button_actual_requests_callback")
@@ -84,19 +83,21 @@ async def button_actual_requests_callback(update: Update, context: ContextTypes.
     user_active_consultations = await service.get_user_active_consultations(telegram_id=telegram_id)
     if user_active_consultations is None:
         await update.callback_query.message.reply_text(text="Данные недоступны!")
-    else:
-        username_trello = user_active_consultations.username_trello
-        consultations_list = user_active_consultations.active_consultations_ids
-        list_for_message = ""
-        for num, consultation in enumerate(consultations_list):
-            list_for_message += f"[{num+1} завка]({URL_SITE}doctor/consultation/{consultation})\n"
-        message = (
-            f"У вас в работе {user_active_consultations.active_consultations} заявок.\n"
-            f"Посмотреть заявки на сайте:\n{list_for_message}"
-            f"\n[Открыть Trello](https://trello.com/{TRELLO_BORD_ID}/?filter=member:"
-            f"{username_trello}/?filter=overdue:true)\n\n"
-        )
-        await reply_message(update=update, text=message)
+        return
+
+    username_trello = user_active_consultations.username_trello
+    consultations_list = user_active_consultations.active_consultations_ids
+    list_for_message = ""
+    for num, consultation in enumerate(consultations_list):
+        number = num + 1
+        list_for_message += f"[{number} завка]({URL_SITE}doctor/consultation/{consultation})\n"
+    message = (
+        f"У вас в работе {user_active_consultations.active_consultations} заявок.\n"
+        f"Посмотреть заявки на сайте:\n{list_for_message}"
+        f"\n[Открыть Trello](https://trello.com/{TRELLO_BORD_ID}/?filter=member:"
+        f"{username_trello}/?filter=overdue:true)\n\n"
+    )
+    await reply_message(update=update, text=message)
 
 
 @async_error_logger(name="conversation.requests.button_overdue_requests_callback")
@@ -110,32 +111,32 @@ async def button_overdue_requests_callback(update: Update, context: ContextTypes
     active_consultations = await service.get_user_active_consultations(telegram_id=telegram_id)
     if expired_consultations is None or active_consultations is None:
         await update.callback_query.message.reply_text(text="Данные недоступны")
-    else:
-        username_trello = expired_consultations.username_trello
-        expired_consultations_list = expired_consultations.expired_consultations_ids
-        link_neneprasno = ""
-        for num, consultation in enumerate(expired_consultations_list):
-            link_neneprasno += f"[{num+1} просроченная заявка]({URL_SITE}doctor/consultation/{consultation})\n"
-        message = (
-            f"Время истекло 😎\n"
-            f"Ваше количество просроченных заявок - {expired_consultations.expired_consultations}\n"
-            f"Верим и ждем.\n\n"
-            f"Посмотреть заявки на сайте:\n {link_neneprasno}\n"
-            f"----\n"
-            f"В работе количество  заявок - {active_consultations.active_consultations}\n"
-            f"Открыть [Trello](https://trello.com/{TRELLO_BORD_ID}/?filter=member:"
-            f"{username_trello}/?filter=overdue:true)\n\n"
-        )
-        await reply_message(update=update, text=message)
+        return
+
+    username_trello = expired_consultations.username_trello
+    expired_consultations_list = expired_consultations.expired_consultations_ids
+    link_neneprasno = ""
+    for num, consultation in enumerate(expired_consultations_list):
+        number = num + 1
+        link_neneprasno += f"[{number} просроченная заявка]({URL_SITE}doctor/consultation/{consultation})\n"
+    message = (
+        f"Время истекло 😎\n"
+        f"Ваше количество просроченных заявок - {expired_consultations.expired_consultations}\n"
+        f"Верим и ждем.\n\n"
+        f"Посмотреть заявки на сайте:\n {link_neneprasno}\n"
+        f"----\n"
+        f"В работе количество  заявок - {active_consultations.active_consultations}\n"
+        f"Открыть [Trello](https://trello.com/{TRELLO_BORD_ID}/?filter=member:"
+        f"{username_trello}/?filter=overdue:true)\n\n"
+    )
+    await reply_message(update=update, text=message)
 
 
 menu_conversation = ConversationHandler(
     allow_reentry=True,
     persistent=True,
     name="menu_conversation",
-    entry_points=[
-        CommandHandler("menu", menu)
-    ],
+    entry_points=[CommandHandler("menu", menu), timezone_conversation],
     states={
         states.MENU_STATE: [
             CallbackQueryHandler(
@@ -148,7 +149,8 @@ menu_conversation = ConversationHandler(
                 button_actual_requests_callback, pattern=callback_data.CALLBACK_ACTUAL_REQUESTS_COMMAND
             ),
             CallbackQueryHandler(
-                set_timezone_from_keyboard, pattern=callback_data.CALLBACK_CONFIGURATE_TIMEZONE_COMMAND),
+                set_timezone_from_keyboard, pattern=callback_data.CALLBACK_CONFIGURATE_TIMEZONE_COMMAND
+            ),
             timezone_conversation,
         ],
     },

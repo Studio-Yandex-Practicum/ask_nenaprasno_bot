@@ -50,6 +50,8 @@ jobs:
           MONTHLY_RECEIPT_REMINDER_TIME: 13:00
           MONTHLY_RECEIPT_REMINDER_DAY: 19
 
+          DAYLY_COLLECT_CONSULTATIONS_TIME: 00:00
+
           BOT_PERSISTENCE_FILE: bot_persistence_file
 
           SITE_API_BOT_TOKEN: ${{ secrets.SITE_API_BOT_TOKEN }}
