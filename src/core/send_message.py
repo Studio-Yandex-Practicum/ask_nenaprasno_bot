@@ -1,8 +1,8 @@
 import logging
 from string import Template
-from typing import List, Optional, Union
+from typing import List, Optional
 
-from telegram import Bot, ReplyKeyboardMarkup, Update
+from telegram import Bot, InlineKeyboardMarkup, ReplyKeyboardMarkup, Update
 from telegram.constants import ParseMode
 from telegram.error import TelegramError
 from telegram.ext import CallbackContext
@@ -14,7 +14,7 @@ async def send_message(
     bot: Bot,
     chat_id: int,
     text: str,
-    reply_markup: Optional[ReplyKeyboardMarkup] = None,
+    reply_markup: Optional[ReplyKeyboardMarkup | InlineKeyboardMarkup] = None,
 ) -> bool:
     """
     Send simple text message.
@@ -32,14 +32,14 @@ async def send_message(
         )
         return True
     except TelegramError:
-        logging.exception("The error sending the message to the chat: %d", chat_id)
+        logging.exception("The error sending the message to the chat: %s", chat_id)
         return False
 
 
 async def edit_message(
     update: Update,
     new_text: str,
-    reply_markup: Optional[ReplyKeyboardMarkup] = None,
+    reply_markup: Optional[ReplyKeyboardMarkup | InlineKeyboardMarkup] = None,
 ) -> bool:
     """
     Edit text message.
@@ -62,7 +62,7 @@ async def edit_message(
 async def reply_message(
     update: Update,
     text: str,
-    reply_markup: Optional[ReplyKeyboardMarkup] = None,
+    reply_markup: Optional[ReplyKeyboardMarkup | InlineKeyboardMarkup] = None,
 ) -> bool:
     """
     Reply on the message.
@@ -83,9 +83,9 @@ async def send_statistics(
     context: CallbackContext,
     template_message: Template,
     template_attribute_aliases: dict,
-    statistic: List[Union[MonthStat, WeekStat]],
-    reply_markup: Optional[ReplyKeyboardMarkup] = None,
-):
+    statistic: List[MonthStat | WeekStat],
+    reply_markup: Optional[ReplyKeyboardMarkup | InlineKeyboardMarkup] = None,
+) -> None:
     """
     Start mailing message with statistics.
     :param context: CallbackContext
@@ -98,7 +98,10 @@ async def send_statistics(
     :param reply_markup: ReplyKeyboardMarkup | None
     """
     for user_statistic in statistic:
-        message = template_message.substitute(
-            {key: getattr(user_statistic, attribute) for key, attribute in template_attribute_aliases.items()}
-        )
-        await send_message(bot=context.bot, chat_id=user_statistic.telegram_id, text=message, reply_markup=reply_markup)
+        if user_statistic.telegram_id:
+            message = template_message.substitute(
+                {key: getattr(user_statistic, attribute) for key, attribute in template_attribute_aliases.items()}
+            )
+            await send_message(
+                bot=context.bot, chat_id=user_statistic.telegram_id, text=message, reply_markup=reply_markup
+            )
