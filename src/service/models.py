@@ -12,8 +12,10 @@ class HealthCheckResponseModel:
 
 @dataclass_json
 @dataclass(frozen=True)
-class ClosedConsultationModel:
+class FeedbackConsultationModel:
     consultation_id: str = field(metadata=config(field_name="consultation_id"))
+    # ! site API does not provide the consultation number right now. It will be fixed in the future
+    # consultation_number: str = field(metadata=config(field_name="consultation_number"))
     consultation_response: str = field(metadata=config(field_name="consultation_response"))
     username_trello: str = field(metadata=config(field_name="username_trello"))
     telegram_id: str = field(metadata=config(field_name="telegram_id"))
@@ -23,7 +25,8 @@ class ClosedConsultationModel:
 @dataclass(frozen=True)
 class ConsultationModel:
     consultation_id: str = field(metadata=config(field_name="consultation_id"))
-    consultation_url: str = field(metadata=config(field_name="consultation_url"))
+    # ! site API does not provide the consultation number right now. It will be fixed in the future
+    # consultation_number: str = field(metadata=config(field_name="consultation_number"))
     trello_card_id: str = field(metadata=config(field_name="trello_card_id"))
     username_trello: str = field(metadata=config(field_name="username_trello"))
     telegram_id: str = field(metadata=config(field_name="telegram_id"))
@@ -33,3 +36,10 @@ class ConsultationModel:
 @dataclass(frozen=True)
 class AssignedConsultationModel(ConsultationModel):
     due: str = field(metadata=config(field_name="due"))
+
+
+@dataclass_json
+@dataclass(frozen=True)
+class ClosedConsultationModel:
+    consultation_id: str = field(metadata=config(field_name="consultation_id"))
+    telegram_id: str = field(metadata=config(field_name="telegram_id"))
