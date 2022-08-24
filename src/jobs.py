@@ -15,9 +15,7 @@ DATE_FORMAT = "%Y-%m-%dT%H:%M:%S.%fZ"
 
 
 async def weekly_stat_job(context: CallbackContext) -> None:
-    """
-    Send weekly statistics on the number of requests in the work
-    """
+    """Send weekly statistics on the number of requests in the work."""
     week_statistics = await APIService().get_week_stat()
     template_message = Template(
         "Вы делали добрые дела 7 дней!\n"
@@ -35,10 +33,11 @@ async def weekly_stat_job(context: CallbackContext) -> None:
         expired_consultations="expired_consultations",
     )
     await send_statistics(
-        context,
-        template_message,
-        alias_dict,
-        week_statistics,
+        context=context,
+        template_message=template_message,
+        template_attribute_aliases=alias_dict,
+        statistic=week_statistics,
+        reply_markup=InlineKeyboardMarkup([[repeat_after_one_hour_button]]),
     )
 
 
@@ -46,7 +45,8 @@ async def monthly_stat_job(context: CallbackContext) -> None:
     """
     Send monthly statistics on the number of successfully
     closed requests.
-    Only if the user had requests
+
+    Only if the user had requests.
     """
     month_statistics = await APIService().get_month_stat()
     template_message = Template(
@@ -63,10 +63,10 @@ async def monthly_stat_job(context: CallbackContext) -> None:
         average_user_answer_time="average_user_answer_time",
     )
     await send_statistics(
-        context,
-        template_message,
-        alias_dict,
-        month_statistics,
+        context=context,
+        template_message=template_message,
+        template_attribute_aliases=alias_dict,
+        statistic=month_statistics,
     )
 
 
