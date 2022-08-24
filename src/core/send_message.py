@@ -1,5 +1,4 @@
 import logging
-from asyncio import sleep
 from string import Template
 from typing import List, Optional, Union
 
@@ -8,12 +7,11 @@ from telegram.constants import ParseMode
 from telegram.error import TelegramError
 from telegram.ext import CallbackContext
 
-from limits import USER_DURATIN, new_limits
+from decorators.limits import cheat_limits_of_telegram
 from service.api_client.models import MonthStat, WeekStat
 
-AMOUNT_CHECKS = 5
 
-
+@cheat_limits_of_telegram
 async def send_message(
     bot: Bot,
     chat_id: int,
@@ -28,12 +26,6 @@ async def send_message(
     :param reply_markup: ReplyKeyboardMarkup | None
     """
     try:
-        for counter in range(AMOUNT_CHECKS):
-            if new_limits.check(telegram_id=chat_id):
-                break
-            await sleep(USER_DURATIN.seconds)
-        if counter >= AMOUNT_CHECKS:
-            new_limits.force(telegram_id=chat_id)
         await bot.send_message(
             chat_id=chat_id,
             text=text,
@@ -46,6 +38,7 @@ async def send_message(
         return False
 
 
+@cheat_limits_of_telegram
 async def edit_message(
     update: Update,
     new_text: str,
@@ -58,12 +51,6 @@ async def edit_message(
     :param reply_markup: ReplyKeyboardMarkup | None
     """
     try:
-        for counter in range(AMOUNT_CHECKS):
-            if new_limits.check(telegram_id=update.effective_chat.id):
-                break
-            await sleep(USER_DURATIN.seconds)
-        if counter >= AMOUNT_CHECKS:
-            new_limits.force(telegram_id=update.effective_chat.id)
         await update.callback_query.edit_message_text(
             text=new_text,
             parse_mode=ParseMode.MARKDOWN,
@@ -75,6 +62,7 @@ async def edit_message(
         return False
 
 
+@cheat_limits_of_telegram
 async def reply_message(
     update: Update,
     text: str,
@@ -88,12 +76,6 @@ async def reply_message(
     """
     try:
         message = update.callback_query.message if update.message is None else update.message
-        for counter in range(AMOUNT_CHECKS):
-            if new_limits.check(telegram_id=update.effective_chat.id):
-                break
-            await sleep(USER_DURATIN.seconds)
-        if counter >= AMOUNT_CHECKS:
-            new_limits.force(telegram_id=update.effective_chat.id)
         await message.reply_markdown(text=text, reply_markup=reply_markup)
         return True
     except TelegramError:
