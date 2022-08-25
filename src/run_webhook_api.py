@@ -98,7 +98,7 @@ async def consultation_assign(request: Request) -> Response:
         bot = api.state.bot_app.bot
         chat_id = request_data.telegram_id
         text = (
-            # ! uncomment when the consultation number is added to the API response and delete line after
+            # ! when the consultation number is added to the API response uncomment next line, delete line after
             # f"Получена новая заявка №{request_data.consultation_number}\n"
             f"Получена новая заявка №<<TBA>>\n"
             f"[Открыть заявку на сайте]({URL_SITE}doctor/consultation/{request_data.consultation_id})\n"
@@ -110,14 +110,8 @@ async def consultation_assign(request: Request) -> Response:
 
 @requires("authenticated", status_code=401)
 async def consultation_close(request: Request) -> Response:
-    # ! add second variable similar to consultation_assign once the site API response is fixed
     response, _ = await deserialize(request, ClosedConsultationModel)
-    # ! request a sample text for the close message
-    # if request_data is not None:
-    #     bot = api.state.bot_app.bot
-    #     chat_id = request_data.telegram_id
-    #     text = (f"Заявка №{request_data.consultation_number} закрыта\n")
-    #     await send_message(bot=bot, chat_id=chat_id, text=text)
+    # add second variable as in consultation_message when will work with it
     return response
 
 
@@ -128,7 +122,7 @@ async def consultation_message(request: Request) -> Response:
         bot = api.state.bot_app.bot
         chat_id = request_data.telegram_id
         text = (
-            # ! uncomment when the consultation number is added to the API response and delete line after
+            # ! when the consultation number is added to the API response uncomment next line, delete line after
             # f"Получено новое сообщение в чате заявки №{request_data.consultation_number}\n"
             f"Получено новое сообщение в чате заявки №<<TBA>>\n"
             f"[Открыть заявку на сайте]({URL_SITE}doctor/consultation/{request_data.consultation_id})\n"
@@ -149,7 +143,7 @@ async def consultation_feedback(request: Request) -> Response:
         bot = api.state.bot_app.bot
         chat_id = request_data.telegram_id
         text = (
-            # ! uncomment next line when the consultation number is added to the API response and delete line after
+            # ! when the consultation number is added to the API response uncomment next line, delete line after
             # f"Вы получили новый отзыв по заявке №{request_data.consultation_number}\n"
             f"Вы получили новый отзыв по заявке №<<TBA>>\n"
             # ! uncomment next line when the consultation response is added to the API response
