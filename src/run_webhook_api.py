@@ -20,10 +20,11 @@ from core.logger import logger
 from core.send_message import send_message
 from middleware import TokenAuthBackend
 from service.api_client import APIService
-from service.models import (  # FeedbackConsultationModel,
+from service.models import (
     AssignedConsultationModel,
     ClosedConsultationModel,
     ConsultationModel,
+    FeedbackConsultationModel,
     HealthCheckResponseModel,
 )
 
@@ -98,9 +99,7 @@ async def consultation_assign(request: Request) -> Response:
         bot = api.state.bot_app.bot
         chat_id = request_data.telegram_id
         text = (
-            # ! when the consultation number is added to the API response uncomment next line, delete line after
-            # f"Получена новая заявка №{request_data.consultation_number}\n"
-            f"Получена новая заявка №<<TBA>>\n"
+            f"Получена новая заявка\n"
             f"[Открыть заявку на сайте]({URL_SITE}doctor/consultation/{request_data.consultation_id})\n"
             f"[Открыть Trello](https://trello.com/{TRELLO_BORD_ID}/?filter=member:{request_data.username_trello})\n\n"
         )
@@ -122,9 +121,7 @@ async def consultation_message(request: Request) -> Response:
         bot = api.state.bot_app.bot
         chat_id = request_data.telegram_id
         text = (
-            # ! when the consultation number is added to the API response uncomment next line, delete line after
-            # f"Получено новое сообщение в чате заявки №{request_data.consultation_number}\n"
-            f"Получено новое сообщение в чате заявки №<<TBA>>\n"
+            f"Получено новое сообщение в чате заявки\n"
             f"[Открыть заявку на сайте]({URL_SITE}doctor/consultation/{request_data.consultation_id})\n"
             f"[Открыть Trello](https://trello.com/{TRELLO_BORD_ID}/?filter=member:{request_data.username_trello})\n\n"
         )
@@ -134,20 +131,12 @@ async def consultation_message(request: Request) -> Response:
 
 @requires("authenticated", status_code=401)
 async def consultation_feedback(request: Request) -> Response:
-    # ! site API does not return the message from the feedback, right now ConsultationModel
-    # ! information is provided, without the consultation_response. Once fixed,
-    # ! uncomment next line, delete line after
-    # response, request_data = await deserialize(request, FeedbackConsultationModel)
-    response, request_data = await deserialize(request, ConsultationModel)
+    response, request_data = await deserialize(request, FeedbackConsultationModel)
     if request_data is not None:
         bot = api.state.bot_app.bot
         chat_id = request_data.telegram_id
         text = (
-            # ! when the consultation number is added to the API response uncomment next line, delete line after
-            # f"Вы получили новый отзыв по заявке №{request_data.consultation_number}\n"
-            f"Вы получили новый отзыв по заявке №<<TBA>>\n"
-            # ! uncomment next line when the consultation response is added to the API response
-            # f"{request_data.consultation_response})\n"
+            f"Вы получили новый отзыв по заявке\n"
             f"[Открыть Trello](https://trello.com/{TRELLO_BORD_ID}"
             f"/?filter=member:{request_data.username_trello},dueComplete:true)\n\n"
         )
