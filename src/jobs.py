@@ -113,12 +113,10 @@ async def check_consultation(context: CallbackContext) -> bool:
     """
     consultation_id = context.job.data
     consultation = await APIService().get_consultation(consultation_id)
+    due_time = datetime.strptime(consultation.due, DATE_FORMAT)
     if consultation is None or consultation.due is None:
         return False
-    due_time = datetime.strptime(consultation.due, DATE_FORMAT)
-    if due_time.date() > date.today():
-        return due_time.date() <= date.today()
-    return True
+    return due_time.date() <= date.today()
 
 
 async def send_reminder_about_overdue(context: CallbackContext) -> None:
@@ -127,14 +125,14 @@ async def send_reminder_about_overdue(context: CallbackContext) -> None:
     """
     if await check_consultation(context=context):
         consultation_id, telegram_id, trello_name, duration_message = context.job.data[:4]
-        user_active = await APIService().get_user_active_consultations(telegram_id)
-        user_expired = await APIService().get_user_expired_consultations(telegram_id)
+        service = await APIService()
+        user_active = await service.get_user_active_consultations(telegram_id)
+        user_expired = await service.get_user_expired_consultations(telegram_id)
         message = (
             f"{duration_message}\n"
             f"Ответьте пожалуйста на заявку {consultation_id}\n"
             "[Открыть заявку на сайте]"
-            "(https://ask.nenaprasno.ru/doctor/consultation/"
-            f"{consultation_id})\n\n"
+            f"(https://ask.nenaprasno.ru/doctor/consultation/{consultation_id})"
             "----\n"
             f"В работе **{user_active.active_consultations}** заявок\n"
             f"Истекает срок у **{user_expired.expired_consultations}** заявок\n"
@@ -156,22 +154,12 @@ async def daily_consulations_reminder_job(context: CallbackContext) -> None:
             context.job_queue.run_once(
                 send_reminder_about_overdue,
                 when=due_time + timedelta(hours=1),
-                data=(
-                    consultation.id,
-                    consultation.telegram_id,
-                    consultation.username_trello,
-                    duration_message
-                ),
+                data=(consultation.id, consultation.telegram_id, consultation.username_trello, duration_message),
             )
         if due_time.date() < date.today():
             duration_message = "Заявка давно истекла!"
             context.job_queue.run_once(
                 send_reminder_about_overdue,
                 when=datetime.time(config.DAILY_REMINDER_FOR_OVERDUE_CONSULTATIONS),
-                data=(
-                    consultation.id,
-                    consultation.telegram_id,
-                    consultation.username_trello,
-                    duration_message
-                ),
+                data=(consultation.id, consultation.telegram_id, consultation.username_trello, duration_message),
             )
