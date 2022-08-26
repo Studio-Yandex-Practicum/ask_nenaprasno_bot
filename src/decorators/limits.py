@@ -3,8 +3,8 @@ from datetime import datetime, timedelta
 
 from core.logger import logger
 
-MODE_ACCOUNTING_LIMIT_TELEGRAM = True
-AMOUNT_MESSAGES_PER_SECOND = 30
+MODE_ACCOUNTING_LIMIT_TELEGRAM = True  # it will be possible to transfer to config
+AMOUNT_MESSAGES_PER_SECOND = 30  # https://core.telegram.org/bots/faq#my-bot-is-hitting-limits-how-do-i-avoid-this
 
 
 def regulating_time_sending_messages(func):
