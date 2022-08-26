@@ -143,7 +143,7 @@ async def set_timezone_from_keyboard(update: Update, context: CallbackContext) -
     ]
     message = "Для начала, давайте настроим часовой пояс, чтобы вы получали уведомления в удобное время."
     await menu_button(context, COMMANDS)
-    await reply_message(update, text=message, reply_markup=InlineKeyboardMarkup(keyboard))
+    await reply_message(update=update, text=message, reply_markup=InlineKeyboardMarkup(keyboard))
     return states.MENU_STATE
 
 
