@@ -7,9 +7,11 @@ from telegram.constants import ParseMode
 from telegram.error import TelegramError
 from telegram.ext import CallbackContext
 
+from decorators.limits import regulating_time_sending_messages
 from service.api_client.models import MonthStat, WeekStat
 
 
+@regulating_time_sending_messages
 async def send_message(
     bot: Bot,
     chat_id: int,
@@ -36,6 +38,7 @@ async def send_message(
         return False
 
 
+@regulating_time_sending_messages
 async def edit_message(
     update: Update,
     new_text: str,
@@ -59,6 +62,7 @@ async def edit_message(
         return False
 
 
+@regulating_time_sending_messages
 async def reply_message(
     update: Update,
     text: str,
