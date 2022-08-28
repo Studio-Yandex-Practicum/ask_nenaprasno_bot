@@ -24,6 +24,7 @@ from service.models import (
     AssignedConsultationModel,
     ClosedConsultationModel,
     ConsultationModel,
+    FeedbackConsultationModel,
     HealthCheckResponseModel,
 )
 
@@ -98,8 +99,8 @@ async def consultation_assign(request: Request) -> Response:
         bot = api.state.bot_app.bot
         chat_id = request_data.telegram_id
         text = (
-            f"Получена новая заявка №{request_data.consultation_id}\n"
-            f"[Открыть заявку на сайте]({URL_SITE}doctor/consultation/{request_data.consultation_url})\n"
+            f"Получена новая заявка\n"
+            f"[Открыть заявку на сайте]({URL_SITE}consultation/redirect/{request_data.consultation_id})\n"
             f"[Открыть Trello](https://trello.com/{TRELLO_BORD_ID}/?filter=member:{request_data.username_trello})\n\n"
         )
         await send_message(bot=bot, chat_id=chat_id, text=text)
@@ -120,8 +121,8 @@ async def consultation_message(request: Request) -> Response:
         bot = api.state.bot_app.bot
         chat_id = request_data.telegram_id
         text = (
-            f"Получено новое сообщение в чате заявки №{request_data.consultation_id}\n"
-            f"[Открыть заявку на сайте]({URL_SITE}doctor/consultation/{request_data.consultation_url})\n"
+            f"Получено новое сообщение в чате заявки\n"
+            f"[Открыть заявку на сайте]({URL_SITE}consultation/redirect/{request_data.consultation_id})\n"
             f"[Открыть Trello](https://trello.com/{TRELLO_BORD_ID}/?filter=member:{request_data.username_trello})\n\n"
         )
         await send_message(bot=bot, chat_id=chat_id, text=text)
@@ -130,13 +131,13 @@ async def consultation_message(request: Request) -> Response:
 
 @requires("authenticated", status_code=401)
 async def consultation_feedback(request: Request) -> Response:
-    response, request_data = await deserialize(request, ClosedConsultationModel)
+    response, request_data = await deserialize(request, FeedbackConsultationModel)
     if request_data is not None:
         bot = api.state.bot_app.bot
         chat_id = request_data.telegram_id
         text = (
-            f"Вы получили новый отзыв по заявке №{request_data.consultation_id}\n"
-            f"{request_data.consultation_response})\n"
+            f"Вы получили новый отзыв по заявке\n"
+            f"[Открыть заявку на сайте]({URL_SITE}consultation/redirect/{request_data.consultation_id})\n"
             f"[Открыть Trello](https://trello.com/{TRELLO_BORD_ID}"
             f"/?filter=member:{request_data.username_trello},dueComplete:true)\n\n"
         )
