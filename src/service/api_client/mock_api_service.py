@@ -96,8 +96,8 @@ class MockAPIService(AbstractAPIService):
 
     async def get_daily_consultations(self) -> list[Consultation]:
         return [
-            Consultation(id=345, due="2022-08-15T21:03:00", telegram_id=211399878, username_trello="user12345678"),
-            Consultation(id=455, due="2022-08-15T21:04:00", telegram_id=211399878, username_trello="user12345678"),
+            Consultation(id=345, due="2022-08-15T21:03:00", telegram_id=876802823, username_trello="user12345678"),
+            Consultation(id=455, due="2022-08-15T21:04:00", telegram_id=876802823, username_trello="user12345678"),
         ]
 
     async def get_consultation(self, consultation_id: int) -> ConsultationDueDate:

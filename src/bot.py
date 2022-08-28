@@ -1,6 +1,3 @@
-from datetime import timedelta
-from functools import partial
-
 from telegram import Update
 from telegram.ext import Application, ApplicationBuilder, CallbackQueryHandler, ContextTypes, PicklePersistence
 
@@ -9,13 +6,7 @@ from constants.jobs import DAILY_CONSULTATIONS_REMINDER_JOB
 from conversation import start_conversation
 from core import config
 from core.send_message import edit_message
-from jobs import (
-    daily_consulations_reminder_job,
-    monthly_bill_reminder_job,
-    monthly_stat_job,
-    send_reminder_about_overdue,
-    weekly_stat_job,
-)
+from jobs import daily_consulations_reminder_job, monthly_bill_reminder_job, monthly_stat_job, weekly_stat_job
 from service.repeat_message import repeat_message_after_1_hour_callback
 
 
@@ -58,12 +49,10 @@ def create_bot():
         monthly_bill_reminder_job, when=config.MONTHLY_RECEIPT_REMINDER_TIME, day=config.MONTHLY_RECEIPT_REMINDER_DAY
     )
     bot_app.job_queue.run_monthly(monthly_stat_job, when=config.MONTHLY_STAT_TIME, day=config.MONTHLY_STAT_DAY)
-
-    overdue_reminder_job = partial(
-        daily_consulations_reminder_job, sub_job_func=send_reminder_about_overdue, time_delta=timedelta(hours=1)
-    )
     bot_app.job_queue.run_daily(
-        overdue_reminder_job, time=config.DAILY_CONSULTATIONS_REMINDER_TIME, name=DAILY_CONSULTATIONS_REMINDER_JOB
+        daily_consulations_reminder_job,
+        time=config.DAYLY_COLLECT_CONSULTATIONS_TIME,
+        name=DAILY_CONSULTATIONS_REMINDER_JOB,
     )
     return bot_app
 
