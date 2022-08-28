@@ -10,14 +10,19 @@ from core.send_message import send_message, send_statistics
 from service.api_client import APIService
 from service.repeat_message import repeat_after_one_hour_button
 
+BOT_SEND_HOUR_REMINDER = "Час прошел, а наша надежда - нет 😃\n"
+BOT_SEND_DAILY_MESSAGE = "Заявка давно истекла!"
+
 DATE_FORMAT = "%Y-%m-%dT%H:%M:%S.%fZ"
+
+service = APIService()
 
 
 async def weekly_stat_job(context: CallbackContext) -> None:
     """
     Send weekly statistics on the number of requests in the work
     """
-    week_statistics = await APIService().get_week_stat()
+    week_statistics = await service.get_week_stat()
     template_message = Template(
         "Вы делали добрые дела 7 дней!\n"
         'Посмотрите, как прошла ваша неделя  в *"Просто спросить"*\n'
@@ -47,7 +52,7 @@ async def monthly_stat_job(context: CallbackContext) -> None:
     closed requests.
     Only if the user had requests
     """
-    month_statistics = await APIService().get_month_stat()
+    month_statistics = await service.get_month_stat()
     template_message = Template(
         "Это был отличный месяц!\n"
         'Посмотрите, как он прошел в *"Просто спросить"* 🔥\n\n'
@@ -74,7 +79,7 @@ async def monthly_bill_reminder_job(context: CallbackContext) -> None:
     Send monthly reminder about the receipt formation during payment
     Only for self-employed users
     """
-    bill_stat = await APIService().get_bill()
+    bill_stat = await service.get_bill()
     user_list = bill_stat.telegram_ids
     for telegram_id in user_list:
         context.job_queue.run_once(daily_bill_remind_job, when=timedelta(seconds=1), user_id=telegram_id)
@@ -112,7 +117,7 @@ async def check_consultation(context: CallbackContext) -> bool:
     Check time overdue consultation and create new job if necessary.
     """
     consultation_id = context.job.data
-    consultation = await APIService().get_consultation(consultation_id)
+    consultation = await service.get_consultation(consultation_id)
     due_time = datetime.strptime(consultation.due, DATE_FORMAT)
     if consultation is None or consultation.due is None:
         return False
@@ -125,14 +130,13 @@ async def send_reminder_about_overdue(context: CallbackContext) -> None:
     """
     if await check_consultation(context=context):
         consultation_id, telegram_id, trello_name, duration_message = context.job.data[:4]
-        service = await APIService()
         user_active = await service.get_user_active_consultations(telegram_id)
         user_expired = await service.get_user_expired_consultations(telegram_id)
         message = (
             f"{duration_message}\n"
             f"Ответьте пожалуйста на заявку {consultation_id}\n"
             "[Открыть заявку на сайте]"
-            f"(https://ask.nenaprasno.ru/doctor/consultation/{consultation_id})"
+            f"(https://ask-nnyp.klbrtest.ru/consultation/redirect/{consultation_id})"
             "----\n"
             f"В работе **{user_active.active_consultations}** заявок\n"
             f"Истекает срок у **{user_expired.expired_consultations}** заявок\n"
@@ -146,18 +150,18 @@ async def daily_consulations_reminder_job(context: CallbackContext) -> None:
     """
     Makes jobs reminder for overdue consultation today.
     """
-    overdue_consultations = await APIService().get_daily_consultations()
+    overdue_consultations = await service.get_daily_consultations()
     for consultation in overdue_consultations:
         due_time = datetime.strptime(consultation.due, DATE_FORMAT)
         if due_time > datetime.utcnow() and due_time.date() == date.today():
-            duration_message = "Час прошел, а наша надежда - нет 😃\n"
+            duration_message = BOT_SEND_HOUR_REMINDER
             context.job_queue.run_once(
                 send_reminder_about_overdue,
                 when=due_time + timedelta(hours=1),
                 data=(consultation.id, consultation.telegram_id, consultation.username_trello, duration_message),
             )
         if due_time.date() < date.today():
-            duration_message = "Заявка давно истекла!"
+            duration_message = BOT_SEND_DAILY_MESSAGE
             context.job_queue.run_once(
                 send_reminder_about_overdue,
                 when=datetime.time(config.DAILY_REMINDER_FOR_OVERDUE_CONSULTATIONS),
