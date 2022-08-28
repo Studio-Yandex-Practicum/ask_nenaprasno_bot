@@ -30,6 +30,11 @@ def get_datetime(setting: str) -> datetime:
 
 
 @safe_conversion
+def get_time(setting: str) -> time:
+    return get_datetime(setting).time()
+
+
+@safe_conversion
 def get_datetime_tuple(setting: str) -> tuple:
     return tuple(map(int, list(filter(None, get_string(setting).split(",")))))
 
@@ -52,9 +57,9 @@ TOKEN = get_string("TELEGRAM_TOKEN")
 SECRET_TELEGRAM_TOKEN = get_string("SECRET_TELEGRAM_TOKEN")
 
 # Параметры рассылки статистики
-WEEKLY_STAT_TIME = get_datetime("WEEKLY_STAT_TIME")
+WEEKLY_STAT_TIME = get_time("WEEKLY_STAT_TIME")
 WEEKLY_STAT_WEEK_DAYS = get_datetime_tuple("WEEKLY_STAT_WEEK_DAYS")
-MONTHLY_STAT_TIME = get_datetime("MONTHLY_STAT_TIME")
+MONTHLY_STAT_TIME = get_time("MONTHLY_STAT_TIME")
 MONTHLY_STAT_DAY = get_int("MONTHLY_STAT_DAY")
 
 # Параметры рассылки чеков
