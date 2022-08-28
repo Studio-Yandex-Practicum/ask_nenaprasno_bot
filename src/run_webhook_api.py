@@ -137,6 +137,7 @@ async def consultation_feedback(request: Request) -> Response:
         chat_id = request_data.telegram_id
         text = (
             f"Вы получили новый отзыв по заявке\n"
+            f"[Открыть заявку на сайте]({URL_SITE}doctor/consultation/{request_data.consultation_id})\n"
             f"[Открыть Trello](https://trello.com/{TRELLO_BORD_ID}"
             f"/?filter=member:{request_data.username_trello},dueComplete:true)\n\n"
         )
