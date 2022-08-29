@@ -28,13 +28,14 @@ documentation = "https://github.com/Studio-Yandex-Practicum/ask_nenaprasno_bot"
 
 [tool.poetry.dependencies]
 python = "^3.10"
-python-telegram-bot = "^20.0a2"
+python-telegram-bot = "^20.0a3"
 starlette = "^0.20.4"
 uvicorn = "^0.18.2"
 python-dotenv = "^0.20.0"
 asgiref = "^3.5.2"
 timezonefinder = "^6.0.1"
 dataclasses-json = "^0.5.7"
+aiolimiter = "^1.0.0"
 
 
 [tool.poetry.dev-dependencies]
