@@ -1,4 +1,5 @@
 from datetime import date, datetime, timedelta
+from enum import Enum
 from string import Template
 
 from telegram import InlineKeyboardButton, InlineKeyboardMarkup
@@ -10,12 +11,44 @@ from core.send_message import send_message, send_statistics
 from service.api_client import APIService
 from service.repeat_message import repeat_after_one_hour_button
 
-BOT_SEND_HOUR_REMINDER = "Час прошел, а наша надежда - нет 😃\n"
-BOT_SEND_DAILY_MESSAGE = "Заявка давно истекла!"
+REMINDER_BASE_TEMPLATE = (
+    "Открыть заявку на сайте (https://ask-nnyp.klbrtest.ru"
+    "/consultation/redirect/{consultation_id})\n"
+    "----\n"
+    "В работе **{active_consultations}** заявок\n"
+    "Истекает срок у **{expired_consultations}** заявок\n\n"
+    "Открыть Trello (https://trello.com/{trello_id}/"
+    "?filter=member:{trello_name}/?filter=overdue:true)"
+)
+
+HOURLY_REMINDER_TEMPLATE = (
+    "Час прошел, а наша надежда - нет :)\n" "Ответьте, пожалуйста, на заявку {consultation_id}\n\n"
+) + REMINDER_BASE_TEMPLATE
+
+DAILY_REMINDER_TEMPLATE = (
+    "Время и стекло 😎\n" "Заявка - {consultation_id}\n" "Верим и ждем.\n\n"
+) + REMINDER_BASE_TEMPLATE
+
+FORWARD_REMINDER_TEMPLATE = (
+    "Пупупууу! Истекает срок ответа по заявке {consultation_id} 🔥\n"
+    "У нас еще есть время, чтобы ответить человеку вовремя!\n\n"
+) + REMINDER_BASE_TEMPLATE
 
 DATE_FORMAT = "%Y-%m-%dT%H:%M:%S.%fZ"
 
 service = APIService()
+
+
+class DueStatus(Enum):
+    """Defines due status of a consultation:
+    - EXPIRED: due date at least one day ago;
+    - TODAY: due date is today;
+    - TOMORROW: due day is tomorrow.
+    """
+
+    EXPIRED = 1
+    TODAY = 2
+    TOMORROW = 3
 
 
 async def weekly_stat_job(context: CallbackContext) -> None:
@@ -28,7 +61,7 @@ async def weekly_stat_job(context: CallbackContext) -> None:
         'Посмотрите, как прошла ваша неделя  в *"Просто спросить"*\n'
         "Закрыто заявок - *$closed_consultations*\n"
         "В работе *$active_consultations* заявок  за неделю\n\n"
-        "Истекает срок у *$expiring_consultations заявок*\n"
+        "Истекает срок у *$expiring_consultations* заявок\n"
         "У *$expired_consultations* заявок срок истек\n\n"
         f"[Открыть Trello](https://trello.com/{config.TRELLO_BORD_ID})\n\n"
     )
@@ -114,58 +147,70 @@ async def daily_bill_remind_job(context: CallbackContext) -> None:
     )
 
 
-async def check_consultation(context: CallbackContext) -> bool:
-    """
-    Check time overdue consultation and create new job if necessary.
-    """
-    consultation_id = context.job.data
+async def check_consultation(consultation_id: int, due_status: DueStatus) -> bool:
+    """Checks if consulation status is still valid."""
     consultation = await service.get_consultation(consultation_id)
-    due_time = datetime.strptime(consultation.due, DATE_FORMAT)
     if consultation is None or consultation.due is None:
         return False
-    return due_time.date() <= date.today()
+
+    due_time = datetime.strptime(consultation.due, DATE_FORMAT)
+    now = datetime.utcnow()
+    if due_status == DueStatus.TODAY:
+        return due_time.date() == now.date()
+    if due_status == DueStatus.EXPIRED:
+        return due_time.date() < date.today()
+    if due_status == DueStatus.TOMORROW:
+        return due_time.date() - now.date() == timedelta(days=1)
+    return False
 
 
-async def send_reminder_about_overdue(context: CallbackContext) -> None:
-    """
-    Send reminder to user.
-    """
-    if await check_consultation(context=context):
-        consultation_id, telegram_id, trello_name, duration_message = context.job.data[:4]
-        user_active = await service.get_user_active_consultations(telegram_id)
-        user_expired = await service.get_user_expired_consultations(telegram_id)
-        message = (
-            f"{duration_message}\n"
-            f"Ответьте пожалуйста на заявку {consultation_id}\n"
-            "[Открыть заявку на сайте]"
-            f"(https://ask-nnyp.klbrtest.ru/consultation/redirect/{consultation_id})"
-            "----\n"
-            f"В работе **{user_active.active_consultations}** заявок\n"
-            f"Истекает срок у **{user_expired.expired_consultations}** заявок\n"
-            f"[Открыть Trello](https://trello.com/{config.TRELLO_BORD_ID}/"
-            f"?filter=member:{trello_name}/?filter=overdue:true)"
+async def send_reminder(context: CallbackContext) -> None:
+    """Sends reminder to the user according to the message tmeplate.
+    Prior to that, check if the consultation is still relevant."""
+    consultation, message_template, due_status = context.job.data
+    if await check_consultation(consultation.id, due_status):
+        telegram_id = consultation.telegram_id
+        active_cons = await service.get_user_active_consultations(telegram_id)
+        expired_cons = await service.get_user_expired_consultations(telegram_id)
+
+        message = message_template.format(
+            consultation_id=consultation.id,
+            active_consultations=active_cons.active_consultations,
+            expired_consultations=expired_cons.expired_consultations,
+            trello_id=config.TRELLO_BORD_ID,
+            trello_name=consultation.username_trello,
         )
         await send_message(bot=context.bot, chat_id=telegram_id, text=message)
 
 
 async def daily_consulations_reminder_job(context: CallbackContext) -> None:
+    """Adds a reminder job to the bot's job queue according
+    to one of the following scenarios:
+    - the due date is tomorrow;
+    - the due date has expired by one hour;
+    - the due date expired at least one day ago.
     """
-    Makes jobs reminder for overdue consultation today.
-    """
-    overdue_consultations = await service.get_daily_consultations()
-    for consultation in overdue_consultations:
+    now = datetime.utcnow()
+    consultations = await service.get_daily_consultations()
+    for consultation in consultations:
         due_time = datetime.strptime(consultation.due, DATE_FORMAT)
-        if due_time > datetime.utcnow() and due_time.date() == date.today():
-            duration_message = BOT_SEND_HOUR_REMINDER
-            context.job_queue.run_once(
-                send_reminder_about_overdue,
-                when=due_time + timedelta(hours=1),
-                data=(consultation.id, consultation.telegram_id, consultation.username_trello, duration_message),
-            )
-        if due_time.date() < date.today():
-            duration_message = BOT_SEND_DAILY_MESSAGE
-            context.job_queue.run_once(
-                send_reminder_about_overdue,
-                when=datetime.time(config.DAILY_REMINDER_FOR_OVERDUE_CONSULTATIONS),
-                data=(consultation.id, consultation.telegram_id, consultation.username_trello, duration_message),
-            )
+        if due_time.date() == now.date():
+            message_template = HOURLY_REMINDER_TEMPLATE
+            when_ = due_time + timedelta(hours=1)
+            due_status = DueStatus.TODAY
+        elif due_time.date() < date.today():
+            message_template = DAILY_REMINDER_TEMPLATE
+            when_ = datetime.time(config.DAILY_CONSULTATIONS_REMINDER_TIME)
+            due_status = DueStatus.EXPIRED
+        elif due_time.date() - now.date() == timedelta(days=1):
+            message_template = FORWARD_REMINDER_TEMPLATE
+            when_ = datetime.time(config.DAILY_CONSULTATIONS_REMINDER_TIME)
+            due_status = DueStatus.TOMORROW
+        else:
+            continue
+
+        context.job_queue.run_once(
+            send_reminder,
+            when=when_,
+            data=(consultation, message_template, due_status),
+        )
