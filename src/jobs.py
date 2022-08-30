@@ -30,7 +30,7 @@ async def weekly_stat_job(context: CallbackContext) -> None:
         "В работе *$active_consultations* заявок  за неделю\n\n"
         "Истекает срок у *$expiring_consultations заявок*\n"
         "У *$expired_consultations* заявок срок истек\n\n"
-        f"[Открыть Trello](https://trello.com/{config.TRELLO_BORD_ID})\n\n"
+        f"[Открыть Trello]({config.URL_TRELLO}{config.TRELLO_BORD_ID})\n\n"
     )
     alias_dict = dict(
         closed_consultations="closed_consultations",
@@ -61,7 +61,7 @@ async def monthly_stat_job(context: CallbackContext) -> None:
         "Количество закрытых заявок - *$closed_consultations*\n"
         "Рейтинг - *$rating*\n"
         "Среднее время ответа - *$average_user_answer_time*\n\n"
-        f"[Открыть Trello](https://trello.com/{config.TRELLO_BORD_ID})\n\n"
+        f"[Открыть Trello]({config.URL_TRELLO}{config.TRELLO_BORD_ID})\n\n"
     )
     alias_dict = dict(
         closed_consultations="closed_consultations",
@@ -138,11 +138,11 @@ async def send_reminder_about_overdue(context: CallbackContext) -> None:
             f"{duration_message}\n"
             f"Ответьте пожалуйста на заявку {consultation_id}\n"
             "[Открыть заявку на сайте]"
-            f"(https://ask-nnyp.klbrtest.ru/consultation/redirect/{consultation_id})"
+            f"({config.URL_ASK_NNYP}{consultation_id})"
             "----\n"
             f"В работе **{user_active.active_consultations}** заявок\n"
             f"Истекает срок у **{user_expired.expired_consultations}** заявок\n"
-            f"[Открыть Trello](https://trello.com/{config.TRELLO_BORD_ID}/"
+            f"[Открыть Trello]({config.URL_TRELLO}{config.TRELLO_BORD_ID}/"
             f"?filter=member:{trello_name}/?filter=overdue:true)"
         )
         await send_message(bot=context.bot, chat_id=telegram_id, text=message)
