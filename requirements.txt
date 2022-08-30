@@ -19,28 +19,10 @@ rfc3986==1.5.0; python_version >= "3.7"
 six==1.16.0; python_version >= "3.7" and python_full_version < "3.0.0" or python_full_version >= "3.5.0" and python_version < "4" and python_version >= "3.7"
 sniffio==1.2.0; python_full_version >= "3.6.2" and python_version >= "3.7"
 starlette==0.20.4; python_version >= "3.7"
+telegram~=0.0.1
 timezonefinder==6.0.1; python_version >= "3.7"
 tornado==6.2; python_version >= "3.7"
 tzdata==2022.1; python_version >= "3.7" and python_full_version < "3.0.0" and platform_system == "Windows" or python_full_version >= "3.6.0" and python_version < "4" and python_version >= "3.7" and platform_system == "Windows"
 tzlocal==4.2; python_version >= "3.7" and python_full_version < "3.0.0" or python_full_version >= "3.5.0" and python_version < "4" and python_version >= "3.7"
 uvicorn==0.18.2; python_version >= "3.7"
 dataclasses_json==0.5.7;python_version >= "3.7"
-
-python-dotenv~=0.20.0
-telegram~=0.0.1
-starlette~=0.19.1
-pip~=22.2.2
-attrs~=22.1.0
-toml~=0.10.2
-py~=1.11.0
-anyio~=3.6.1
-sniffio~=1.2.0
-idna~=3.3
-certifi~=2022.6.15
-setuptools~=58.1.0
-cffi~=1.15.0
-mccabe~=0.6.1
-uvloop~=0.16.0
-cachetools~=5.2.0
-six~=1.16.0
-SQLAlchemy~=1.4.39
