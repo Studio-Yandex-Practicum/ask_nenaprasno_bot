@@ -1,3 +1,5 @@
+from datetime import timedelta
+
 from telegram import InlineKeyboardButton, InlineKeyboardMarkup, Update
 from telegram.ext import CallbackQueryHandler, CommandHandler, ContextTypes, ConversationHandler
 
@@ -47,6 +49,13 @@ async def button_reaction_callback(update: Update, context: ContextTypes.DEFAULT
     return states.MENU_STATE
 
 
+def format_average_user_answer_time(time):
+    td_object = timedelta(days=0, hours=0, milliseconds=time)
+    days = td_object.days
+    hours = td_object.seconds // 3600
+    return f"{days} дней {hours} часа"
+
+
 @async_error_logger(name="conversation.requests.button_statistic_month_callback")
 async def button_statistic_month_callback(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     """
@@ -64,7 +73,8 @@ async def button_statistic_month_callback(update: Update, context: ContextTypes.
             f'С начала месяца вы сделали очень много для "Просто спросить" 🔥\n'
             f"***Количество закрытых заявок*** - {user_statistics.closed_consultations}\n"
             f"***Рейтинг*** - {user_statistics.rating:.1f}\n"
-            f"***Среднее время ответа*** - {user_statistics.average_user_answer_time:.1f}\n\n"
+            f"***Среднее время ответа*** -"
+            f" {format_average_user_answer_time(user_statistics.average_user_answer_time)}\n\n"
             "Мы рады работать в одной команде :)\n"
             "Так держать!"
         )
