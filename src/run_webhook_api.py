@@ -108,8 +108,14 @@ async def consultation_assign(request: Request) -> Response:
 
 @requires("authenticated", status_code=401)
 async def consultation_close(request: Request) -> Response:
-    response, _ = await deserialize(request, ClosedConsultationModel)
-    # add second variable as in consultation_message when will work with it
+    response, request_data = await deserialize(request, ClosedConsultationModel)
+    if request_data is not None:
+        consultation_id = request_data.consultation_id
+        bot_app = api.state.bot_app
+        reminder_jobs = bot_app.job_queue.get_jobs()
+        for job in reminder_jobs:
+            if job.data[0] == consultation_id:
+                job.schedule_removal()
     return response
 
 
