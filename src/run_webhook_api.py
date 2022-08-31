@@ -112,7 +112,7 @@ async def consultation_close(request: Request) -> Response:
     if request_data is not None:
         consultation_id = request_data.consultation_id
         bot_app = api.state.bot_app
-        reminder_jobs = bot_app.job_queue.get_jobs()
+        reminder_jobs = bot_app.job_queue.jobs()
         for job in reminder_jobs:
             if job.data[0] == consultation_id:
                 job.schedule_removal()
