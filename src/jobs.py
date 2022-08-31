@@ -138,7 +138,7 @@ async def send_reminder_about_overdue(context: CallbackContext) -> None:
             f"{duration_message}\n"
             f"Ответьте пожалуйста на заявку {consultation_id}\n"
             "[Открыть заявку на сайте]"
-            f"({config.URL_ASK_NNYP}{consultation_id})"
+            f"({config.URL_ASK_NENAPRASNO}{consultation_id})"
             "----\n"
             f"В работе **{user_active.active_consultations}** заявок\n"
             f"Истекает срок у **{user_expired.expired_consultations}** заявок\n"
