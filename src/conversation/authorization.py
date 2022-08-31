@@ -93,7 +93,7 @@ async def support_or_consult_callback(update: Update, context: CallbackContext) 
     keyboard = [
         [
             InlineKeyboardButton("Получить онлайн консультацию", url=config.URL_SITE),
-            InlineKeyboardButton("Поддержать проект", url=config.URL_SITE_DONATION),
+            InlineKeyboardButton("Поддержать проект", url=f"{config.URL_SITE}#donation"),
         ]
     ]
     reply_markup = InlineKeyboardMarkup(keyboard)
