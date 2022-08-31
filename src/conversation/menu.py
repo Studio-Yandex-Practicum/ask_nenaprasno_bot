@@ -5,7 +5,7 @@ from telegram.ext import CallbackQueryHandler, CommandHandler, ContextTypes, Con
 
 from constants import callback_data, states
 from conversation.timezone import set_timezone_from_keyboard, timezone_conversation
-from core.config import TRELLO_BORD_ID, URL_SERVICE_RULES, URL_SITE, URL_TRELLO
+from core.config import TRELLO_BORD_ID, URL_SERVICE_RULES, URL_SITE
 from core.send_message import reply_message
 from decorators.logger import async_error_logger
 from service.api_client import APIService
@@ -104,7 +104,7 @@ async def button_actual_requests_callback(update: Update, context: ContextTypes.
     message = (
         f"У вас в работе {user_active_consultations.active_consultations} заявок.\n"
         f"Посмотреть заявки на сайте:\n{list_for_message}"
-        f"\n[Открыть Trello]({URL_TRELLO}{TRELLO_BORD_ID}/?filter=member:"
+        f"\n[Открыть Trello](https://trello.com/{TRELLO_BORD_ID}/?filter=member:"
         f"{username_trello}/?filter=overdue:true)\n\n"
     )
     await reply_message(update=update, text=message)
@@ -136,7 +136,7 @@ async def button_overdue_requests_callback(update: Update, context: ContextTypes
         f"Посмотреть заявки на сайте:\n {link_neneprasno}\n"
         f"----\n"
         f"В работе количество  заявок - {active_consultations.active_consultations}\n"
-        f"Открыть [Trello]({URL_TRELLO}{TRELLO_BORD_ID}/?filter=member:"
+        f"Открыть [Trello](https://trello.com/{TRELLO_BORD_ID}/?filter=member:"
         f"{username_trello}/?filter=overdue:true)\n\n"
     )
     await reply_message(update=update, text=message)

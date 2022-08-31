@@ -101,7 +101,7 @@ async def consultation_assign(request: Request) -> Response:
         text = (
             f"Получена новая заявка\n"
             f"[Открыть заявку на сайте]({URL_SITE}consultation/redirect/{request_data.consultation_id})\n"
-            f"[Открыть Trello]({config.URL_TRELLO}{TRELLO_BORD_ID}/?filter=member:{request_data.username_trello})\n\n"
+            f"[Открыть Trello](https://trello.com/{TRELLO_BORD_ID}/?filter=member:{request_data.username_trello})\n\n"
         )
         await send_message(bot=bot, chat_id=chat_id, text=text)
     return response
@@ -123,7 +123,7 @@ async def consultation_message(request: Request) -> Response:
         text = (
             f"Получено новое сообщение в чате заявки\n"
             f"[Открыть заявку на сайте]({URL_SITE}consultation/redirect/{request_data.consultation_id})\n"
-            f"[Открыть Trello]({config.URL_TRELLO}{TRELLO_BORD_ID}/?filter=member:{request_data.username_trello})\n\n"
+            f"[Открыть Trello](https://trello.com/{TRELLO_BORD_ID}/?filter=member:{request_data.username_trello})\n\n"
         )
         await send_message(bot=bot, chat_id=chat_id, text=text)
     return response
@@ -138,7 +138,7 @@ async def consultation_feedback(request: Request) -> Response:
         text = (
             f"Вы получили новый отзыв по заявке\n"
             f"[Открыть заявку на сайте]({URL_SITE}consultation/redirect/{request_data.consultation_id})\n"
-            f"[Открыть Trello]({config.URL_TRELLO}{TRELLO_BORD_ID}"
+            f"[Открыть Trello](https://trello.com/{TRELLO_BORD_ID}"
             f"/?filter=member:{request_data.username_trello},dueComplete:true)\n\n"
         )
         await send_message(bot=bot, chat_id=chat_id, text=text)
