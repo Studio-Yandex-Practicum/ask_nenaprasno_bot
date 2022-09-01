@@ -6,6 +6,7 @@ from telegram.ext import CallbackContext
 
 from constants.callback_data import CALLBACK_DONE_BILL_COMMAND, CALLBACK_SKIP_BILL_COMMAND
 from core import config
+from core.logger import logger
 from core.send_message import send_message, send_statistics
 from service.api_client import APIService
 from service.repeat_message import repeat_after_one_hour_button
@@ -118,11 +119,17 @@ async def check_consultation(context: CallbackContext) -> bool:
     """
     Check time overdue consultation and create new job if necessary.
     """
-    consultation_id = context.job.data
+    if not isinstance(context.job.data, tuple):
+        logger.warning('context.job.data has type "%s" instead of "%s"', type(context.job.data), type(tuple()))
+        return False
+
+    consultation_id = context.job.data[0]
     consultation = await service.get_consultation(consultation_id)
     due_time = datetime.strptime(consultation.due, DATE_FORMAT)
+
     if consultation is None or consultation.due is None:
         return False
+
     return due_time.date() <= date.today()
 
 
@@ -138,7 +145,7 @@ async def send_reminder_about_overdue(context: CallbackContext) -> None:
             f"{duration_message}\n"
             f"Ответьте пожалуйста на заявку {consultation_id}\n"
             "[Открыть заявку на сайте]"
-            f"(https://ask-nnyp.klbrtest.ru/consultation/redirect/{consultation_id})"
+            f"(https://ask-nnyp.klbrtest.ru/consultation/redirect/{consultation_id})\n"
             "----\n"
             f"В работе **{user_active.active_consultations}** заявок\n"
             f"Истекает срок у **{user_expired.expired_consultations}** заявок\n"
