@@ -111,12 +111,10 @@ async def consultation_assign(request: Request) -> Response:
             bot = api.state.bot_app.bot
             chat_id = request_data.telegram_id
             text = (
-                "Получена новая заявка\n",
-                (f"[Открыть заявку на сайте]" f"({URL_SITE}consultation/redirect/{request_data.consultation_id})\n"),
-                (
-                    f"[Открыть Trello](https://trello.com/{TRELLO_BORD_ID}/?filter=member:"
-                    f"{request_data.username_trello})\n\n"
-                ),
+                f"Получена новая заявка\n"
+                f"[Открыть заявку на сайте]({URL_SITE}consultation/redirect/{request_data.consultation_id})\n"
+                f"[Открыть Trello]"
+                f"(https://trello.com/{TRELLO_BORD_ID}/?filter=member:{request_data.username_trello})\n\n"
             )
             await send_message(bot=bot, chat_id=chat_id, text=text)
     except Exception as error:
@@ -133,12 +131,10 @@ async def consultation_close(request: Request) -> Response:
             bot = api.state.bot_app.bot
             chat_id = request_data.telegram_id
             text = (
-                "Заявка успешно закрыта\n",
-                (f"[Посмотреть заявку на сайте]" f"({URL_SITE}consultation/redirect/{request_data.consultation_id})\n"),
-                (
-                    f"[Открыть Trello](https://trello.com/{TRELLO_BORD_ID}/?filter=member:"
-                    f"{request_data.username_trello})\n\n"
-                ),
+                f"Заявка успешно закрыта\n"
+                f"[Посмотреть заявку на сайте]({URL_SITE}consultation/redirect/{request_data.consultation_id})\n"
+                f"[Открыть Trello]"
+                f"(https://trello.com/{TRELLO_BORD_ID}/?filter=member:{request_data.username_trello})\n\n"
             )
             await send_message(bot=bot, chat_id=chat_id, text=text)
         # add second variable as in consultation_message when will work with it
@@ -157,12 +153,10 @@ async def consultation_message(request: Request) -> Response:
             bot = api.state.bot_app.bot
             chat_id = request_data.telegram_id
             text = (
-                "Получено новое сообщение в чате заявки\n",
-                (f"[Открыть заявку на сайте]" f"({URL_SITE}consultation/redirect/{request_data.consultation_id})\n"),
-                (
-                    f"[Открыть Trello](https://trello.com/{TRELLO_BORD_ID}/?filter=member:"
-                    f"{request_data.username_trello})\n\n"
-                ),
+                f"Получено новое сообщение в чате заявки\n"
+                f"[Открыть заявку на сайте]({URL_SITE}consultation/redirect/{request_data.consultation_id})\n"
+                f"[Открыть Trello]"
+                f"(https://trello.com/{TRELLO_BORD_ID}/?filter=member:{request_data.username_trello})\n\n"
             )
             await send_message(bot=bot, chat_id=chat_id, text=text)
         # return response
@@ -180,10 +174,10 @@ async def consultation_feedback(request: Request) -> Response:
             bot = api.state.bot_app.bot
             chat_id = request_data.telegram_id
             text = (
-                "Вы получили новый отзыв по заявке\n",
-                (f"[Открыть заявку на сайте]" f"({URL_SITE}consultation/redirect/{request_data.consultation_id})\n"),
+                f"Вы получили новый отзыв по заявке\n"
+                f"[Открыть заявку на сайте]({URL_SITE}consultation/redirect/{request_data.consultation_id})\n"
                 f"[Открыть Trello](https://trello.com/{TRELLO_BORD_ID}"
-                f"/?filter=member:{request_data.username_trello},dueComplete:true)\n\n",
+                f"/?filter=member:{request_data.username_trello},dueComplete:true)\n\n"
             )
             await send_message(bot=bot, chat_id=chat_id, text=text)
         # return response
