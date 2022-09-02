@@ -8,3 +8,7 @@ class EnvVariablesError(Exception):
 
     def __str__(self):
         return f"{self.setting} -> {self.message}"
+
+
+class BadRequestError(Exception):
+    pass
