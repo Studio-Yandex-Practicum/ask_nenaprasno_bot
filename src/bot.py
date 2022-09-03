@@ -1,5 +1,12 @@
 from telegram import Update
-from telegram.ext import Application, ApplicationBuilder, CallbackQueryHandler, ContextTypes, PicklePersistence
+from telegram.ext import (
+    AIORateLimiter,
+    Application,
+    ApplicationBuilder,
+    CallbackQueryHandler,
+    ContextTypes,
+    PicklePersistence,
+)
 
 from constants import callback_data
 from constants.jobs import DAILY_CONSULTATIONS_REMINDER_JOB
@@ -35,7 +42,13 @@ def create_bot():
     :return: Created telegram bot application
     """
     bot_persistence = PicklePersistence(filepath=config.BOT_PERSISTENCE_FILE)
-    bot_app = ApplicationBuilder().token(config.TOKEN).persistence(persistence=bot_persistence).build()
+    bot_app = (
+        ApplicationBuilder()
+        .token(config.TOKEN)
+        .rate_limiter(AIORateLimiter())
+        .persistence(persistence=bot_persistence)
+        .build()
+    )
     bot_app.add_handler(start_conversation)
     bot_app.add_handlers(
         handlers=[
@@ -51,7 +64,7 @@ def create_bot():
     bot_app.job_queue.run_monthly(monthly_stat_job, when=config.MONTHLY_STAT_TIME, day=config.MONTHLY_STAT_DAY)
     bot_app.job_queue.run_daily(
         daily_consulations_reminder_job,
-        time=config.DAYLY_COLLECT_CONSULTATIONS_TIME,
+        time=config.DAILY_COLLECT_CONSULTATIONS_TIME,
         name=DAILY_CONSULTATIONS_REMINDER_JOB,
     )
     return bot_app

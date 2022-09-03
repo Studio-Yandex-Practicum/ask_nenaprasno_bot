@@ -100,7 +100,8 @@ async def button_actual_requests_callback(update: Update, context: ContextTypes.
     list_for_message = ""
     for num, consultation in enumerate(consultations_list):
         number = num + 1
-        list_for_message += f"[{number} завка]({URL_ASK_NENAPRASNO}/doctor/consultation/{consultation})\n"
+        list_for_message += f"[{number} заявка]({URL_ASK_NENAPRASNO}/doctor/consultation/{consultation})\n"
+
     message = (
         f"У вас в работе {user_active_consultations.active_consultations} заявок.\n"
         f"Посмотреть заявки на сайте:\n{list_for_message}"
