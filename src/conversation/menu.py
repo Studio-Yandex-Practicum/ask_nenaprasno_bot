@@ -5,7 +5,7 @@ from telegram.ext import CallbackQueryHandler, CommandHandler, ContextTypes, Con
 
 from constants import callback_data, states
 from conversation.timezone import set_timezone_from_keyboard, timezone_conversation
-from core.config import TRELLO_BORD_ID, URL_SERVICE_RULES, URL_SITE
+from core.config import TRELLO_BORD_ID, URL_ASK_NENAPRASNO, URL_SERVICE_RULES
 from core.send_message import reply_message
 from decorators.logger import async_error_logger
 from service.api_client import APIService
@@ -100,7 +100,8 @@ async def button_actual_requests_callback(update: Update, context: ContextTypes.
     list_for_message = ""
     for num, consultation in enumerate(consultations_list):
         number = num + 1
-        list_for_message += f"[{number} заявка]({URL_SITE}doctor/consultation/{consultation})\n"
+        list_for_message += f"[{number} заявка]({URL_ASK_NENAPRASNO}/doctor/consultation/{consultation})\n"
+
     message = (
         f"У вас в работе {user_active_consultations.active_consultations} заявок.\n"
         f"Посмотреть заявки на сайте:\n{list_for_message}"
@@ -128,7 +129,7 @@ async def button_overdue_requests_callback(update: Update, context: ContextTypes
     link_neneprasno = ""
     for num, consultation in enumerate(expired_consultations_list):
         number = num + 1
-        link_neneprasno += f"[{number} просроченная заявка]({URL_SITE}doctor/consultation/{consultation})\n"
+        link_neneprasno += f"[{number} просроченная заявка]({URL_ASK_NENAPRASNO}/doctor/consultation/{consultation})\n"
     message = (
         f"Время истекло 😎\n"
         f"Ваше количество просроченных заявок - {expired_consultations.expired_consultations}\n"

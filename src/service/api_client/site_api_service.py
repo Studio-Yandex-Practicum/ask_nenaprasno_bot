@@ -36,56 +36,44 @@ class SiteAPIService(AbstractAPIService):
     async def get_week_stat(self) -> Optional[list[WeekStat]]:
         url = urljoin(self.site_url, "/tgbot/stat/weekly")
         list_week_stat = await self.__get_json_data(url=url)
-        try:
-            return [WeekStat.from_dict(one_week_stat) for one_week_stat in list_week_stat]
-        except TypeError as error:
-            logger.error("Failed convert json to dataclass: %s, error: %s", WeekStat, error)
+        if list_week_stat is None:
             return None
+        return [WeekStat.from_dict(one_week_stat) for one_week_stat in list_week_stat]
 
     async def get_month_stat(self) -> Optional[list[MonthStat]]:
         url = urljoin(self.site_url, "/tgbot/stat/monthly")
         list_month_stat = await self.__get_json_data(url=url)
-        try:
-            return [MonthStat.from_dict(one_month_stat) for one_month_stat in list_month_stat]
-        except TypeError as error:
-            logger.error("Failed convert json to dataclass: %s, error: %s", MonthStat, error)
+        if list_month_stat is None:
             return None
+        return [MonthStat.from_dict(one_month_stat) for one_month_stat in list_month_stat]
 
     async def get_user_active_consultations(self, telegram_id: int) -> Optional[UserActiveConsultations]:
         url = urljoin(self.site_url, f"tgbot/stat/active/user/{telegram_id}")
         active_consultations = await self.__get_json_data(url=url)
-        try:
-            return UserActiveConsultations.from_dict(active_consultations)
-        except (AttributeError, KeyError) as error:
-            logger.error("Failed convert json to dataclass: %s, error: %s", UserActiveConsultations, error)
+        if active_consultations is None:
             return None
+        return UserActiveConsultations.from_dict(active_consultations)
 
     async def get_user_expired_consultations(self, telegram_id: int) -> Optional[UserExpiredConsultations]:
         url = urljoin(self.site_url, f"/tgbot/stat/overdue/user/{telegram_id}")
         exp_consultations = await self.__get_json_data(url=url)
-        try:
-            return UserExpiredConsultations.from_dict(exp_consultations)
-        except (AttributeError, KeyError) as error:
-            logger.error("Failed convert json to dataclass: %s, error: %s", UserExpiredConsultations, error)
+        if exp_consultations is None:
             return None
+        return UserExpiredConsultations.from_dict(exp_consultations)
 
     async def get_user_month_stat(self, telegram_id: int) -> Optional[UserMonthStat]:
         url = urljoin(self.site_url, f"/tgbot/stat/monthly/user/{telegram_id}")
         user_month_stat = await self.__get_json_data(url=url)
-        try:
-            return UserMonthStat.from_dict(user_month_stat)
-        except (AttributeError, KeyError) as error:
-            logger.error("Failed convert json to dataclass: %s, error: %s", UserMonthStat, error)
+        if user_month_stat is None:
             return None
+        return UserMonthStat.from_dict(user_month_stat)
 
     async def authenticate_user(self, telegram_id: int) -> Optional[UserData]:
         url = urljoin(self.site_url, f"/tgbot/user/{telegram_id}")
         user = await self.__get_json_data(url=url)
-        try:
-            return UserData.from_dict(user)
-        except (AttributeError, KeyError) as error:
-            logger.error("Failed convert json to dataclass: %s, error: %s", UserData, error)
+        if user is None:
             return None
+        return UserData.from_dict(user)
 
     async def set_user_timezone(self, telegram_id: int, user_time_zone: str) -> Optional[int]:
         url = urljoin(self.site_url, "/tgbot/user")
@@ -98,20 +86,16 @@ class SiteAPIService(AbstractAPIService):
     async def get_daily_consultations(self) -> Optional[list[Consultation]]:
         url = urljoin(self.site_url, "tgbot/consultations/")
         consultations = await self.__get_json_data(url=url)
-        try:
-            return [Consultation.from_dict(consultation) for consultation in consultations]
-        except TypeError as error:
-            logger.error("Failed convert json to dataclass: %s", error)
+        if consultations is None:
             return None
+        return [Consultation.from_dict(consultation) for consultation in consultations]
 
     async def get_consultation(self, consultation_id: str) -> Optional[ConsultationDueDate]:
         url = urljoin(self.site_url, f"tgbot/consultations/{consultation_id}")
         consultation = await self.__get_json_data(url=url)
-        try:
-            return ConsultationDueDate.from_dict(consultation)
-        except TypeError as error:
-            logger.error("Failed convert json to dataclass: %s", error)
+        if consultation is None:
             return None
+        return ConsultationDueDate.from_dict(consultation)
 
     async def __get_json_data(self, url: str) -> Optional[dict]:
         headers = {"Authorization": self.bot_token}
