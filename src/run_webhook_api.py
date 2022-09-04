@@ -15,7 +15,7 @@ from telegram.error import TelegramError
 
 from bot import DAILY_CONSULTATIONS_REMINDER_JOB, init_webhook
 from core import config
-from core.config import TRELLO_BORD_ID, URL_SITE
+from core.config import TRELLO_BORD_ID, URL_ASK_NENAPRASNO
 from core.logger import logger
 from core.send_message import send_message
 from middleware import TokenAuthBackend
@@ -100,7 +100,7 @@ async def consultation_assign(request: Request) -> Response:
         chat_id = request_data.telegram_id
         text = (
             f"Получена новая заявка\n"
-            f"[Открыть заявку на сайте]({URL_SITE}consultation/redirect/{request_data.consultation_id})\n"
+            f"[Открыть заявку на сайте]({URL_ASK_NENAPRASNO}/consultation/redirect/{request_data.consultation_id})\n"
             f"[Открыть Trello](https://trello.com/{TRELLO_BORD_ID}/?filter=member:{request_data.username_trello})\n\n"
         )
         await send_message(bot=bot, chat_id=chat_id, text=text)
@@ -109,8 +109,14 @@ async def consultation_assign(request: Request) -> Response:
 
 @requires("authenticated", status_code=401)
 async def consultation_close(request: Request) -> Response:
-    response, _ = await deserialize(request, ClosedConsultationModel)
-    # add second variable as in consultation_message when will work with it
+    response, request_data = await deserialize(request, ClosedConsultationModel)
+    if request_data is not None:
+        consultation_id = request_data.consultation_id
+        bot_app = api.state.bot_app
+        reminder_jobs = bot_app.job_queue.jobs()
+        for job in reminder_jobs:
+            if job.data[0] == consultation_id:
+                job.schedule_removal()
     return response
 
 
@@ -122,7 +128,7 @@ async def consultation_message(request: Request) -> Response:
         chat_id = request_data.telegram_id
         text = (
             f"Получено новое сообщение в чате заявки\n"
-            f"[Открыть заявку на сайте]({URL_SITE}consultation/redirect/{request_data.consultation_id})\n"
+            f"[Открыть заявку на сайте]({URL_ASK_NENAPRASNO}/consultation/redirect/{request_data.consultation_id})\n"
             f"[Открыть Trello](https://trello.com/{TRELLO_BORD_ID}/?filter=member:{request_data.username_trello})\n\n"
         )
         await send_message(bot=bot, chat_id=chat_id, text=text)
@@ -137,7 +143,7 @@ async def consultation_feedback(request: Request) -> Response:
         chat_id = request_data.telegram_id
         text = (
             f"Вы получили новый отзыв по заявке\n"
-            f"[Открыть заявку на сайте]({URL_SITE}consultation/redirect/{request_data.consultation_id})\n"
+            f"[Открыть заявку на сайте]({URL_ASK_NENAPRASNO}/consultation/redirect/{request_data.consultation_id})\n"
             f"[Открыть Trello](https://trello.com/{TRELLO_BORD_ID}"
             f"/?filter=member:{request_data.username_trello},dueComplete:true)\n\n"
         )
