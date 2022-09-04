@@ -49,6 +49,7 @@ jobs:
             echo BOT_PORT=${{ secrets.BOT_PORT }} >> .env
             echo WEBHOOK_URL=${{ secrets.WEBHOOK_URL }} >> .env
             echo HOST=${{ secrets.HOST }} >> .env
+            echo SECRET_TELEGRAM_TOKEN=${{ secrets.SECRET_TELEGRAM_TOKEN }} >> .env
             echo WEEKLY_STAT_TIME=${{ secrets.WEEKLY_STAT_TIME }} >> .env
             echo WEEKLY_STAT_WEEK_DAYS=${{ secrets.WEEKLY_STAT_WEEK_DAYS }} >> .env
             echo MONTHLY_STAT_TIME=${{ secrets.MONTHLY_STAT_TIME }} >> .env
