@@ -49,18 +49,18 @@ async def button_reaction_callback(update: Update, context: ContextTypes.DEFAULT
     return states.MENU_STATE
 
 
-def format_average_user_answer_time(time: float) -> str:
+def format_average_user_answer_time(time: float | None) -> str:
     if time is None:
         return ""
 
-    td_object = timedelta(days=0, hours=0, milliseconds=time)
-    days = td_object.days
-    hours = td_object.seconds // 3600
+    average_answer_time = timedelta(days=0, hours=0, milliseconds=time)
+    days = average_answer_time.days
+    hours = average_answer_time.seconds // 3600
 
     return f"***Среднее время ответа*** - {days} дней {hours} часа\n"
 
 
-def format_rating(rating: float) -> str:
+def format_rating(rating: float | None) -> str:
     if rating is None:
         return ""
 
@@ -76,13 +76,11 @@ async def button_statistic_month_callback(update: Update, context: ContextTypes.
     telegram_id = update.effective_user.id
     user_statistics = await service.get_user_month_stat(telegram_id=telegram_id)
 
-    if user_statistics is None or not isinstance(user_statistics.closed_consultations, int):
+    if user_statistics is None:
         await update.callback_query.message.reply_text(text="Данные недоступны!")
         return
 
-    if user_statistics.closed_consultations < 1:
-        message = "К сожалению у вас не было отвеченных завок :(\nМы верим, что в следующем месяце все изменится! :)"
-    else:
+    if user_statistics.closed_consultations > 0:
         message = (
             'С начала месяца вы сделали очень много для "Просто спросить" 🔥\n'
             f"***Количество закрытых заявок*** - {user_statistics.closed_consultations}\n"
@@ -91,6 +89,8 @@ async def button_statistic_month_callback(update: Update, context: ContextTypes.
             "\nМы рады работать в одной команде :)\n"
             "Так держать!"
         )
+    else:
+        message = "К сожалению у вас не было отвеченных завок :(\nМы верим, что в следующем месяце все изменится! :)"
 
     await reply_message(update=update, text=message)
 
