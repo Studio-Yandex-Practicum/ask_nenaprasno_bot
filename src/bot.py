@@ -57,13 +57,11 @@ def create_bot():
             CallbackQueryHandler(skip_bill_callback_handler, pattern=callback_data.CALLBACK_SKIP_BILL_COMMAND),
         ]
     )
-    bot_app.job_queue.run_daily(
-        weekly_stat_job, time=config.WEEKLY_STAT_COLLECT_TIME, days=config.WEEKLY_STAT_WEEK_DAYS
-    )
+    bot_app.job_queue.run_daily(weekly_stat_job, time=config.WEEKLY_STAT_TIME, days=config.WEEKLY_STAT_WEEK_DAYS)
     bot_app.job_queue.run_monthly(
         monthly_bill_reminder_job, when=config.MONTHLY_RECEIPT_REMINDER_TIME, day=config.MONTHLY_RECEIPT_REMINDER_DAY
     )
-    bot_app.job_queue.run_monthly(monthly_stat_job, when=config.MONTHLY_STAT_COLLECT_TIME, day=config.MONTHLY_STAT_DAY)
+    bot_app.job_queue.run_monthly(monthly_stat_job, when=config.MONTHLY_STAT_TIME, day=config.MONTHLY_STAT_DAY)
     bot_app.job_queue.run_daily(
         daily_consulations_reminder_job,
         time=config.DAILY_COLLECT_CONSULTATIONS_TIME,
