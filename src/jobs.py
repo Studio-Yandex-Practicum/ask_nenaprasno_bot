@@ -1,13 +1,13 @@
 from datetime import date, datetime, time, timedelta
 from enum import Enum
-from string import Template
 
 from telegram import InlineKeyboardButton, InlineKeyboardMarkup
 from telegram.ext import CallbackContext
 
 from constants.callback_data import CALLBACK_DONE_BILL_COMMAND, CALLBACK_SKIP_BILL_COMMAND
+from conversation.menu import format_average_user_answer_time
 from core import config
-from core.send_message import send_message, send_statistics
+from core.send_message import send_message
 from core.utils import get_timezone_from_str
 from service.api_client import APIService
 from service.repeat_message import repeat_after_one_hour_button
@@ -42,7 +42,17 @@ WEEKLY_STATISTIC_TEMPLATE = (
     "В работе *{active_consultations}* заявок  за неделю\n\n"
     "Истекает срок у *{expiring_consultations}* заявок\n"
     "У *{expired_consultations}* заявок срок истек\n\n"
-    "[Открыть Trello](https://trello.com/{trello_id})\n\n"
+    "[Открыть Trello](https://trello.com/{trello_id}/"
+    "?filter=member:{trello_name}/)\n"
+)
+
+MONTHLY_STATISTIC_TEMPLATE = (
+    "Это был отличный месяц!\n"
+    'Посмотрите, как он прошел в *"Просто спросить"* 🔥\n\n'
+    "Количество закрытых заявок - *{closed_consultations}*\n"
+    "Рейтинг - *{rating:.1f}*\n"
+    "Среднее время ответа - *{average_user_answer_time}*\n\n"
+    "[Открыть Trello](https://trello.com/{trello_id}/)\n"
 )
 
 DATE_FORMAT = "%Y-%m-%dT%H:%M:%S.%fZ"
@@ -75,6 +85,18 @@ async def weekly_stat_job(context: CallbackContext) -> None:
         context.job_queue.run_once(send_weekly_statistic_job, when=start_time, data=statistic.telegram_id)
 
 
+async def monthly_stat_job(context: CallbackContext) -> None:
+    month_statistics = await service.get_month_stat()
+
+    for statistic in month_statistics:
+        if statistic.telegram_id is None:
+            continue
+
+        user_tz = await get_timezone_from_str(statistic.timezone)
+        start_time: time = config.MONTHLY_STAT_TIME.replace(tzinfo=user_tz)
+        context.job_queue.run_once(send_monthly_statistic_job, when=start_time, data=statistic)
+
+
 async def send_weekly_statistic_job(context: CallbackContext) -> None:
     """Send weekly statistics to user."""
     telegram_id = context.job.data
@@ -86,6 +108,7 @@ async def send_weekly_statistic_job(context: CallbackContext) -> None:
             expiring_consultations=stat.expiring_consultations,
             expired_consultations=stat.expired_consultations,
             trello_id=config.TRELLO_BORD_ID,
+            trello_name=stat.username_trello,
         )
         await send_message(
             bot=context.bot,
@@ -95,32 +118,20 @@ async def send_weekly_statistic_job(context: CallbackContext) -> None:
         )
 
 
-async def monthly_stat_job(context: CallbackContext) -> None:
-    """
-    Send monthly statistics on the number of successfully
-    closed requests.
-
-    Only if the user had requests.
-    """
-    month_statistics = await service.get_month_stat()
-    template_message = Template(
-        "Это был отличный месяц!\n"
-        'Посмотрите, как он прошел в *"Просто спросить"* 🔥\n\n'
-        "Количество закрытых заявок - *$closed_consultations*\n"
-        "Рейтинг - *$rating*\n"
-        "Среднее время ответа - *$average_user_answer_time*\n\n"
-        f"[Открыть Trello](https://trello.com/{config.TRELLO_BORD_ID})\n\n"
+async def send_monthly_statistic_job(context: CallbackContext) -> None:
+    """Send monthly statistic to user."""
+    statistic = context.job.data
+    # в ответе от /tgbot/stat/monthly нет username_trello
+    message = MONTHLY_STATISTIC_TEMPLATE.format(
+        closed_consultations=statistic.closed_consultations,
+        rating="" if statistic.rating is None else statistic.rating,
+        average_user_answer_time=format_average_user_answer_time(statistic.average_user_answer_time),
+        trello_id=config.TRELLO_BORD_ID,
     )
-    alias_dict = dict(
-        closed_consultations="closed_consultations",
-        rating="rating",
-        average_user_answer_time="average_user_answer_time",
-    )
-    await send_statistics(
-        context=context,
-        template_message=template_message,
-        template_attribute_aliases=alias_dict,
-        statistic=month_statistics,
+    await send_message(
+        bot=context.bot,
+        chat_id=statistic.telegram_id,
+        text=message,
     )
 
 

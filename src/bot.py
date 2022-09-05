@@ -63,7 +63,7 @@ def create_bot():
     bot_app.job_queue.run_monthly(
         monthly_bill_reminder_job, when=config.MONTHLY_RECEIPT_REMINDER_TIME, day=config.MONTHLY_RECEIPT_REMINDER_DAY
     )
-    bot_app.job_queue.run_monthly(monthly_stat_job, when=config.MONTHLY_STAT_TIME, day=config.MONTHLY_STAT_DAY)
+    bot_app.job_queue.run_monthly(monthly_stat_job, when=config.MONTHLY_STAT_COLLECT_TIME, day=config.MONTHLY_STAT_DAY)
     bot_app.job_queue.run_daily(
         daily_consulations_reminder_job,
         time=config.DAILY_COLLECT_CONSULTATIONS_TIME,
