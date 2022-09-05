@@ -49,11 +49,22 @@ async def button_reaction_callback(update: Update, context: ContextTypes.DEFAULT
     return states.MENU_STATE
 
 
-def format_average_user_answer_time(time):
-    td_object = timedelta(days=0, hours=0, milliseconds=time)
-    days = td_object.days
-    hours = td_object.seconds // 3600
-    return f"{days} дней {hours} часа"
+def format_average_user_answer_time(time: float | None) -> str:
+    if time is None:
+        return ""
+
+    average_answer_time = timedelta(days=0, hours=0, milliseconds=time)
+    days = average_answer_time.days
+    hours = average_answer_time.seconds // 3600
+
+    return f"***Среднее время ответа*** - {days} дней {hours} часа\n"
+
+
+def format_rating(rating: float | None) -> str:
+    if rating is None:
+        return ""
+
+    return f"***Рейтинг*** - {rating:.1f}\n"
 
 
 @async_error_logger(name="conversation.requests.button_statistic_month_callback")
@@ -64,22 +75,23 @@ async def button_statistic_month_callback(update: Update, context: ContextTypes.
     service = APIService()
     telegram_id = update.effective_user.id
     user_statistics = await service.get_user_month_stat(telegram_id=telegram_id)
+
     if user_statistics is None:
         await update.callback_query.message.reply_text(text="Данные недоступны!")
         return
 
     if user_statistics.closed_consultations > 0:
         message = (
-            f'С начала месяца вы сделали очень много для "Просто спросить" 🔥\n'
+            'С начала месяца вы сделали очень много для "Просто спросить" 🔥\n'
             f"***Количество закрытых заявок*** - {user_statistics.closed_consultations}\n"
-            f"***Рейтинг*** - {user_statistics.rating:.1f}\n"
-            f"***Среднее время ответа*** -"
-            f" {format_average_user_answer_time(user_statistics.average_user_answer_time)}\n\n"
-            "Мы рады работать в одной команде :)\n"
+            f"{format_rating(user_statistics.rating)}"
+            f"{format_average_user_answer_time(user_statistics.average_user_answer_time)}"
+            "\nМы рады работать в одной команде :)\n"
             "Так держать!"
         )
     else:
         message = "К сожалению у вас не было отвеченных завок :(\nМы верим, что в следующем месяце все изменится! :)"
+
     await reply_message(update=update, text=message)
 
 
