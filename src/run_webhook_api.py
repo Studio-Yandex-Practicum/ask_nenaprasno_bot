@@ -87,29 +87,29 @@ async def deserialize(request: Request, deserializer):
         return request_data
     except KeyError as error:
         logger.error("Got a KeyError: %s", error)
-        raise BadRequestError(Response(status_code=httpx.codes.BAD_REQUEST), None) from error
+        raise BadRequestError("There is an error in the request") from error
     except JSONDecodeError as error:
         logger.error("Got a JSONDecodeError: %s", error)
-        raise BadRequestError(Response(status_code=httpx.codes.BAD_REQUEST), None) from error
+        raise BadRequestError("There is an error in the request") from error
 
 
 @requires("authenticated", status_code=401)
 async def consultation_assign(request: Request) -> Response:
     try:
         request_data = await deserialize(request, AssignedConsultationModel)
-        bot = api.state.bot_app.bot
-        chat_id = request_data.telegram_id
-        text = (
-            f"Получена новая заявка\n"
-            f"[Открыть заявку на сайте]({URL_SITE}consultation/redirect/{request_data.consultation_id})\n"
-            f"[Открыть Trello]"
-            f"(https://trello.com/{TRELLO_BORD_ID}/?filter=member:{request_data.username_trello})\n\n"
-        )
-        await send_message(bot=bot, chat_id=chat_id, text=text)
-        return Response(status_code=httpx.codes.OK)
     except BadRequestError as error:
         logger.error("Got a BadRequestError: %s", error)
-        return BadRequestError(Response(status_code=httpx.codes.BAD_REQUEST), error.message)
+        return Response(status_code=httpx.codes.BAD_REQUEST)
+    bot = api.state.bot_app.bot
+    chat_id = request_data.telegram_id
+    text = (
+        f"Получена новая заявка\n"
+        f"[Открыть заявку на сайте]({URL_SITE}consultation/redirect/{request_data.consultation_id})\n"
+        f"[Открыть Trello]"
+        f"(https://trello.com/{TRELLO_BORD_ID}/?filter=member:{request_data.username_trello})\n\n"
+    )
+    await send_message(bot=bot, chat_id=chat_id, text=text)
+    return Response(status_code=httpx.codes.OK)
 
 
 @requires("authenticated", status_code=401)
@@ -123,38 +123,38 @@ async def consultation_close(request: Request) -> Response:
 async def consultation_message(request: Request) -> Response:
     try:
         request_data = await deserialize(request, ConsultationModel)
-        bot = api.state.bot_app.bot
-        chat_id = request_data.telegram_id
-        text = (
-            f"Получено новое сообщение в чате заявки\n"
-            f"[Открыть заявку на сайте]({URL_SITE}consultation/redirect/{request_data.consultation_id})\n"
-            f"[Открыть Trello]"
-            f"(https://trello.com/{TRELLO_BORD_ID}/?filter=member:{request_data.username_trello})\n\n"
-        )
-        await send_message(bot=bot, chat_id=chat_id, text=text)
-        return Response(status_code=httpx.codes.OK)
     except BadRequestError as error:
         logger.error("Got a BadRequestError: %s", error)
-        return BadRequestError(Response(status_code=httpx.codes.BAD_REQUEST), error.message)
+        return Response(status_code=httpx.codes.BAD_REQUEST)
+    bot = api.state.bot_app.bot
+    chat_id = request_data.telegram_id
+    text = (
+        f"Получено новое сообщение в чате заявки\n"
+        f"[Открыть заявку на сайте]({URL_SITE}consultation/redirect/{request_data.consultation_id})\n"
+        f"[Открыть Trello]"
+        f"(https://trello.com/{TRELLO_BORD_ID}/?filter=member:{request_data.username_trello})\n\n"
+    )
+    await send_message(bot=bot, chat_id=chat_id, text=text)
+    return Response(status_code=httpx.codes.OK)
 
 
 @requires("authenticated", status_code=401)
 async def consultation_feedback(request: Request) -> Response:
     try:
         request_data = await deserialize(request, FeedbackConsultationModel)
-        bot = api.state.bot_app.bot
-        chat_id = request_data.telegram_id
-        text = (
-            f"Вы получили новый отзыв по заявке\n"
-            f"[Открыть заявку на сайте]({URL_SITE}consultation/redirect/{request_data.consultation_id})\n"
-            f"[Открыть Trello](https://trello.com/{TRELLO_BORD_ID}"
-            f"/?filter=member:{request_data.username_trello},dueComplete:true)\n\n"
-        )
-        await send_message(bot=bot, chat_id=chat_id, text=text)
-        return Response(status_code=httpx.codes.OK)
     except BadRequestError as error:
         logger.error("Got a BadRequestError: %s", error)
-        return BadRequestError(Response(status_code=httpx.codes.BAD_REQUEST), error.message)
+        return Response(status_code=httpx.codes.BAD_REQUEST)
+    bot = api.state.bot_app.bot
+    chat_id = request_data.telegram_id
+    text = (
+        f"Вы получили новый отзыв по заявке\n"
+        f"[Открыть заявку на сайте]({URL_SITE}consultation/redirect/{request_data.consultation_id})\n"
+        f"[Открыть Trello](https://trello.com/{TRELLO_BORD_ID}"
+        f"/?filter=member:{request_data.username_trello},dueComplete:true)\n\n"
+    )
+    await send_message(bot=bot, chat_id=chat_id, text=text)
+    return Response(status_code=httpx.codes.OK)
 
 
 routes = [

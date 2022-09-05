@@ -13,10 +13,9 @@ class EnvVariablesError(Exception):
 class BadRequestError(Exception):
     """Exception class for errors caused by an incorrect request from the site to the bot."""
 
-    def __init__(self, setting, message="An incorrect request was sent from the site."):
-        self.setting = setting
+    def __init__(self, message="An incorrect request was sent from the site."):
         self.message = message
         super().__init__(self.message)
 
     def __str__(self):
-        return f"{self.setting} -> {self.message}"
+        return f"{self.message}"
