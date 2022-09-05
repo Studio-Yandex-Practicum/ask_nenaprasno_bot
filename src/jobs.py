@@ -1,4 +1,4 @@
-from datetime import date, datetime, timedelta
+from datetime import date, datetime, time, timedelta
 from enum import Enum
 from string import Template
 
@@ -8,6 +8,7 @@ from telegram.ext import CallbackContext
 from constants.callback_data import CALLBACK_DONE_BILL_COMMAND, CALLBACK_SKIP_BILL_COMMAND
 from core import config
 from core.send_message import send_message, send_statistics
+from core.utils import get_timezone_from_str
 from service.api_client import APIService
 from service.repeat_message import repeat_after_one_hour_button
 
@@ -34,6 +35,16 @@ FORWARD_REMINDER_TEMPLATE = (
     "У нас еще есть время, чтобы ответить человеку вовремя!\n\n"
 ) + REMINDER_BASE_TEMPLATE
 
+WEEKLY_STATISTIC_TEMPLATE = (
+    "Вы делали добрые дела 7 дней!\n"
+    'Посмотрите, как прошла ваша неделя  в *"Просто спросить"*\n'
+    "Закрыто заявок - *{closed_consultations}*\n"
+    "В работе *{active_consultations}* заявок  за неделю\n\n"
+    "Истекает срок у *{expiring_consultations}* заявок\n"
+    "У *{expired_consultations}* заявок срок истек\n\n"
+    "[Открыть Trello](https://trello.com/{trello_id})\n\n"
+)
+
 DATE_FORMAT = "%Y-%m-%dT%H:%M:%S.%fZ"
 
 service = APIService()
@@ -52,32 +63,36 @@ class DueStatus(Enum):
 
 
 async def weekly_stat_job(context: CallbackContext) -> None:
-    """
-    Send weekly statistics on the number of requests in the work
-    """
+    """Collects users timezones and adds statistic-sending jobs to queue."""
     week_statistics = await service.get_week_stat()
-    template_message = Template(
-        "Вы делали добрые дела 7 дней!\n"
-        'Посмотрите, как прошла ваша неделя  в *"Просто спросить"*\n'
-        "Закрыто заявок - *$closed_consultations*\n"
-        "В работе *$active_consultations* заявок  за неделю\n\n"
-        "Истекает срок у *$expiring_consultations* заявок\n"
-        "У *$expired_consultations* заявок срок истек\n\n"
-        f"[Открыть Trello](https://trello.com/{config.TRELLO_BORD_ID})\n\n"
-    )
-    alias_dict = dict(
-        closed_consultations="closed_consultations",
-        active_consultations="active_consultations",
-        expiring_consultations="expiring_consultations",
-        expired_consultations="expired_consultations",
-    )
-    await send_statistics(
-        context=context,
-        template_message=template_message,
-        template_attribute_aliases=alias_dict,
-        statistic=week_statistics,
-        reply_markup=InlineKeyboardMarkup([[repeat_after_one_hour_button]]),
-    )
+
+    for statistic in week_statistics:
+        if statistic.telegram_id is None:
+            continue
+
+        user_tz = await get_timezone_from_str(statistic.timezone)
+        start_time: time = config.WEEKLY_STAT_TIME.replace(tzinfo=user_tz)
+        context.job_queue.run_once(send_weekly_statistic_job, when=start_time, data=statistic.telegram_id)
+
+
+async def send_weekly_statistic_job(context: CallbackContext) -> None:
+    """Send weekly statistics to user."""
+    telegram_id = context.job.data
+    week_statistics = await service.get_week_stat()
+    for stat in filter(lambda statistic: statistic.telegram_id == telegram_id, week_statistics):
+        message = WEEKLY_STATISTIC_TEMPLATE.format(
+            closed_consultations=stat.closed_consultations,
+            active_consultations=stat.active_consultations,
+            expiring_consultations=stat.expiring_consultations,
+            expired_consultations=stat.expired_consultations,
+            trello_id=config.TRELLO_BORD_ID,
+        )
+        await send_message(
+            bot=context.bot,
+            chat_id=stat.telegram_id,
+            text=message,
+            reply_markup=InlineKeyboardMarkup([[repeat_after_one_hour_button]]),
+        )
 
 
 async def monthly_stat_job(context: CallbackContext) -> None:
