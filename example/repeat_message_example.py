@@ -1,5 +1,12 @@
+# pylint: disable=import-error, wrong-import-position
+import sys
+from pathlib import Path
+
 from telegram import InlineKeyboardMarkup, Update
 from telegram.ext import Application, CallbackQueryHandler, CommandHandler, ContextTypes
+
+dir_code_of_bot = f"{Path(__file__).resolve().parent.parent}/src"
+sys.path.append(dir_code_of_bot)
 
 from constants.callback_data import CALLBACK_REPEAT_COMMAND
 from core.config import TOKEN
