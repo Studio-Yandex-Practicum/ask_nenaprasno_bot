@@ -67,8 +67,9 @@ MONTHLY_RECEIPT_REMINDER_TIME = get_datetime("MONTHLY_RECEIPT_REMINDER_TIME")
 MONTHLY_RECEIPT_REMINDER_DAY = get_int("MONTHLY_RECEIPT_REMINDER_DAY")
 
 # Параметры рассылки напоминаний
-DAYLY_COLLECT_CONSULTATIONS_TIME = time(hour=0, minute=0, tzinfo=timezone.utc)
-DAILY_REMINDER_FOR_OVERDUE_CONSULTATIONS = get_datetime("DAILY_REMINDER_FOR_OVERDUE_CONSULTATIONS")
+DAILY_COLLECT_CONSULTATIONS_TIME = time(hour=0, minute=0, tzinfo=timezone.utc)
+DAILY_CONSULTATIONS_REMINDER_TIME = get_datetime("DAILY_REMINDER_FOR_OVERDUE_CONSULTATIONS")
+# suggested constant name: "DAILY_CONSULTATIONS_REMINDER_TIME"
 
 # Файл с сохраненными данными бота
 BOT_PERSISTENCE_FILE = get_string("BOT_PERSISTENCE_FILE")
@@ -87,7 +88,6 @@ TRELLO_TOKEN = get_string("TRELLO_TOKEN")
 TRELLO_BORD_ID = get_string("TRELLO_BORD_ID")
 
 # URL nenaprasno
-URL_SITE = "https://ask.nenaprasno.ru/"
-URL_SITE_DONATION = "https://ask.nenaprasno.ru/#donation"
 FORM_URL_FUTURE_EXPERT = "https://forms.gle/DGMUm35bxZytE3QLA"
 URL_SERVICE_RULES = "https://docs.google.com/document/d/1hW2HUv9aWQMnUBuIE_YQEtmIDDbk8KhpychckbyaIEQ/edit"
+URL_ASK_NENAPRASNO = get_string("URL_ASK_NENAPRASNO")

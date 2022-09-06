@@ -15,7 +15,7 @@ from telegram.error import TelegramError
 
 from bot import DAILY_CONSULTATIONS_REMINDER_JOB, init_webhook
 from core import config
-from core.config import TRELLO_BORD_ID, URL_SITE
+from core.config import TRELLO_BORD_ID, URL_ASK_NENAPRASNO
 from core.exceptions import BadRequestError
 from core.logger import logger
 from core.send_message import send_message
@@ -104,7 +104,7 @@ async def consultation_assign(request: Request) -> Response:
     chat_id = request_data.telegram_id
     text = (
         f"Получена новая заявка\n"
-        f"[Открыть заявку на сайте]({URL_SITE}consultation/redirect/{request_data.consultation_id})\n"
+        f"[Открыть заявку на сайте]({URL_ASK_NENAPRASNO}consultation/redirect/{request_data.consultation_id})\n"
         f"[Открыть Trello]"
         f"(https://trello.com/{TRELLO_BORD_ID}/?filter=member:{request_data.username_trello})\n\n"
     )
@@ -130,7 +130,7 @@ async def consultation_message(request: Request) -> Response:
     chat_id = request_data.telegram_id
     text = (
         f"Получено новое сообщение в чате заявки\n"
-        f"[Открыть заявку на сайте]({URL_SITE}consultation/redirect/{request_data.consultation_id})\n"
+        f"[Открыть заявку на сайте]({URL_ASK_NENAPRASNO}consultation/redirect/{request_data.consultation_id})\n"
         f"[Открыть Trello]"
         f"(https://trello.com/{TRELLO_BORD_ID}/?filter=member:{request_data.username_trello})\n\n"
     )
@@ -149,7 +149,7 @@ async def consultation_feedback(request: Request) -> Response:
     chat_id = request_data.telegram_id
     text = (
         f"Вы получили новый отзыв по заявке\n"
-        f"[Открыть заявку на сайте]({URL_SITE}consultation/redirect/{request_data.consultation_id})\n"
+        f"[Открыть заявку на сайте]({URL_ASK_NENAPRASNO}consultation/redirect/{request_data.consultation_id})\n"
         f"[Открыть Trello](https://trello.com/{TRELLO_BORD_ID}"
         f"/?filter=member:{request_data.username_trello},dueComplete:true)\n\n"
     )
