@@ -64,6 +64,8 @@ jobs:
           TRELLO_TOKEN: ${{ secrets.TRELLO_TOKEN }}
           TRELLO_BORD_ID: 14nNNGRp
 
+          URL_ASK_NENAPRASNO: ${{ secrets.URL_ASK_NENAPRASNO }}
+
         run: |
           python3 src/run_bot.py & sleep 15 && pkill -9 python
           python3 src/run_webhook_api.py & sleep 15 && pkill -9 python
