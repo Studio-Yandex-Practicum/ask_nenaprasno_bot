@@ -1,3 +1,5 @@
+from datetime import timedelta
+
 from telegram import Update
 from telegram.ext import (
     AIORateLimiter,
@@ -90,3 +92,4 @@ def init_polling() -> None:
     """
     bot_app = create_bot()
     bot_app.run_polling()
+    bot_app.job_queue.run_once(daily_consulations_reminder_job, when=timedelta(seconds=1))
