@@ -114,9 +114,18 @@ async def consultation_assign(request: Request) -> Response:
 
 @requires("authenticated", status_code=401)
 async def consultation_close(request: Request) -> Response:
-    response, _ = await deserialize(request, ClosedConsultationModel)
-    # add second variable as in consultation_message when will work with it
-    return response
+    try:
+        request_data = await deserialize(request, ClosedConsultationModel)
+    except BadRequestError as error:
+        logger.error("Got a BadRequestError: %s", error)
+        return Response(status_code=httpx.codes.BAD_REQUEST)
+    consultation_id = request_data.consultation_id
+    bot_app = api.state.bot_app
+    reminder_jobs = bot_app.job_queue.jobs()
+    for job in reminder_jobs:
+        if job.data[0] == consultation_id:
+            job.schedule_removal()
+    return Response(status_code=httpx.codes.OK)
 
 
 @requires("authenticated", status_code=401)
