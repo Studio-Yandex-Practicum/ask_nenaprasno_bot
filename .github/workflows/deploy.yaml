@@ -81,20 +81,6 @@ jobs:
             echo Start container
             sudo docker-compose up -d
 
-            echo Backup nginx config
-            sudo cp /etc/nginx/sites-enabled/default /etc/nginx/sites-available/default.backup
-            echo Copy robots.txt to working directory
-            sudo docker-compose cp bot:/code/infra/robots.txt .
-            echo Copy nginx.conf to working directory
-            sudo docker-compose cp bot:/code/infra/nginx.conf .
-            echo Replace path placeholder
-            sudo sed -i "s+__ROBOTS_FULL_PATH__+$(pwd)+g" nginx.conf
-            echo Replace IP placeholder
-            sudo sed -i 's/__IP__/${{ secrets.IP }}/g' nginx.conf
-            echo Replace Domain placeholder
-            sudo sed -i 's/__DOMAIN__/${{ secrets.DOMAIN }}/g' nginx.conf
-            echo Replace Port placeholder
-            sudo sed -i 's/__BOT_PORT__/${{ secrets.BOT_PORT }}/g' nginx.conf
             echo Replace active configuration
             sudo cp nginx.conf /etc/nginx/sites-enabled/default
             echo Reload nginx configuration
