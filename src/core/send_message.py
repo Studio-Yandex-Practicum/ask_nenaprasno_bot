@@ -79,6 +79,7 @@ async def reply_message(
         return False
 
 
+# is useless now
 async def send_statistics(
     context: CallbackContext,
     template_message: Template,
