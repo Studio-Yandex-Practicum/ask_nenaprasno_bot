@@ -12,8 +12,8 @@ jobs:
       - name: Copy infrastructure directory to remote
         uses: garygrossgarten/github-action-scp@release
         with:
-          local: docker-compose-serv.yaml
-          remote: infrastructure/docker-compose.yaml
+          local: infrastructure/docker-compose-serv.yaml
+          remote: code/infrastructure/docker-compose.yaml
           host: ${{ secrets.DEV_HOST }}
           username: ${{ secrets.SSH_USER }}
           privateKey: ${{ secrets.SSH_KEY }}
