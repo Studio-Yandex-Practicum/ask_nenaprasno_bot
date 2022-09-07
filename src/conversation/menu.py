@@ -97,17 +97,17 @@ async def button_statistic_month_callback(update: Update, context: ContextTypes.
 
 
 def make_consultations_list(consultations_list: List[Dict]) -> str:
-    text = ""
-    count = 0
-    for consultation in consultations_list:
-        count += 1
-        consultation_number = consultation["number"]
-        consultation_id = consultation["id"]
-        text += (
-            f"{count}. [Заявка №{consultation_number}]({URL_ASK_NENAPRASNO}/doctor/consultation/{consultation_id})\n"
-        )
+    url_base = f"{URL_ASK_NENAPRASNO}/doctor/consultation/"
 
-    return text
+    return (
+        "\n".join(
+            [
+                f"{number}. [Заявка №{consultation['number']}]({url_base}{consultation['id']})"
+                for number, consultation in enumerate(consultations_list, start=1)
+            ]
+        )
+        + "\n"
+    )
 
 
 @async_error_logger(name="conversation.requests.button_actual_requests_callback")
@@ -129,8 +129,8 @@ async def button_actual_requests_callback(update: Update, context: ContextTypes.
 
     message = (
         f"У вас в работе {active_consultations.active_consultations} заявок.\n"
-        f"Посмотреть заявки на сайте:\n{link_neneprasno}"
-        f"\n[Открыть Trello](https://trello.com/{TRELLO_BORD_ID}/?filter=member:"
+        f"Посмотреть заявки на сайте:\n{link_neneprasno}\n"
+        f"[Открыть Trello](https://trello.com/{TRELLO_BORD_ID}/?filter=member:"
         f"{username_trello}/?filter=overdue:true)\n\n"
     )
     await reply_message(update=update, text=message)
@@ -155,10 +155,10 @@ async def button_overdue_requests_callback(update: Update, context: ContextTypes
     link_neneprasno = make_consultations_list(expired_consultations_list)
 
     message = (
-        f"Время истекло 😎\n"
+        f"Время и стекло 😎\n"
         f"Ваше количество просроченных заявок - {expired_consultations.expired_consultations}\n"
         f"Верим и ждем.\n\n"
-        f"Посмотреть заявки на сайте:\n {link_neneprasno}\n"
+        f"Посмотреть заявки на сайте:\n{link_neneprasno}\n"
         f"----\n"
         f"В работе количество заявок - {active_consultations.active_consultations}\n"
         f"Открыть [Trello](https://trello.com/{TRELLO_BORD_ID}/?filter=member:"
