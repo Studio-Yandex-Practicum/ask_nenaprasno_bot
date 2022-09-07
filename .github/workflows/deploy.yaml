@@ -78,9 +78,9 @@ jobs:
             sudo cp /etc/nginx/sites-enabled/default /etc/nginx/sites-available/default.backup
             sudo docker-compose cp bot:/code/infra/robots.txt .
             sudo docker-compose cp bot:/code/infra/nginx.conf .
-            sed -i "s+{{ROBOTS_FULL_PATH}}+$(pwd)+g" nginx.conf
-            sed -i 's/{{IP}}/${{ secrets.IP }}/g' nginx.conf
-            sed -i 's/{{DOMAIN}}/${{ secrets.DOMAIN }}/g' nginx.conf
-            sed -i 's/{{BOT_PORT}}/${{ secrets.BOT_PORT }}/g' nginx.conf
+            sudo sed -i "s+{{ROBOTS_FULL_PATH}}+$(pwd)+g" nginx.conf
+            sudo sed -i 's/{{IP}}/${{ secrets.IP }}/g' nginx.conf
+            sudo sed -i 's/{{DOMAIN}}/${{ secrets.DOMAIN }}/g' nginx.conf
+            sudo sed -i 's/{{BOT_PORT}}/${{ secrets.BOT_PORT }}/g' nginx.conf
             sudo cp nginx.conf /etc/nginx/sites-enabled/default
             sudo systemctl reload nginx
