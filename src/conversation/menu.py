@@ -49,24 +49,24 @@ async def button_reaction_callback(update: Update, context: ContextTypes.DEFAULT
     return states.MENU_STATE
 
 
-def get_word_ending(number, one, two, five):
+def get_word_case(number, single, few, many):
     num = number % 100
     if 5 <= num <= 20:
-        return five
+        return many
     num = number % 10
     if num == 1:
-        return one
+        return single
     if 2 <= num <= 4:
-        return two
-    return five
+        return few
+    return many
 
 
 def format_average_user_answer_time(time):
     td_object = timedelta(days=0, hours=0, milliseconds=time)
     days = td_object.days
     hours = td_object.seconds // 3600
-    output_days = get_word_ending(days, "день", "дня", "дней")
-    output_hours = get_word_ending(hours, "час", "часа", "часов")
+    output_days = get_word_case(days, "день", "дня", "дней")
+    output_hours = get_word_case(hours, "час", "часа", "часов")
     return f"{days} {output_days} {hours} {output_hours}"
 
 
