@@ -9,7 +9,7 @@ from telegram.ext import AIORateLimiter, Application, CommandHandler, ContextTyp
 dir_code_of_bot = f"{Path(__file__).resolve().parent.parent}/src"
 sys.path.append(dir_code_of_bot)
 
-from core.config import TOKEN
+from core.config import TOKEN  # noqa: E402
 
 
 async def start(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:

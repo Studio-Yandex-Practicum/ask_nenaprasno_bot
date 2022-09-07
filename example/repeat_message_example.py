@@ -8,9 +8,9 @@ from telegram.ext import Application, CallbackQueryHandler, CommandHandler, Cont
 dir_code_of_bot = f"{Path(__file__).resolve().parent.parent}/src"
 sys.path.append(dir_code_of_bot)
 
-from constants.callback_data import CALLBACK_REPEAT_COMMAND
-from core.config import TOKEN
-from service.repeat_message import repeat_after_one_hour_button, repeat_message_after_1_hour_callback
+from constants.callback_data import CALLBACK_REPEAT_COMMAND  # noqa: E402
+from core.config import TOKEN  # noqa: E402
+from service.repeat_message import repeat_after_one_hour_button, repeat_message_after_1_hour_callback  # noqa: E402
 
 
 async def start(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
