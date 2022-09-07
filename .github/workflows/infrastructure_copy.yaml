@@ -1,0 +1,19 @@
+name: Copy infrastructure files
+
+on:
+  push:
+    branches:
+      - feature/docker-compose-copy
+
+jobs:
+  copy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Copy infrastructure directory to remote
+        uses: garygrossgarten/github-action-scp@release
+        with:
+          local: code/infrastructure
+          remote: infrastructure
+          host: ${{ secrets.DEV_HOST }}
+          username: ${{ secrets.SSH_USER }}
+          privateKey: ${{ secrets.SSH_KEY }}
