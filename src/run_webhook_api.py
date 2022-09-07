@@ -137,13 +137,21 @@ async def consultation_message(request: Request) -> Response:
     except BadRequestError as error:
         logger.error("Got a BadRequestError: %s", error)
         return Response(status_code=httpx.codes.BAD_REQUEST)
+    service = APIService()
     bot = api.state.bot_app.bot
     chat_id = request_data.telegram_id
+    active_conusult = await service.get_user_active_consultations(telegram_id=chat_id)
+    active_conusult_list = active_conusult.active_consultations_data
+    new_consultation_number = active_conusult_list[len(active_conusult_list)]["number"]
+    consultations_in_work = active_conusult.active_consultations
+    expiring_consultations = active_conusult.expiring_consultation_ids
     text = (
-        f"Получено новое сообщение в чате заявки\n"
+        f"Получено новое сообщение в чате заявки {new_consultation_number}\n"
         f"[Открыть заявку на сайте]({URL_ASK_NENAPRASNO}consultation/redirect/{request_data.consultation_id})\n"
         f"[Открыть Trello]"
-        f"(https://trello.com/{TRELLO_BORD_ID}/?filter=member:{request_data.username_trello})\n\n"
+        f"(https://trello.com/{TRELLO_BORD_ID}/?filter=member:{request_data.username_trello})\n"
+        f"Заявки в работе: {consultations_in_work}"
+        f"Из них у {expiring_consultations} завтра истекает срок ответа.\n\n"
     )
     await send_message(bot=bot, chat_id=chat_id, text=text)
     return Response(status_code=httpx.codes.OK)
