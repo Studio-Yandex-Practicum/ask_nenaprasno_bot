@@ -48,10 +48,17 @@ class WeekStat:
 
 @dataclass_json
 @dataclass(frozen=True)
+class ConsultationData:
+    id: str
+    number: int
+
+
+@dataclass_json
+@dataclass(frozen=True)
 class UserActiveConsultations:
     username_trello: str
     active_consultations: int
-    active_consultations_ids: list[int]
+    active_consultations_data: list[ConsultationData]
 
 
 @dataclass_json
@@ -59,7 +66,7 @@ class UserActiveConsultations:
 class UserExpiredConsultations:
     username_trello: str
     expired_consultations: int
-    expired_consultations_ids: list[int]
+    expired_consultations_data: list[ConsultationData]
 
 
 @dataclass_json

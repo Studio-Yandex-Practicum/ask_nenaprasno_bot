@@ -199,7 +199,7 @@ async def check_consultation(consultation_id: int, due_status: DueStatus) -> boo
 
 
 async def send_reminder(context: CallbackContext) -> None:
-    """Sends reminder to the user according to the message tmeplate.
+    """Sends reminder to the user according to the message template.
     Prior to that, check if the consultation is still relevant."""
     consultation, message_template, due_status = context.job.data
     if await check_consultation(consultation.id, due_status):
