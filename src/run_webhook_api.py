@@ -1,4 +1,5 @@
 # pylint: disable=W0612
+import os
 from json import JSONDecodeError
 
 import httpx
@@ -174,7 +175,11 @@ routes = [
     Route("/bot/consultation/close", consultation_close, methods=["POST"]),
     Route("/bot/consultation/message", consultation_message, methods=["POST"]),
     Route("/bot/consultation/feedback", consultation_feedback, methods=["POST"]),
-    Mount("/", app=StaticFiles(directory="static"), name="static"),
+    Mount(
+        "/",
+        app=StaticFiles(directory=os.path.join(os.path.dirname(os.path.abspath(__file__)), "static")),
+        name="static",
+    ),
 ]
 
 middleware = [Middleware(AuthenticationMiddleware, backend=TokenAuthBackend())]
