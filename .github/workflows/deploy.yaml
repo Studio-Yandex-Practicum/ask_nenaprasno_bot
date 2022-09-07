@@ -42,7 +42,6 @@ jobs:
           username: ${{ secrets.USER }}
           key: ${{ secrets.SSH_KEY }}
           script: |
-            echo Enter worknig directory and creating .env file
             cd code
             sudo rm -f .env
             touch .env
@@ -70,18 +69,8 @@ jobs:
             echo TRELLO_BORD_ID=${{ secrets.TRELLO_BORD_ID }} >> .env
             echo URL_ASK_NENAPRASNO=${{ secrets.URL_ASK_NENAPRASNO }} >> .env
 
-            echo Remove all unused images
             sudo docker image prune -f
-            echo Pull ask_nenaprasno_bot:latest image from cloud
             sudo docker pull ${{ secrets.DOCKER_USERNAME }}/ask_nenaprasno_bot:latest
-            echo Stop container
             sudo docker-compose stop
-            echo Remove container
             sudo docker-compose rm bot -f
-            echo Start container
             sudo docker-compose up -d
-
-            echo Replace active configuration
-            sudo cp nginx.conf /etc/nginx/sites-available/default
-            echo Reload nginx configuration
-            sudo systemctl reload nginx
