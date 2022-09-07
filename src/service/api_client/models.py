@@ -26,6 +26,7 @@ class UserMonthStat:
 class MonthStat:
     telegram_id: int
     timezone: str
+    username_trello: str
     closed_consultations: int
     rating: float
     average_user_answer_time: float

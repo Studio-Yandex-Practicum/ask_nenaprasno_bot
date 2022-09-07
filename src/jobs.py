@@ -5,7 +5,8 @@ from telegram import InlineKeyboardButton, InlineKeyboardMarkup
 from telegram.ext import CallbackContext
 
 from constants.callback_data import CALLBACK_DONE_BILL_COMMAND, CALLBACK_SKIP_BILL_COMMAND
-from conversation.menu import format_average_user_answer_time
+from constants.timezone import MOSCOW_TIME_OFFSET
+from conversation.menu import format_average_user_answer_time, format_rating
 from core import config
 from core.send_message import send_message
 from core.utils import get_timezone_from_str
@@ -43,17 +44,17 @@ WEEKLY_STATISTIC_TEMPLATE = (
     "Истекает срок у *{expiring_consultations}* заявок\n"
     "У *{expired_consultations}* заявок срок истек\n\n"
     "[Открыть Trello](https://trello.com/{trello_id}/"
-    "?filter=member:{trello_name}/)\n"
+    "?filter=member:{username_trello}/)\n"
 )
 
 MONTHLY_STATISTIC_TEMPLATE = (
     "Это был отличный месяц!\n"
     'Посмотрите, как он прошел в *"Просто спросить"* 🔥\n\n'
     "Количество закрытых заявок - *{closed_consultations}*\n"
-    "Рейтинг - *{rating:.1f}*\n"
-    "Среднее время ответа - *{average_user_answer_time}*\n\n"
+    "{rating}"
+    "{average_user_answer_time}\n"
     "[Открыть Trello](https://trello.com/{trello_id}/"
-    "?filter=member:{trello_name}/)\n"
+    "?filter=member:{username_trello}/)\n"
 )
 
 DATE_FORMAT = "%Y-%m-%dT%H:%M:%S.%fZ"
@@ -74,27 +75,21 @@ class DueStatus(Enum):
 
 
 async def weekly_stat_job(context: CallbackContext) -> None:
-    """Collects users weekly statistics and adds statistic-sending jobs to queue."""
+    """Collects users timezones and adds statistic-sending jobs to queue."""
     week_statistics = await service.get_week_stat()
+    # микропроблема: если у пользователя не выбрана таймзона, то в сете будет None,
+    # который в send_weekly_statistic_job будет интрепретирован как таймзона по-умолчанию (МСК)
+    # Получаетcя на МСК будет 2 джобы
+    timezones = set(statistic.timezone for statistic in week_statistics)
 
-    for statistic in week_statistics:
-        if statistic.telegram_id is None:
-            continue
-
-        user_tz = await get_timezone_from_str(statistic.timezone)
-        if user_tz == timezone.utc:
-            message = WEEKLY_STATISTIC_TEMPLATE.format(trello_id=config.TRELLO_BORD_ID, **statistic.to_dict())
-            await send_message(
-                bot=context.bot,
-                chat_id=statistic.telegram_id,
-                text=message,
-                reply_markup=InlineKeyboardMarkup([[repeat_after_one_hour_button]]),
-            )
-            continue
-
-        context.job_queue.run_once(
-            send_weekly_statistic_job, when=config.WEEKLY_STAT_TIME.replace(tzinfo=user_tz), data=statistic.telegram_id
+    for tz_string in timezones:
+        timezone_ = get_timezone_from_str(tz_string)
+        start_time = (
+            timedelta(microseconds=1)
+            if timezone_ == timezone.utc
+            else config.WEEKLY_STAT_TIME.replace(tzinfo=timezone_)
         )
+        context.job_queue.run_once(send_weekly_statistic_job, when=start_time, data=tz_string)
 
 
 async def monthly_stat_job(context: CallbackContext) -> None:
@@ -104,34 +99,21 @@ async def monthly_stat_job(context: CallbackContext) -> None:
     for statistic in month_statistics:
         if statistic.telegram_id is None:
             continue
-
-        user_tz = await get_timezone_from_str(statistic.timezone)
-        if user_tz == timezone.utc:
-            user = await service.authenticate_user(statistic.telegram_id)
-            message = MONTHLY_STATISTIC_TEMPLATE.format(
-                closed_consultations=statistic.closed_consultations,
-                rating=statistic.rating or 0,
-                average_user_answer_time=format_average_user_answer_time(statistic.average_user_answer_time or 0),
-                trello_id=config.TRELLO_BORD_ID,
-                trello_name=user.username_trello,
-            )
-            await send_message(
-                bot=context.bot,
-                chat_id=statistic.telegram_id,
-                text=message,
-            )
-            continue
-
-        context.job_queue.run_once(
-            send_monthly_statistic_job, when=config.MONTHLY_STAT_TIME.replace(tzinfo=user_tz), data=statistic
+        timezone_ = get_timezone_from_str(statistic.timezone)
+        start_time = (
+            timedelta(microseconds=1)
+            if timezone_ == timezone.utc
+            else config.MONTHLY_STAT_TIME.replace(tzinfo=timezone_)
         )
+        context.job_queue.run_once(send_monthly_statistic_job, when=start_time, data=statistic)
 
 
 async def send_weekly_statistic_job(context: CallbackContext) -> None:
-    """Send weekly statistics to user."""
-    telegram_id = context.job.data
+    """Sends weekly statistics to users with specific timezone."""
+    current_tz = context.job.data
     week_statistics = await service.get_week_stat()
-    for statistic in filter(lambda stat: stat.telegram_id == telegram_id, week_statistics):
+
+    for statistic in filter(lambda stat: stat.telegram_id is not None and stat.timezone == current_tz, week_statistics):
         message = WEEKLY_STATISTIC_TEMPLATE.format(
             trello_id=config.TRELLO_BORD_ID,
             **statistic.to_dict(),
@@ -147,15 +129,12 @@ async def send_weekly_statistic_job(context: CallbackContext) -> None:
 async def send_monthly_statistic_job(context: CallbackContext) -> None:
     """Send monthly statistic to user."""
     statistic = context.job.data
-    # в ответе от /tgbot/stat/monthly нет username_trello, дергаю tgbot/user/{tg_id}
-    user = await service.authenticate_user(statistic.telegram_id)
-    # нужен PR на форматирование месячной статы по нажатию кнопки
     message = MONTHLY_STATISTIC_TEMPLATE.format(
         closed_consultations=statistic.closed_consultations,
-        rating=statistic.rating or 0,
-        average_user_answer_time=format_average_user_answer_time(statistic.average_user_answer_time or 0),
+        rating=format_rating(statistic.rating),
+        average_user_answer_time=format_average_user_answer_time(statistic.average_user_answer_time),
         trello_id=config.TRELLO_BORD_ID,
-        trello_name=user.username_trello,
+        username_trello=statistic.username_trello,
     )
     await send_message(
         bot=context.bot,
@@ -246,10 +225,10 @@ async def daily_consulations_reminder_job(context: CallbackContext) -> None:
     - the due date expired at least one day ago.
     """
     now = datetime.utcnow()
+    default_timezone = timezone(timedelta(hours=MOSCOW_TIME_OFFSET))
     consultations = await service.get_daily_consultations()
     for consultation in consultations:
-        user = await service.authenticate_user(consultation.telegram_id)
-        user_timezone = await get_timezone_from_str(user.timezone)
+        user_timezone = context.bot_data.get(int(consultation.telegram_id), default_timezone)
         due_time = datetime.strptime(consultation.due, DATE_FORMAT)
         if due_time.date() == now.date():
             message_template = HOURLY_REMINDER_TEMPLATE
