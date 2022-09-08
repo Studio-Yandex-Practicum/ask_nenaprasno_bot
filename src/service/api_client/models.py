@@ -59,8 +59,8 @@ class UserActiveConsultations:
     username_trello: str
     active_consultations: int
     # оставил словарь, чтобы не вылез старый баг, но 
-    когда будем править сообщение недельной статистики
-    предлагаю использовать ConsultationData
+    # когда будем править сообщение недельной статистики
+    # предлагаю использовать ConsultationData
     active_consultations_data: List[Dict]
 
 
