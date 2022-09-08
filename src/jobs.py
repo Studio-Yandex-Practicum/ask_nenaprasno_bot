@@ -26,7 +26,7 @@ HOURLY_REMINDER_TEMPLATE = (
 ) + REMINDER_BASE_TEMPLATE
 
 DAILY_REMINDER_TEMPLATE = (
-    "Время и стекло 😎\n" "Заявка - {consultation_id}\n" "Верим и ждем.\n\n"
+    "Время истекло 😎\n" "Заявка - {consultation_id}\n" "Верим и ждем.\n\n"
 ) + REMINDER_BASE_TEMPLATE
 
 FORWARD_REMINDER_TEMPLATE = (
@@ -134,7 +134,7 @@ async def daily_bill_remind_job(context: CallbackContext) -> None:
     await send_message(chat_id=job.user_id, text=message, reply_markup=menu, bot=context.bot)
     send_time = config.MONTHLY_RECEIPT_REMINDER_TIME
     # user_utc = context.user_data.get("UTC")
-    # Не смог понять, в каком виде хранятся данные о часовом поясе юзера. Здесь надо переопределить информацию о
+    # Не смог понять в каком виде хранятся данные о часовом поясе юзера. Здесь надо переопределить информацию о
     # времени отправки сообщения
     # if user_utc:
     #     send_time += user_utc

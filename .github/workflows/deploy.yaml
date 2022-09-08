@@ -49,6 +49,7 @@ jobs:
             echo BOT_PORT=${{ secrets.BOT_PORT }} >> .env
             echo WEBHOOK_URL=${{ secrets.WEBHOOK_URL }} >> .env
             echo HOST=${{ secrets.HOST }} >> .env
+            echo SECRET_TELEGRAM_TOKEN=${{ secrets.SECRET_TELEGRAM_TOKEN }} >> .env
             echo WEEKLY_STAT_TIME=${{ secrets.WEEKLY_STAT_TIME }} >> .env
             echo WEEKLY_STAT_WEEK_DAYS=${{ secrets.WEEKLY_STAT_WEEK_DAYS }} >> .env
             echo MONTHLY_STAT_TIME=${{ secrets.MONTHLY_STAT_TIME }} >> .env
@@ -66,6 +67,8 @@ jobs:
             echo TRELLO_ID_MODEL=${{ secrets.TRELLO_ID_MODEL }} >> .env
             echo TRELLO_TOKEN=${{ secrets.TRELLO_TOKEN }} >> .env
             echo TRELLO_BORD_ID=${{ secrets.TRELLO_BORD_ID }} >> .env
+            echo URL_ASK_NENAPRASNO=${{ secrets.URL_ASK_NENAPRASNO }} >> .env
+
             sudo docker image prune -f
             sudo docker pull ${{ secrets.DOCKER_USERNAME }}/ask_nenaprasno_bot:latest
             sudo docker-compose stop

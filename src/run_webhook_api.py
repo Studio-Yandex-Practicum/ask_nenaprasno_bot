@@ -1,4 +1,5 @@
 # pylint: disable=W0612
+import os
 from json import JSONDecodeError
 
 import httpx
@@ -9,13 +10,15 @@ from starlette.middleware import Middleware
 from starlette.middleware.authentication import AuthenticationMiddleware
 from starlette.requests import Request
 from starlette.responses import JSONResponse, Response
-from starlette.routing import Route
+from starlette.routing import Mount, Route
+from starlette.staticfiles import StaticFiles
 from telegram import Bot, Update
 from telegram.error import TelegramError
 
 from bot import DAILY_CONSULTATIONS_REMINDER_JOB, init_webhook
 from core import config
 from core.config import TRELLO_BORD_ID, URL_ASK_NENAPRASNO
+from core.exceptions import BadRequestError
 from core.logger import logger
 from core.send_message import send_message
 from middleware import TokenAuthBackend
@@ -83,73 +86,86 @@ async def deserialize(request: Request, deserializer):
     try:
         request_data: deserializer = deserializer.from_dict(await request.json())
         logger.info("Got new api request: %s", request_data)
-        return Response(status_code=httpx.codes.OK), request_data
+        return request_data
     except KeyError as error:
         logger.error("Got a KeyError: %s", error)
-        return Response(status_code=httpx.codes.BAD_REQUEST), None
+        raise BadRequestError("There is an error in the request") from error
     except JSONDecodeError as error:
         logger.error("Got a JSONDecodeError: %s", error)
-        return Response(status_code=httpx.codes.BAD_REQUEST), None
+        raise BadRequestError("There is an error in the request") from error
 
 
 @requires("authenticated", status_code=401)
 async def consultation_assign(request: Request) -> Response:
-    response, request_data = await deserialize(request, AssignedConsultationModel)
-    if request_data is not None:
-        bot = api.state.bot_app.bot
-        chat_id = request_data.telegram_id
-        text = (
-            f"Получена новая заявка\n"
-            f"[Открыть заявку на сайте]({URL_ASK_NENAPRASNO}/consultation/redirect/{request_data.consultation_id})\n"
-            f"[Открыть Trello](https://trello.com/{TRELLO_BORD_ID}/?filter=member:{request_data.username_trello})\n\n"
-        )
-        await send_message(bot=bot, chat_id=chat_id, text=text)
-    return response
+    try:
+        request_data = await deserialize(request, AssignedConsultationModel)
+    except BadRequestError as error:
+        logger.error("Got a BadRequestError: %s", error)
+        return Response(status_code=httpx.codes.BAD_REQUEST)
+    bot = api.state.bot_app.bot
+    chat_id = request_data.telegram_id
+    text = (
+        f"Получена новая заявка\n"
+        f"[Открыть заявку на сайте]({URL_ASK_NENAPRASNO}consultation/redirect/{request_data.consultation_id})\n"
+        f"[Открыть Trello]"
+        f"(https://trello.com/{TRELLO_BORD_ID}/?filter=member:{request_data.username_trello})\n\n"
+    )
+    await send_message(bot=bot, chat_id=chat_id, text=text)
+    return Response(status_code=httpx.codes.OK)
 
 
 @requires("authenticated", status_code=401)
 async def consultation_close(request: Request) -> Response:
-    response, request_data = await deserialize(request, ClosedConsultationModel)
-    if request_data is not None:
-        consultation_id = request_data.consultation_id
-        bot_app = api.state.bot_app
-        reminder_jobs = bot_app.job_queue.jobs()
-        for job in reminder_jobs:
-            if job.data[0] == consultation_id:
-                job.schedule_removal()
-    return response
+    try:
+        request_data = await deserialize(request, ClosedConsultationModel)
+    except BadRequestError as error:
+        logger.error("Got a BadRequestError: %s", error)
+        return Response(status_code=httpx.codes.BAD_REQUEST)
+    consultation_id = request_data.consultation_id
+    bot_app = api.state.bot_app
+    reminder_jobs = bot_app.job_queue.jobs()
+    for job in reminder_jobs:
+        if job.data[0] == consultation_id:
+            job.schedule_removal()
+    return Response(status_code=httpx.codes.OK)
 
 
 @requires("authenticated", status_code=401)
 async def consultation_message(request: Request) -> Response:
-    response, request_data = await deserialize(request, ConsultationModel)
-    if request_data is not None:
-        bot = api.state.bot_app.bot
-        chat_id = request_data.telegram_id
-        text = (
-            f"Получено новое сообщение в чате заявки\n"
-            f"[Открыть заявку на сайте]({URL_ASK_NENAPRASNO}/consultation/redirect/{request_data.consultation_id})\n"
-            f"[Открыть Trello](https://trello.com/{TRELLO_BORD_ID}/?filter=member:{request_data.username_trello})\n\n"
-        )
-        await send_message(bot=bot, chat_id=chat_id, text=text)
-    return response
+    try:
+        request_data = await deserialize(request, ConsultationModel)
+    except BadRequestError as error:
+        logger.error("Got a BadRequestError: %s", error)
+        return Response(status_code=httpx.codes.BAD_REQUEST)
+
+    bot = api.state.bot_app.bot
+    text = (
+        f"Вау! Получено новое сообщение в чате заявки {request_data.consultation_id}\n"
+        f"[Прочитать сообщение]({URL_ASK_NENAPRASNO}consultation/redirect/{request_data.consultation_id})\n\n"
+        f"[Открыть Trello]"
+        f"(https://trello.com/{TRELLO_BORD_ID}/?filter=member:{request_data.username_trello})\n\n"
+    )
+    await send_message(bot=bot, chat_id=request_data.telegram_id, text=text)
+    return Response(status_code=httpx.codes.OK)
 
 
 @requires("authenticated", status_code=401)
 async def consultation_feedback(request: Request) -> Response:
-    response, request_data = await deserialize(request, FeedbackConsultationModel)
-    if request_data is not None:
-        bot = api.state.bot_app.bot
-        chat_id = request_data.telegram_id
-        text = (
-            f"Вы получили новый отзыв по заявке\n"
-            f"[Открыть заявку на сайте]({URL_ASK_NENAPRASNO}/consultation/redirect/{request_data.consultation_id})\n"
-            f"[Открыть Trello](https://trello.com/{TRELLO_BORD_ID}"
-            f"/?filter=member:{request_data.username_trello},dueComplete:true)\n\n"
-        )
-        await send_message(bot=bot, chat_id=chat_id, text=text)
-
-    return response
+    try:
+        request_data = await deserialize(request, FeedbackConsultationModel)
+    except BadRequestError as error:
+        logger.error("Got a BadRequestError: %s", error)
+        return Response(status_code=httpx.codes.BAD_REQUEST)
+    bot = api.state.bot_app.bot
+    chat_id = request_data.telegram_id
+    text = (
+        f"Вы получили новый отзыв по заявке\n"
+        f"[Открыть заявку на сайте]({URL_ASK_NENAPRASNO}consultation/redirect/{request_data.consultation_id})\n"
+        f"[Открыть Trello](https://trello.com/{TRELLO_BORD_ID}"
+        f"/?filter=member:{request_data.username_trello},dueComplete:true)\n\n"
+    )
+    await send_message(bot=bot, chat_id=chat_id, text=text)
+    return Response(status_code=httpx.codes.OK)
 
 
 routes = [
@@ -159,6 +175,11 @@ routes = [
     Route("/bot/consultation/close", consultation_close, methods=["POST"]),
     Route("/bot/consultation/message", consultation_message, methods=["POST"]),
     Route("/bot/consultation/feedback", consultation_feedback, methods=["POST"]),
+    Mount(
+        "/",
+        app=StaticFiles(directory=os.path.join(os.path.dirname(os.path.abspath(__file__)), "static")),
+        name="static",
+    ),
 ]
 
 middleware = [Middleware(AuthenticationMiddleware, backend=TokenAuthBackend())]
