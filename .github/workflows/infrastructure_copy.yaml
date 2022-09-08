@@ -14,8 +14,20 @@ jobs:
       - name: Copy infrastructure directory to remote
         uses: garygrossgarten/github-action-scp@release
         with:
-          local: infrastructure/docker-compose.yaml
-          remote: code/docker-compose.yaml
+          local: infrastructure/
+          remote: code/
           host: ${{ secrets.DEV_HOST }}
           username: ${{ secrets.USER }}
           privateKey: ${{ secrets.SSH_KEY }}
+      - name: executing remote ssh commands to deploy
+        uses: appleboy/ssh-action@master
+        with:
+          host: ${{ secrets.DEV_HOST }}
+          username: ${{ secrets.USER }}
+          key: ${{ secrets.SSH_KEY }}
+          script: |
+            cd code/nginx
+            sed -i "s+{{ROBOTS_FULL_PATH}}+$(pwd)+g" nginx.conf
+            sed -i 's/{{IP}}/${{ secrets.IP }}/g' nginx.conf
+            sed -i 's/{{DOMAIN}}/${{ secrets.DOMAIN }}/g' nginx.conf
+            sed -i 's/{{BOT_PORT}}/${{ secrets.BOT_PORT }}/g' nginx.conf
