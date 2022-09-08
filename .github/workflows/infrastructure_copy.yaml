@@ -27,7 +27,10 @@ jobs:
           key: ${{ secrets.SSH_KEY }}
           script: |
             cd code/nginx
+            sudo cp /etc/nginx/sites-available/default /etc/nginx/sites-available/default.backup
             sed -i "s+{{ROBOTS_FULL_PATH}}+$(pwd)+g" nginx.conf
             sed -i 's/{{IP}}/${{ secrets.IP }}/g' nginx.conf
             sed -i 's/{{DOMAIN}}/${{ secrets.DOMAIN }}/g' nginx.conf
             sed -i 's/{{BOT_PORT}}/${{ secrets.BOT_PORT }}/g' nginx.conf
+            sudo cp nginx.conf /etc/nginx/sites-available/default
+            sudo systemctl reload nginx
