@@ -9,6 +9,8 @@ jobs:
   copy:
     runs-on: ubuntu-latest
     steps:
+      - name: Check out the repo
+        uses: actions/checkout@v2
       - name: Copy infrastructure directory to remote
         uses: garygrossgarten/github-action-scp@release
         with:
