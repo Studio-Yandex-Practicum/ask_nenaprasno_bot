@@ -1,4 +1,5 @@
 # pylint: disable=W0612
+import os
 from json import JSONDecodeError
 
 import httpx
@@ -9,7 +10,8 @@ from starlette.middleware import Middleware
 from starlette.middleware.authentication import AuthenticationMiddleware
 from starlette.requests import Request
 from starlette.responses import JSONResponse, Response
-from starlette.routing import Route
+from starlette.routing import Mount, Route
+from starlette.staticfiles import StaticFiles
 from telegram import Bot, Update
 from telegram.error import TelegramError
 
@@ -135,15 +137,15 @@ async def consultation_message(request: Request) -> Response:
     except BadRequestError as error:
         logger.error("Got a BadRequestError: %s", error)
         return Response(status_code=httpx.codes.BAD_REQUEST)
+
     bot = api.state.bot_app.bot
-    chat_id = request_data.telegram_id
     text = (
-        f"Получено новое сообщение в чате заявки\n"
-        f"[Открыть заявку на сайте]({URL_ASK_NENAPRASNO}consultation/redirect/{request_data.consultation_id})\n"
+        f"Вау! Получено новое сообщение в чате заявки {request_data.consultation_id}\n"
+        f"[Прочитать сообщение]({URL_ASK_NENAPRASNO}consultation/redirect/{request_data.consultation_id})\n\n"
         f"[Открыть Trello]"
         f"(https://trello.com/{TRELLO_BORD_ID}/?filter=member:{request_data.username_trello})\n\n"
     )
-    await send_message(bot=bot, chat_id=chat_id, text=text)
+    await send_message(bot=bot, chat_id=request_data.telegram_id, text=text)
     return Response(status_code=httpx.codes.OK)
 
 
@@ -173,6 +175,11 @@ routes = [
     Route("/bot/consultation/close", consultation_close, methods=["POST"]),
     Route("/bot/consultation/message", consultation_message, methods=["POST"]),
     Route("/bot/consultation/feedback", consultation_feedback, methods=["POST"]),
+    Mount(
+        "/",
+        app=StaticFiles(directory=os.path.join(os.path.dirname(os.path.abspath(__file__)), "static")),
+        name="static",
+    ),
 ]
 
 middleware = [Middleware(AuthenticationMiddleware, backend=TokenAuthBackend())]

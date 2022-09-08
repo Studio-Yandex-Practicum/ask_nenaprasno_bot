@@ -1,6 +1,6 @@
 # pylint: disable=C0103
 from dataclasses import dataclass
-from typing import Optional, Union
+from typing import Dict, List, Optional, Union
 
 from dataclasses_json import dataclass_json
 
@@ -50,7 +50,7 @@ class WeekStat:
 @dataclass(frozen=True)
 class ConsultationData:
     id: str
-    number: int
+    number: in
 
 
 @dataclass_json
@@ -58,7 +58,10 @@ class ConsultationData:
 class UserActiveConsultations:
     username_trello: str
     active_consultations: int
-    active_consultations_data: list[ConsultationData]
+    # оставил словарь, чтобы не вылез старый баг, но 
+    когда будем править сообщение недельной статистики
+    предлагаю использовать ConsultationData
+    active_consultations_data: List[Dict]
 
 
 @dataclass_json
@@ -66,7 +69,7 @@ class UserActiveConsultations:
 class UserExpiredConsultations:
     username_trello: str
     expired_consultations: int
-    expired_consultations_data: list[ConsultationData]
+    expired_consultations_data: List[Dict]
 
 
 @dataclass_json
