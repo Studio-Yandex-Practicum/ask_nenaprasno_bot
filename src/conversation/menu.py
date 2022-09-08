@@ -50,6 +50,18 @@ async def button_reaction_callback(update: Update, context: ContextTypes.DEFAULT
     return states.MENU_STATE
 
 
+def get_word_case(number, single, few, many):
+    num = number % 100
+    if 5 <= num <= 20:
+        return many
+    num = number % 10
+    if num == 1:
+        return single
+    if 2 <= num <= 4:
+        return few
+    return many
+
+
 def format_average_user_answer_time(time: float | None) -> str:
     if time is None:
         return ""
@@ -57,8 +69,10 @@ def format_average_user_answer_time(time: float | None) -> str:
     average_answer_time = timedelta(days=0, hours=0, milliseconds=time)
     days = average_answer_time.days
     hours = average_answer_time.seconds // 3600
+    output_days = get_word_case(days, "день", "дня", "дней")
+    output_hours = get_word_case(hours, "час", "часа", "часов")
 
-    return f"***Среднее время ответа*** - {days} дней {hours} часа\n"
+    return f"***Среднее время ответа*** - {days} {output_days} {hours} {output_hours}\n"
 
 
 def format_rating(rating: float | None) -> str:
