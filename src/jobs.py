@@ -1,13 +1,15 @@
-from datetime import date, datetime, timedelta
+from datetime import date, datetime, timedelta, timezone
 from enum import Enum
-from string import Template
 
 from telegram import InlineKeyboardButton, InlineKeyboardMarkup
 from telegram.ext import CallbackContext
 
 from constants.callback_data import CALLBACK_DONE_BILL_COMMAND, CALLBACK_SKIP_BILL_COMMAND
+from constants.timezone import MOSCOW_TIME_OFFSET
+from conversation.menu import format_average_user_answer_time, format_rating
 from core import config
-from core.send_message import send_message, send_statistics
+from core.send_message import send_message
+from core.utils import get_timezone_from_str
 from service.api_client import APIService
 from service.repeat_message import repeat_after_one_hour_button
 
@@ -34,6 +36,27 @@ FORWARD_REMINDER_TEMPLATE = (
     "У нас еще есть время, чтобы ответить человеку вовремя!\n\n"
 ) + REMINDER_BASE_TEMPLATE
 
+WEEKLY_STATISTIC_TEMPLATE = (
+    "Вы делали добрые дела 7 дней!\n"
+    'Посмотрите, как прошла ваша неделя  в *"Просто спросить"*\n'
+    "Закрыто заявок - *{closed_consultations}*\n"
+    "В работе *{active_consultations}* заявок  за неделю\n\n"
+    "Истекает срок у *{expiring_consultations}* заявок\n"
+    "У *{expired_consultations}* заявок срок истек\n\n"
+    "[Открыть Trello](https://trello.com/{trello_id}/"
+    "?filter=member:{username_trello}/)\n"
+)
+
+MONTHLY_STATISTIC_TEMPLATE = (
+    "Это был отличный месяц!\n"
+    'Посмотрите, как он прошел в *"Просто спросить"* 🔥\n\n'
+    "Количество закрытых заявок - *{closed_consultations}*\n"
+    "{rating}"
+    "{average_user_answer_time}\n"
+    "[Открыть Trello](https://trello.com/{trello_id}/"
+    "?filter=member:{username_trello}/)\n"
+)
+
 DATE_FORMAT = "%Y-%m-%dT%H:%M:%S.%fZ"
 
 service = APIService()
@@ -52,60 +75,71 @@ class DueStatus(Enum):
 
 
 async def weekly_stat_job(context: CallbackContext) -> None:
-    """
-    Send weekly statistics on the number of requests in the work
-    """
+    """Collects users timezones and adds statistic-sending jobs to queue."""
     week_statistics = await service.get_week_stat()
-    template_message = Template(
-        "Вы делали добрые дела 7 дней!\n"
-        'Посмотрите, как прошла ваша неделя  в *"Просто спросить"*\n'
-        "Закрыто заявок - *$closed_consultations*\n"
-        "В работе *$active_consultations* заявок  за неделю\n\n"
-        "Истекает срок у *$expiring_consultations* заявок\n"
-        "У *$expired_consultations* заявок срок истек\n\n"
-        f"[Открыть Trello](https://trello.com/{config.TRELLO_BORD_ID})\n\n"
-    )
-    alias_dict = dict(
-        closed_consultations="closed_consultations",
-        active_consultations="active_consultations",
-        expiring_consultations="expiring_consultations",
-        expired_consultations="expired_consultations",
-    )
-    await send_statistics(
-        context=context,
-        template_message=template_message,
-        template_attribute_aliases=alias_dict,
-        statistic=week_statistics,
-        reply_markup=InlineKeyboardMarkup([[repeat_after_one_hour_button]]),
-    )
+    # микропроблема: если у пользователя не выбрана таймзона, то в сете будет None,
+    # который в send_weekly_statistic_job будет интрепретирован как таймзона по-умолчанию (МСК)
+    # Получаетcя на МСК будет 2 джобы
+    timezones = set(statistic.timezone for statistic in week_statistics)
+
+    for tz_string in timezones:
+        timezone_ = get_timezone_from_str(tz_string)
+        start_time = (
+            timedelta(microseconds=1)
+            if timezone_ == timezone.utc
+            else config.WEEKLY_STAT_TIME.replace(tzinfo=timezone_)
+        )
+        context.job_queue.run_once(send_weekly_statistic_job, when=start_time, data=tz_string)
 
 
 async def monthly_stat_job(context: CallbackContext) -> None:
-    """
-    Send monthly statistics on the number of successfully
-    closed requests.
-
-    Only if the user had requests.
-    """
+    """Collects users timezones and adds statistic-sending jobs to queue."""
     month_statistics = await service.get_month_stat()
-    template_message = Template(
-        "Это был отличный месяц!\n"
-        'Посмотрите, как он прошел в *"Просто спросить"* 🔥\n\n'
-        "Количество закрытых заявок - *$closed_consultations*\n"
-        "Рейтинг - *$rating*\n"
-        "Среднее время ответа - *$average_user_answer_time*\n\n"
-        f"[Открыть Trello](https://trello.com/{config.TRELLO_BORD_ID})\n\n"
+
+    for statistic in month_statistics:
+        if statistic.telegram_id is None:
+            continue
+        timezone_ = get_timezone_from_str(statistic.timezone)
+        start_time = (
+            timedelta(microseconds=1)
+            if timezone_ == timezone.utc
+            else config.MONTHLY_STAT_TIME.replace(tzinfo=timezone_)
+        )
+        context.job_queue.run_once(send_monthly_statistic_job, when=start_time, data=statistic)
+
+
+async def send_weekly_statistic_job(context: CallbackContext) -> None:
+    """Sends weekly statistics to users with specific timezone."""
+    current_tz = context.job.data
+    week_statistics = await service.get_week_stat()
+
+    for statistic in filter(lambda stat: stat.telegram_id is not None and stat.timezone == current_tz, week_statistics):
+        message = WEEKLY_STATISTIC_TEMPLATE.format(
+            trello_id=config.TRELLO_BORD_ID,
+            **statistic.to_dict(),
+        )
+        await send_message(
+            bot=context.bot,
+            chat_id=statistic.telegram_id,
+            text=message,
+            reply_markup=InlineKeyboardMarkup([[repeat_after_one_hour_button]]),
+        )
+
+
+async def send_monthly_statistic_job(context: CallbackContext) -> None:
+    """Send monthly statistic to user."""
+    statistic = context.job.data
+    message = MONTHLY_STATISTIC_TEMPLATE.format(
+        closed_consultations=statistic.closed_consultations,
+        rating=format_rating(statistic.rating),
+        average_user_answer_time=format_average_user_answer_time(statistic.average_user_answer_time),
+        trello_id=config.TRELLO_BORD_ID,
+        username_trello=statistic.username_trello,
     )
-    alias_dict = dict(
-        closed_consultations="closed_consultations",
-        rating="rating",
-        average_user_answer_time="average_user_answer_time",
-    )
-    await send_statistics(
-        context=context,
-        template_message=template_message,
-        template_attribute_aliases=alias_dict,
-        statistic=month_statistics,
+    await send_message(
+        bot=context.bot,
+        chat_id=statistic.telegram_id,
+        text=message,
     )
 
 
@@ -165,7 +199,7 @@ async def check_consultation(consultation_id: int, due_status: DueStatus) -> boo
 
 
 async def send_reminder(context: CallbackContext) -> None:
-    """Sends reminder to the user according to the message tmeplate.
+    """Sends reminder to the user according to the message template.
     Prior to that, check if the consultation is still relevant."""
     consultation, message_template, due_status = context.job.data
     if await check_consultation(consultation.id, due_status):
@@ -191,8 +225,10 @@ async def daily_consulations_reminder_job(context: CallbackContext) -> None:
     - the due date expired at least one day ago.
     """
     now = datetime.utcnow()
+    default_timezone = timezone(timedelta(hours=MOSCOW_TIME_OFFSET))
     consultations = await service.get_daily_consultations()
     for consultation in consultations:
+        user_timezone = context.bot_data.get(int(consultation.telegram_id), default_timezone)
         due_time = datetime.strptime(consultation.due, DATE_FORMAT)
         if due_time.date() == now.date():
             message_template = HOURLY_REMINDER_TEMPLATE
@@ -200,11 +236,11 @@ async def daily_consulations_reminder_job(context: CallbackContext) -> None:
             due_status = DueStatus.TODAY
         elif due_time.date() < date.today():
             message_template = DAILY_REMINDER_TEMPLATE
-            when_ = datetime.time(config.DAILY_CONSULTATIONS_REMINDER_TIME)
+            when_ = config.DAILY_CONSULTATIONS_REMINDER_TIME.replace(tzinfo=user_timezone)
             due_status = DueStatus.EXPIRED
         elif due_time.date() - now.date() == timedelta(days=1):
             message_template = FORWARD_REMINDER_TEMPLATE
-            when_ = datetime.time(config.DAILY_CONSULTATIONS_REMINDER_TIME)
+            when_ = config.DAILY_CONSULTATIONS_REMINDER_TIME.replace(tzinfo=user_timezone)
             due_status = DueStatus.TOMORROW
         else:
             continue
