@@ -3,7 +3,7 @@ version: '3.8'
 services:
   bot:
     env_file:
-      - ../.env
+      - .env
     image: agamova/ask_nenaprasno_bot:latest
     restart: always
     ports:

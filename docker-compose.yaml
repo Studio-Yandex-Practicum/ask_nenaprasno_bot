@@ -9,7 +9,7 @@ services:
     ports:
       - "8000:8000"
     volumes:
-      - bot_data:/code
+      - logs:/code/src/logs
 
 volumes:
-  bot_data:
+  logs:
