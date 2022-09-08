@@ -1,5 +1,4 @@
 # pylint: disable=W0612
-import os
 from json import JSONDecodeError
 
 import httpx
@@ -10,8 +9,7 @@ from starlette.middleware import Middleware
 from starlette.middleware.authentication import AuthenticationMiddleware
 from starlette.requests import Request
 from starlette.responses import JSONResponse, Response
-from starlette.routing import Mount, Route
-from starlette.staticfiles import StaticFiles
+from starlette.routing import Route
 from telegram import Bot, Update
 from telegram.error import TelegramError
 
@@ -175,11 +173,6 @@ routes = [
     Route("/bot/consultation/close", consultation_close, methods=["POST"]),
     Route("/bot/consultation/message", consultation_message, methods=["POST"]),
     Route("/bot/consultation/feedback", consultation_feedback, methods=["POST"]),
-    Mount(
-        "/",
-        app=StaticFiles(directory=os.path.join(os.path.dirname(os.path.abspath(__file__)), "static")),
-        name="static",
-    ),
 ]
 
 middleware = [Middleware(AuthenticationMiddleware, backend=TokenAuthBackend())]
