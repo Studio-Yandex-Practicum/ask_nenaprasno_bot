@@ -12,28 +12,26 @@ class HealthCheckResponseModel:
 
 @dataclass_json
 @dataclass(frozen=True)
-class FeedbackConsultationModel:
+class ClosedConsultationModel:
     consultation_id: str = field(metadata=config(field_name="consultation_id"))
-    username_trello: str = field(metadata=config(field_name="username_trello"))
-    telegram_id: str = field(metadata=config(field_name="telegram_id"))
 
 
 @dataclass_json
 @dataclass(frozen=True)
-class ConsultationModel:
-    consultation_id: str = field(metadata=config(field_name="consultation_id"))
-    trello_card_id: str = field(metadata=config(field_name="trello_card_id"))
+class ConsultationModel(ClosedConsultationModel):
+    consultation_number: str = field(metadata=config(field_name="consultation_number"))
     username_trello: str = field(metadata=config(field_name="username_trello"))
     telegram_id: str = field(metadata=config(field_name="telegram_id"))
+    trello_card_id: str = field(metadata=config(field_name="trello_card_id"))
+
+
+@dataclass_json
+@dataclass(frozen=True)
+class FeedbackConsultationModel(ConsultationModel):
+    feedback: str = field(metadata=config(field_name="feedback"))
 
 
 @dataclass_json
 @dataclass(frozen=True)
 class AssignedConsultationModel(ConsultationModel):
     due: str = field(metadata=config(field_name="due"))
-
-
-@dataclass_json
-@dataclass(frozen=True)
-class ClosedConsultationModel:
-    consultation_id: str = field(metadata=config(field_name="consultation_id"))
