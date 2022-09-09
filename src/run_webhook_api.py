@@ -1,6 +1,7 @@
 # pylint: disable=W0612
 import os
 from json import JSONDecodeError
+from typing import Tuple
 
 import httpx
 import uvicorn
@@ -125,7 +126,7 @@ async def consultation_close(request: Request) -> Response:
     bot_app = api.state.bot_app
     reminder_jobs = bot_app.job_queue.jobs()
     for job in reminder_jobs:
-        if job.data[0] == consultation_id:
+        if isinstance(job.data, Tuple) and job.data[0] == consultation_id:
             job.schedule_removal()
     return Response(status_code=httpx.codes.OK)
 
@@ -159,7 +160,7 @@ async def consultation_feedback(request: Request) -> Response:
     bot = api.state.bot_app.bot
     chat_id = request_data.telegram_id
     text = (
-        f"Вы получили новый отзыв по заявке\n"
+        f"Воу-воу-воу, у вас отзыв!\n"
         f"[Открыть заявку на сайте]({URL_ASK_NENAPRASNO}consultation/redirect/{request_data.consultation_id})\n"
         f"[Открыть Trello](https://trello.com/{TRELLO_BORD_ID}"
         f"/?filter=member:{request_data.username_trello},dueComplete:true)\n\n"
