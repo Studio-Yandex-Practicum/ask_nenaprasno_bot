@@ -17,6 +17,14 @@ jobs:
     steps:
       - name: Check out the repo
         uses: actions/checkout@v2
+      - name: Copy infrastructure directory to remote
+        uses: garygrossgarten/github-action-scp@release
+        with:
+          local: infrastructure/
+          remote: code/
+          host: ${{ secrets.DEV_HOST }}
+          username: ${{ secrets.USER }}
+          privateKey: ${{ secrets.SSH_KEY }}
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v1
       - name: Login to Docker
@@ -74,3 +82,12 @@ jobs:
             sudo docker-compose stop
             sudo docker-compose rm bot -f
             sudo docker-compose up -d
+
+            cd nginx
+            sudo cp /etc/nginx/sites-available/default /etc/nginx/sites-available/default.backup
+            sed -i "s+{{ROBOTS_FULL_PATH}}+$(pwd)+g" nginx.conf
+            sed -i 's/{{IP}}/${{ secrets.IP }}/g' nginx.conf
+            sed -i 's/{{DOMAIN}}/${{ secrets.DOMAIN }}/g' nginx.conf
+            sed -i 's/{{BOT_PORT}}/${{ secrets.BOT_PORT }}/g' nginx.conf
+            sudo cp nginx.conf /etc/nginx/sites-available/default
+            sudo systemctl reload nginx

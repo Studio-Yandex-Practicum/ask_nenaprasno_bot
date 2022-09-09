@@ -4,7 +4,7 @@ services:
   bot:
     env_file:
       - .env
-    build: .
+    image: agamova/ask_nenaprasno_bot:latest
     restart: always
     ports:
       - "8000:8000"
