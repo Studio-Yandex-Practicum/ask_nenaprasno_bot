@@ -8,11 +8,10 @@ on:
   push:
     branches:
       - feature/test-deploy
-      - feature/docker-compose-copy
 
 jobs:
   build_and_push_ask_nenaprasno_bot_image:
-#    if: github.event.pull_request.merged == true
+    if: github.event.pull_request.merged == true
     name: Push Docker image to Docker Hub
     runs-on: ubuntu-latest
     steps:
@@ -32,7 +31,7 @@ jobs:
           tags: ${{ secrets.DOCKER_USERNAME }}/ask_nenaprasno_bot:latest
 
   prepare_infrastructure:
-#    if: github.event.pull_request.merged == true
+    if: github.event.pull_request.merged == true
     name: Prepare Infrastructure
     runs-on: ubuntu-latest
     needs: build_and_push_ask_nenaprasno_bot_image
@@ -64,7 +63,7 @@ jobs:
             sudo systemctl reload nginx
 
   deploy:
-#    if: github.event.pull_request.merged == true
+    if: github.event.pull_request.merged == true
     runs-on: ubuntu-latest
     needs: prepare_infrastructure
     steps:
