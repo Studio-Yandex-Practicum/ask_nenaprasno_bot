@@ -157,15 +157,15 @@ async def consultation_feedback(request: Request) -> Response:
     except BadRequestError as error:
         logger.error("Got a BadRequestError: %s", error)
         return Response(status_code=httpx.codes.BAD_REQUEST)
+
     bot = api.state.bot_app.bot
-    chat_id = request_data.telegram_id
     text = (
         f"Воу-воу-воу, у вас отзыв!\n"
-        f"[Открыть заявку на сайте]({URL_ASK_NENAPRASNO}consultation/redirect/{request_data.consultation_id})\n"
-        f"[Открыть Trello](https://trello.com/{TRELLO_BORD_ID}"
-        f"/?filter=member:{request_data.username_trello},dueComplete:true)\n\n"
+        f"Ваша ***заявка {request_data.consultation_number}*** успешно закрыта пользователем!\n\n"
+        f"***{request_data.feedback}***\n\n"
+        f"Надеемся, он был вам полезен:)"
     )
-    await send_message(bot=bot, chat_id=chat_id, text=text)
+    await send_message(bot=bot, chat_id=request_data.telegram_id, text=text)
     return Response(status_code=httpx.codes.OK)
 
 
