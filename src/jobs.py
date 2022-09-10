@@ -1,5 +1,7 @@
+from dataclasses import dataclass
 from datetime import date, datetime, timedelta, timezone
 from enum import Enum
+from typing import Optional
 
 from telegram import InlineKeyboardButton, InlineKeyboardMarkup
 from telegram.ext import CallbackContext
@@ -11,6 +13,7 @@ from core import config
 from core.send_message import send_message
 from core.utils import get_timezone_from_str
 from service.api_client import APIService
+from service.api_client.models import Consultation
 from service.repeat_message import repeat_after_one_hour_button
 
 REMINDER_BASE_TEMPLATE = (
@@ -23,11 +26,15 @@ REMINDER_BASE_TEMPLATE = (
     "?filter=member:{trello_name}/?filter=overdue:true)"
 )
 
-HOURLY_REMINDER_TEMPLATE = (
+DUE_REMINDER_TEMPLATE = (
+    "Нееееет! Срок ответа на заявку номер заявки истек :(\n" "Мы все очень ждем вашего ответа.\n\n"
+) + REMINDER_BASE_TEMPLATE
+
+DUE_HOUR_REMINDER_TEMPLATE = (
     "Час прошел, а наша надежда - нет :)\n" "Ответьте, пожалуйста, на заявку {consultation_id}\n\n"
 ) + REMINDER_BASE_TEMPLATE
 
-DAILY_REMINDER_TEMPLATE = (
+PAST_REMINDER_TEMPLATE = (
     "Время истекло 😎\n" "Заявка - {consultation_id}\n" "Верим и ждем.\n\n"
 ) + REMINDER_BASE_TEMPLATE
 
@@ -64,14 +71,81 @@ service = APIService()
 
 class DueStatus(Enum):
     """Defines due status of a consultation:
-    - EXPIRED: due date at least one day ago;
+    - PAST: due date at least one day ago;
     - TODAY: due date is today;
     - TOMORROW: due day is tomorrow.
     """
 
-    EXPIRED = 1
+    PAST = 1
     TODAY = 2
     TOMORROW = 3
+
+
+@dataclass(frozen=True)
+class BaseConsultationData:
+    """Stores structured data that is passed
+    within a job to the job_queue of the bot.
+    """
+
+    consultation: Consultation
+    message_template: Optional[str]
+    due_status: Optional[DueStatus]
+
+    async def is_valid(self):
+        """Checks if consulation status is still valid."""
+        consultation = await service.get_consultation(self.consultation.id)
+        if (consultation is None) or (consultation.due is None):
+            return False
+
+        due_time = datetime.strptime(consultation.due, DATE_FORMAT)
+        now = datetime.utcnow()
+        if self.due_status == DueStatus.PAST:
+            return due_time.date() < date.today()
+        if self.due_status == DueStatus.TODAY:
+            return due_time.date() == now.date()
+        if self.due_status == DueStatus.TOMORROW:
+            return due_time.date() - now.date() == timedelta(days=1)
+        return False
+
+
+@dataclass(frozen=True)
+class DueConsultationData(BaseConsultationData):
+    """Stores structured data to be passed
+    right upon expiration of the due time.
+    """
+
+    message_template: str = DUE_REMINDER_TEMPLATE
+    due_status: DueStatus = DueStatus.TODAY
+
+
+@dataclass(frozen=True)
+class DueHourConsultationData(BaseConsultationData):
+    """Stores structured data to be passed
+    one hour after expiration of the due time.
+    """
+
+    message_template: str = DUE_HOUR_REMINDER_TEMPLATE
+    due_status: DueStatus = DueStatus.TODAY
+
+
+@dataclass(frozen=True)
+class PastConsultationData(BaseConsultationData):
+    """Stores structured data to be passed
+    for consultations expired at least one day ago.
+    """
+
+    message_template: str = PAST_REMINDER_TEMPLATE
+    due_status: DueStatus = DueStatus.PAST
+
+
+@dataclass(frozen=True)
+class ForwardConsultationData(BaseConsultationData):
+    """Stores structured data to be passed
+    for consultations expiring tomorrow.
+    """
+
+    message_template: str = FORWARD_REMINDER_TEMPLATE
+    due_status: DueStatus = DueStatus.TOMORROW
 
 
 async def weekly_stat_job(context: CallbackContext) -> None:
@@ -144,8 +218,7 @@ async def send_monthly_statistic_job(context: CallbackContext) -> None:
 
 
 async def monthly_bill_reminder_job(context: CallbackContext) -> None:
-    """
-    Send monthly reminder about the receipt formation during payment
+    """Send monthly reminder about the receipt formation during payment
     Only for self-employed users
     """
     bill_stat = await service.get_bill()
@@ -155,8 +228,7 @@ async def monthly_bill_reminder_job(context: CallbackContext) -> None:
 
 
 async def daily_bill_remind_job(context: CallbackContext) -> None:
-    """
-    Send message every day until delete job from JobQueue
+    """Send message every day until delete job from JobQueue
     :param context:
     :return:
     """
@@ -181,28 +253,14 @@ async def daily_bill_remind_job(context: CallbackContext) -> None:
     )
 
 
-async def check_consultation(consultation_id: int, due_status: DueStatus) -> bool:
-    """Checks if consulation status is still valid."""
-    consultation = await service.get_consultation(consultation_id)
-    if consultation is None or consultation.due is None:
-        return False
-
-    due_time = datetime.strptime(consultation.due, DATE_FORMAT)
-    now = datetime.utcnow()
-    if due_status == DueStatus.TODAY:
-        return due_time.date() == now.date()
-    if due_status == DueStatus.EXPIRED:
-        return due_time.date() < date.today()
-    if due_status == DueStatus.TOMORROW:
-        return due_time.date() - now.date() == timedelta(days=1)
-    return False
-
-
 async def send_reminder(context: CallbackContext) -> None:
     """Sends reminder to the user according to the message template.
-    Prior to that, check if the consultation is still relevant."""
-    consultation, message_template, due_status = context.job.data
-    if await check_consultation(consultation.id, due_status):
+    Prior to that, check if the consultation is still relevant.
+    """
+    job_data = context.job.data
+    consultation = job_data.consultation
+    message_template = job_data.message_template
+    if await job_data.is_valid():
         telegram_id = consultation.telegram_id
         active_cons = await service.get_user_active_consultations(telegram_id)
         expired_cons = await service.get_user_expired_consultations(telegram_id)
@@ -221,7 +279,8 @@ async def daily_consulations_reminder_job(context: CallbackContext) -> None:
     """Adds a reminder job to the bot's job queue according
     to one of the following scenarios:
     - the due date is tomorrow;
-    - the due date has expired by one hour;
+    - the due date has just expired;
+    - the due date expired one hour ago;
     - the due date expired at least one day ago.
     """
     now = datetime.utcnow()
@@ -231,22 +290,19 @@ async def daily_consulations_reminder_job(context: CallbackContext) -> None:
         user_timezone = context.bot_data.get(int(consultation.telegram_id), default_timezone)
         due_time = datetime.strptime(consultation.due, DATE_FORMAT)
         if due_time.date() == now.date():
-            message_template = HOURLY_REMINDER_TEMPLATE
-            when_ = due_time + timedelta(hours=1)
-            due_status = DueStatus.TODAY
+            context.job_queue.run_once(send_reminder, when=due_time, data=DueConsultationData(consultation))
+            context.job_queue.run_once(
+                send_reminder, when=due_time + timedelta(hours=1), data=DueHourConsultationData(consultation)
+            )
         elif due_time.date() < date.today():
-            message_template = DAILY_REMINDER_TEMPLATE
-            when_ = config.DAILY_CONSULTATIONS_REMINDER_TIME.replace(tzinfo=user_timezone)
-            due_status = DueStatus.EXPIRED
-        elif due_time.date() - now.date() == timedelta(days=1):
-            message_template = FORWARD_REMINDER_TEMPLATE
-            when_ = config.DAILY_CONSULTATIONS_REMINDER_TIME.replace(tzinfo=user_timezone)
-            due_status = DueStatus.TOMORROW
-        else:
-            continue
-
-        context.job_queue.run_once(
-            send_reminder,
-            when=when_,
-            data=(consultation, message_template, due_status),
-        )
+            context.job_queue.run_once(
+                send_reminder,
+                when=config.DAILY_CONSULTATIONS_REMINDER_TIME.replace(tzinfo=user_timezone),
+                data=PastConsultationData(consultation),
+            )
+        elif (due_time.date() - now.date()) == timedelta(days=1):
+            context.job_queue.run_once(
+                send_reminder,
+                when=config.DAILY_CONSULTATIONS_REMINDER_TIME.replace(tzinfo=user_timezone),
+                data=ForwardConsultationData(consultation),
+            )
