@@ -139,11 +139,12 @@ async def button_actual_requests_callback(update: Update, context: ContextTypes.
 
     username_trello = active_consultations.username_trello
     active_consultations_list = active_consultations.active_consultations_data
-    link_neneprasno = make_consultations_list(active_consultations_list)
+    link_nenaprasno = make_consultations_list(active_consultations_list)
+    declination_zayavka = get_word_case(active_consultations.active_consultations, "заявка", "заявки", "заявок")
 
     message = (
-        f"У вас в работе {active_consultations.active_consultations} заявок.\n"
-        f"Посмотреть заявки на сайте:\n{link_neneprasno}\n"
+        f"У вас в работе {active_consultations.active_consultations} {declination_zayavka}.\n"
+        f"Посмотреть заявки на сайте:\n{link_nenaprasno}\n"
         f"[Открыть Trello](https://trello.com/{TRELLO_BORD_ID}/?filter=member:"
         f"{username_trello}/?filter=overdue:true)\n\n"
     )
@@ -166,13 +167,13 @@ async def button_overdue_requests_callback(update: Update, context: ContextTypes
 
     username_trello = expired_consultations.username_trello
     expired_consultations_list = expired_consultations.expired_consultations_data
-    link_neneprasno = make_consultations_list(expired_consultations_list)
+    link_nenaprasno = make_consultations_list(expired_consultations_list)
 
     message = (
         f"Время и стекло 😎\n"
         f"Ваше количество просроченных заявок - {expired_consultations.expired_consultations}\n"
         f"Верим и ждем.\n\n"
-        f"Посмотреть заявки на сайте:\n{link_neneprasno}\n"
+        f"Посмотреть заявки на сайте:\n{link_nenaprasno}\n"
         f"----\n"
         f"В работе количество заявок - {active_consultations.active_consultations}\n"
         f"Открыть [Trello](https://trello.com/{TRELLO_BORD_ID}/?filter=member:"
