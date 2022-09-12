@@ -140,10 +140,10 @@ async def button_actual_requests_callback(update: Update, context: ContextTypes.
     username_trello = active_consultations.username_trello
     active_consultations_list = active_consultations.active_consultations_data
     link_nenaprasno = make_consultations_list(active_consultations_list)
-    declination_zayavka = get_word_case(active_consultations.active_consultations, "заявка", "заявки", "заявок")
+    declination_consultation = get_word_case(active_consultations.active_consultations, "заявка", "заявки", "заявок")
 
     message = (
-        f"У вас в работе {active_consultations.active_consultations} {declination_zayavka}.\n"
+        f"У вас в работе {active_consultations.active_consultations} {declination_consultation}.\n"
         f"Посмотреть заявки на сайте:\n{link_nenaprasno}\n"
         f"[Открыть Trello](https://trello.com/{TRELLO_BORD_ID}/?filter=member:"
         f"{username_trello}/?filter=overdue:true)\n\n"
