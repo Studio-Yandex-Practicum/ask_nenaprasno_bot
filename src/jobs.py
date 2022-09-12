@@ -44,7 +44,9 @@ WEEKLY_STATISTIC_TEMPLATE = (
     "Истекает срок у *{expiring_consultations}* заявок\n"
     "У *{expired_consultations}* заявок срок истек\n\n"
     "[Открыть Trello](https://trello.com/{trello_id}/"
-    "?filter=member:{username_trello}/)\n"
+    "?filter=member:{username_trello}/)\n\n"
+    "Мы рады работать в одной команде :)\n"
+    "Так держать!\n"
 )
 
 MONTHLY_STATISTIC_TEMPLATE = (
@@ -54,7 +56,9 @@ MONTHLY_STATISTIC_TEMPLATE = (
     "{rating}"
     "{average_user_answer_time}\n"
     "[Открыть Trello](https://trello.com/{trello_id}/"
-    "?filter=member:{username_trello}/)\n"
+    "?filter=member:{username_trello}/)\n\n"
+    "Мы рады работать в одной команде :)\n"
+    "Так держать!\n"
 )
 
 DATE_FORMAT = "%Y-%m-%dT%H:%M:%S.%fZ"
