@@ -1,6 +1,5 @@
 from dataclasses import dataclass
 from datetime import date, datetime, timedelta, timezone
-from enum import Enum
 from typing import Optional
 
 from telegram import InlineKeyboardButton, InlineKeyboardMarkup
@@ -17,12 +16,12 @@ from service.api_client.models import Consultation
 from service.repeat_message import repeat_after_one_hour_button
 
 REMINDER_BASE_TEMPLATE = (
-    "Открыть заявку на сайте (https://ask-nnyp.klbrtest.ru"
+    "[Открыть заявку на сайте](https://ask-nnyp.klbrtest.ru"
     "/consultation/redirect/{consultation_id})\n"
     "----\n"
     "В работе **{active_consultations}** заявок\n"
     "Истекает срок у **{expired_consultations}** заявок\n\n"
-    "Открыть Trello (https://trello.com/{trello_id}/"
+    "[Открыть Trello](https://trello.com/{trello_id}/"
     "?filter=member:{trello_name}/?filter=overdue:true)"
 )
 
@@ -35,7 +34,7 @@ DUE_HOUR_REMINDER_TEMPLATE = (
 ) + REMINDER_BASE_TEMPLATE
 
 PAST_REMINDER_TEMPLATE = (
-    "Время истекло 😎\n" "Заявка - {consultation_id}\n" "Верим и ждем.\n\n"
+    "Время и стекло 😎\n" "Заявка - {consultation_id}\n" "Верим и ждем.\n\n"
 ) + REMINDER_BASE_TEMPLATE
 
 FORWARD_REMINDER_TEMPLATE = (
@@ -51,7 +50,7 @@ WEEKLY_STATISTIC_TEMPLATE = (
     "Истекает срок у *{expiring_consultations}* заявок\n"
     "У *{expired_consultations}* заявок срок истек\n\n"
     "[Открыть Trello](https://trello.com/{trello_id}/"
-    "?filter=member:{username_trello}/)\n"
+    "?filter=member:{username_trello}/)"
 )
 
 MONTHLY_STATISTIC_TEMPLATE = (
@@ -61,24 +60,12 @@ MONTHLY_STATISTIC_TEMPLATE = (
     "{rating}"
     "{average_user_answer_time}\n"
     "[Открыть Trello](https://trello.com/{trello_id}/"
-    "?filter=member:{username_trello}/)\n"
+    "?filter=member:{username_trello}/)"
 )
 
 DATE_FORMAT = "%Y-%m-%dT%H:%M:%S.%fZ"
 
 service = APIService()
-
-
-class DueStatus(Enum):
-    """Defines due status of a consultation:
-    - PAST: due date at least one day ago;
-    - TODAY: due date is today;
-    - TOMORROW: due day is tomorrow.
-    """
-
-    PAST = 1
-    TODAY = 2
-    TOMORROW = 3
 
 
 @dataclass(frozen=True)
@@ -89,23 +76,13 @@ class BaseConsultationData:
 
     consultation: Consultation
     message_template: Optional[str]
-    due_status: Optional[DueStatus]
 
-    async def is_valid(self):
-        """Checks if consulation status is still valid."""
+    async def get_due_date(self):
+        """Returns due date or None."""
         consultation = await service.get_consultation(self.consultation.id)
         if (consultation is None) or (consultation.due is None):
-            return False
-
-        due_time = datetime.strptime(consultation.due, DATE_FORMAT)
-        now = datetime.utcnow()
-        if self.due_status == DueStatus.PAST:
-            return due_time.date() < date.today()
-        if self.due_status == DueStatus.TODAY:
-            return due_time.date() == now.date()
-        if self.due_status == DueStatus.TOMORROW:
-            return due_time.date() - now.date() == timedelta(days=1)
-        return False
+            return None
+        return datetime.strptime(consultation.due, DATE_FORMAT).date()
 
 
 @dataclass(frozen=True)
@@ -115,7 +92,10 @@ class DueConsultationData(BaseConsultationData):
     """
 
     message_template: str = DUE_REMINDER_TEMPLATE
-    due_status: DueStatus = DueStatus.TODAY
+
+    async def is_valid(self):
+        """Checks if consulation status is still valid."""
+        return await self.get_due_date() == date.today()
 
 
 @dataclass(frozen=True)
@@ -125,7 +105,10 @@ class DueHourConsultationData(BaseConsultationData):
     """
 
     message_template: str = DUE_HOUR_REMINDER_TEMPLATE
-    due_status: DueStatus = DueStatus.TODAY
+
+    async def is_valid(self):
+        """Checks if consulation status is still valid."""
+        return await self.get_due_date() == date.today()
 
 
 @dataclass(frozen=True)
@@ -135,7 +118,10 @@ class PastConsultationData(BaseConsultationData):
     """
 
     message_template: str = PAST_REMINDER_TEMPLATE
-    due_status: DueStatus = DueStatus.PAST
+
+    async def is_valid(self):
+        """Checks if consulation status is still valid."""
+        return await self.get_due_date() < date.today()
 
 
 @dataclass(frozen=True)
@@ -145,7 +131,10 @@ class ForwardConsultationData(BaseConsultationData):
     """
 
     message_template: str = FORWARD_REMINDER_TEMPLATE
-    due_status: DueStatus = DueStatus.TOMORROW
+
+    async def is_valid(self):
+        """Checks if consulation status is still valid."""
+        return await self.get_due_date() - date.today() == timedelta(days=1)
 
 
 async def weekly_stat_job(context: CallbackContext) -> None:
