@@ -6,10 +6,23 @@ services:
       - .env
     image: agamova/ask_nenaprasno_bot:latest
     restart: always
-    ports:
-      - "8000:8000"
+    expose:
+      - 8000
     volumes:
-      - logs:/code/src/logs
-
-volumes:
-  logs:
+      - ./logs:/code/src/logs
+      - ./nginx:/code/infrastructure/nginx
+  nginx:
+    image: nginx:1.19.3
+    hostname: agamova.nenaprasno.ru
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./nginx/nginx.conf:/etc/nginx/conf.d/default.conf
+      - ./nginx/robots.txt:/var/www/robots.txt
+      - ./logs:/var/logs/
+      - /etc/letsencrypt/options-ssl-nginx.conf:/etc/letsencrypt/options-ssl-nginx.conf
+      - /etc/letsencrypt/ssl-dhparams.pem:/etc/letsencrypt/ssl-dhparams.pem
+      - /etc/letsencrypt/archive/nenaprasno.agamova.ru/:/etc/letsencrypt/archive/nenaprasno.agamova.ru/
+    depends_on:
+      - bot
