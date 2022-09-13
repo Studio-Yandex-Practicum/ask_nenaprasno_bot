@@ -139,7 +139,7 @@ async def consultation_message(request: Request) -> Response:
 
     bot = api.state.bot_app.bot
     text = (
-        f"Вау! Получено новое сообщение в чате заявки {request_data.consultation_id}\n"
+        f"Вау! Получено новое сообщение в чате заявки ***{request_data.consultation_number}***\n"
         f"[Прочитать сообщение]({URL_ASK_NENAPRASNO}consultation/redirect/{request_data.consultation_id})\n\n"
         f"[Открыть Trello]"
         f"(https://trello.com/{TRELLO_BORD_ID}/?filter=member:{request_data.username_trello})\n\n"
