@@ -10,7 +10,7 @@ services:
       - 8000
     volumes:
       - ./logs:/code/src/logs
-      - ./nginx:/code/src/infrastructure/nginx
+      - ./nginx:/code/infrastructure/nginx
   nginx:
     image: nginx:1.19.3
     hostname: agamova.nenaprasno.ru
