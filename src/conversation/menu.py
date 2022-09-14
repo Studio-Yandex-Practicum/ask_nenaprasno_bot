@@ -62,6 +62,16 @@ def get_word_case(number, single, few, many):
     return many
 
 
+def get_word_genitive(number, single, many):
+    num = number % 100
+    if 2 <= num <= 20:
+        return many
+    num = number % 10
+    if num == 1:
+        return single
+    return many
+
+
 def format_average_user_answer_time(time: float | None) -> str:
     if time is None:
         return ""

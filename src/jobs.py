@@ -7,7 +7,7 @@ from telegram.ext import CallbackContext
 
 from constants.callback_data import CALLBACK_DONE_BILL_COMMAND, CALLBACK_SKIP_BILL_COMMAND
 from constants.timezone import MOSCOW_TIME_OFFSET
-from conversation.menu import format_average_user_answer_time, format_rating
+from conversation.menu import format_average_user_answer_time, format_rating, get_word_case, get_word_genitive
 from core import config
 from core.send_message import send_message
 from core.utils import get_timezone_from_str
@@ -19,8 +19,8 @@ REMINDER_BASE_TEMPLATE = (
     "[Открыть заявку на сайте](https://ask-nnyp.klbrtest.ru"
     "/consultation/redirect/{consultation_id})\n"
     "----\n"
-    "В работе **{active_consultations}** заявок\n"
-    "Истекает срок у **{expired_consultations}** заявок\n\n"
+    "В работе **{active_consultations}** {declination_consultation}\n"
+    "Истекает срок у **{expired_consultations}** {genitive_declination_consultation}\n\n"
     "[Открыть Trello](https://trello.com/{trello_id}/"
     "?filter=member:{trello_name}/?filter=overdue:true)"
 )
@@ -44,10 +44,10 @@ FORWARD_REMINDER_TEMPLATE = (
 
 WEEKLY_STATISTIC_TEMPLATE = (
     "Вы делали добрые дела 7 дней!\n"
-    'Посмотрите, как прошла ваша неделя  в *"Просто спросить"*\n'
+    'Посмотрите, как прошла ваша неделя в *"Просто спросить"*\n'
     "Закрыто заявок - *{closed_consultations}*\n"
-    "В работе *{active_consultations}* заявок  за неделю\n\n"
-    "Истекает срок у *{expiring_consultations}* заявок\n"
+    "В работе *{active_consultations}* {declination_consultation} за неделю\n\n"
+    "Истекает срок у *{expiring_consultations}* {genitive_declination_consultation}\n"
     "У *{expired_consultations}* заявок срок истек\n\n"
     "[Открыть Trello](https://trello.com/{trello_id}/"
     "?filter=member:{username_trello}/)\n\n"
@@ -262,6 +262,8 @@ async def send_reminder(context: CallbackContext) -> None:
             consultation_id=consultation.id,
             active_consultations=active_cons.active_consultations,
             expired_consultations=expired_cons.expired_consultations,
+            declination_consultation=get_word_case(active_cons.active_consultations, "заявка", "заявки", "заявок"),
+            genitive_declination_consultation=get_word_genitive(expired_cons.expired_consultations, "заявки", "заявок"),
             trello_id=config.TRELLO_BORD_ID,
             trello_name=consultation.username_trello,
         )
