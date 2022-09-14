@@ -58,7 +58,7 @@ jobs:
             echo MONTHLY_RECEIPT_REMINDER_TIME=${{ secrets.MONTHLY_RECEIPT_REMINDER_TIME }} >> .env
             echo MONTHLY_RECEIPT_REMINDER_DAY=${{ secrets.MONTHLY_RECEIPT_REMINDER_DAY }} >> .env
             echo DAYLY_COLLECT_CONSULTATIONS_TIME=${{ secrets.DAYLY_COLLECT_CONSULTATIONS_TIME }} >> .env
-            echo DAILY_REMINDER_FOR_OVERDUE_CONSULTATIONS=${{ secrets.DAILY_REMINDER_FOR_OVERDUE_CONSULTATIONS }} >> .env
+            echo DAILY_CONSULTATIONS_REMINDER_TIME=${{ secrets.DAILY_CONSULTATIONS_REMINDER_TIME }} >> .env
             echo BOT_PERSISTENCE_FILE=${{ secrets.BOT_PERSISTENCE_FILE }} >> .env
             echo SITE_API_URL=${{ secrets.SITE_API_URL }} >> .env
             echo IS_FAKE_API=${{ secrets.IS_FAKE_API }} >> .env
