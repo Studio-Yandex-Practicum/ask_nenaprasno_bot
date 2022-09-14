@@ -69,7 +69,6 @@ MONTHLY_RECEIPT_REMINDER_DAY = get_int("MONTHLY_RECEIPT_REMINDER_DAY")
 # Параметры рассылки напоминаний
 DAILY_COLLECT_CONSULTATIONS_TIME = time(hour=0, minute=0, tzinfo=timezone.utc)
 DAILY_CONSULTATIONS_REMINDER_TIME = get_time("DAILY_REMINDER_FOR_OVERDUE_CONSULTATIONS")
-# suggested constant name: "DAILY_CONSULTATIONS_REMINDER_TIME"
 
 # Файл с сохраненными данными бота
 BOT_PERSISTENCE_FILE = BASE_DIR / "persistence_data" / get_string("BOT_PERSISTENCE_FILE")
