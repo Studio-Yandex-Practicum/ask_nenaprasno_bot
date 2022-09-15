@@ -7,10 +7,10 @@ from telegram.ext import CallbackContext
 
 from constants.callback_data import CALLBACK_DONE_BILL_COMMAND, CALLBACK_SKIP_BILL_COMMAND
 from constants.timezone import MOSCOW_TIME_OFFSET
-from conversation.menu import format_average_user_answer_time, format_rating, get_word_case, get_word_genitive
+from conversation.menu import format_average_user_answer_time, format_rating
 from core import config
 from core.send_message import send_message
-from core.utils import get_timezone_from_str
+from core.utils import get_timezone_from_str, get_word_case, get_word_genitive
 from service.api_client import APIService
 from service.api_client.models import Consultation
 from service.repeat_message import repeat_after_one_hour_button

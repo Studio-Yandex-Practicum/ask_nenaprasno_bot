@@ -8,6 +8,7 @@ from constants import callback_data, states
 from conversation.timezone import set_timezone_from_keyboard, timezone_conversation
 from core.config import TRELLO_BORD_ID, URL_ASK_NENAPRASNO, URL_SERVICE_RULES
 from core.send_message import reply_message
+from core.utils import get_word_case
 from decorators.logger import async_error_logger
 from service.api_client import APIService
 
@@ -48,28 +49,6 @@ async def button_reaction_callback(update: Update, context: ContextTypes.DEFAULT
     """
     await reply_message(update=update, text="button reaction callback")
     return states.MENU_STATE
-
-
-def get_word_case(number, single, few, many):
-    num = number % 100
-    if 5 <= num <= 20:
-        return many
-    num = number % 10
-    if num == 1:
-        return single
-    if 2 <= num <= 4:
-        return few
-    return many
-
-
-def get_word_genitive(number, single, many):
-    num = number % 100
-    if 2 <= num <= 20:
-        return many
-    num = number % 10
-    if num == 1:
-        return single
-    return many
 
 
 def format_average_user_answer_time(time: float | None) -> str:
