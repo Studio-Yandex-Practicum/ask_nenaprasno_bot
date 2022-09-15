@@ -16,10 +16,10 @@ from telegram.error import TelegramError
 
 from bot import DAILY_CONSULTATIONS_REMINDER_JOB, init_webhook
 from core import config
-from core.config import TRELLO_BORD_ID, URL_ASK_NENAPRASNO
 from core.exceptions import BadRequestError
 from core.logger import logger
 from core.send_message import send_message
+from core.utils import build_consultation_url, build_trello_url
 from middleware import TokenAuthBackend
 from service.api_client import APIService
 from service.models import (
@@ -103,12 +103,10 @@ async def consultation_assign(request: Request) -> Response:
         return Response(status_code=httpx.codes.BAD_REQUEST)
     bot = api.state.bot_app.bot
     chat_id = request_data.telegram_id
-    text = (
-        f"Получена новая заявка\n"
-        f"[Открыть заявку на сайте]({URL_ASK_NENAPRASNO}consultation/redirect/{request_data.consultation_id})\n"
-        f"[Открыть Trello]"
-        f"(https://trello.com/{TRELLO_BORD_ID}/?filter=member:{request_data.username_trello})\n\n"
-    )
+    site_url = build_consultation_url(request_data.consultation_id)
+    trello_url = build_trello_url(request_data.username_trello)
+
+    text = f"Получена новая заявка\n" f"[Открыть заявку на сайте]({site_url})\n" f"[Открыть Trello]({trello_url})\n\n"
     await send_message(bot=bot, chat_id=chat_id, text=text)
     return Response(status_code=httpx.codes.OK)
 
@@ -138,11 +136,13 @@ async def consultation_message(request: Request) -> Response:
         return Response(status_code=httpx.codes.BAD_REQUEST)
 
     bot = api.state.bot_app.bot
+    site_url = build_consultation_url(request_data.consultation_id)
+    trello_url = build_trello_url(request_data.username_trello)
+
     text = (
         f"Вау! Получено новое сообщение в чате заявки ***{request_data.consultation_number}***\n"
-        f"[Прочитать сообщение]({URL_ASK_NENAPRASNO}consultation/redirect/{request_data.consultation_id})\n\n"
-        f"[Открыть Trello]"
-        f"(https://trello.com/{TRELLO_BORD_ID}/?filter=member:{request_data.username_trello})\n\n"
+        f"[Прочитать сообщение]({site_url})\n\n"
+        f"[Открыть Trello]({trello_url})\n\n"
     )
     await send_message(bot=bot, chat_id=request_data.telegram_id, text=text)
     return Response(status_code=httpx.codes.OK)
