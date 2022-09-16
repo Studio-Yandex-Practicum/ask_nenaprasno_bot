@@ -12,6 +12,16 @@ from core.utils import build_consultation_url, build_trello_url, get_word_case
 from decorators.logger import async_error_logger
 from service.api_client import APIService
 
+OVERDUE_TEMPLATE = (
+    "Время и стекло 😎\n"
+    "Ваше количество просроченных заявок - {expired_consultations}\n"
+    "Верим и ждем.\n\n"
+    "Посмотреть заявки на сайте:\n{link_nenaprasno}\n"
+    "----\n"
+    "В работе количество заявок - {active_consultations}\n"
+    "[Открыть Trello]({trello_url})\n\n"
+)
+
 
 @async_error_logger(name="conversation.menu_commands.menu")
 async def menu(update: Update, context: ContextTypes.DEFAULT_TYPE) -> str:
@@ -156,14 +166,11 @@ async def button_overdue_requests_callback(update: Update, context: ContextTypes
     link_nenaprasno = make_consultations_list(expired_consultations_list)
     trello_url = build_trello_url(expired_consultations.username_trello, overdue=True)
 
-    message = (
-        f"Время и стекло 😎\n"
-        f"Ваше количество просроченных заявок - {expired_consultations.expired_consultations}\n"
-        f"Верим и ждем.\n\n"
-        f"Посмотреть заявки на сайте:\n{link_nenaprasno}\n"
-        f"----\n"
-        f"В работе количество заявок - {active_consultations.active_consultations}\n"
-        f"[Открыть Trello]({trello_url})\n\n"
+    message = OVERDUE_TEMPLATE.format(
+        expired_consultations=expired_consultations.expired_consultations,
+        link_nenaprasno=link_nenaprasno,
+        active_consultations=active_consultations.active_consultations,
+        trello_url=trello_url,
     )
     await reply_message(update=update, text=message)
 

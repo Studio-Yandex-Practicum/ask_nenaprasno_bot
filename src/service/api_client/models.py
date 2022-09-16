@@ -81,7 +81,7 @@ class BillStat:
 @dataclass_json
 @dataclass(frozen=True)
 class Consultation:
-    id: int
+    id: str
     due: str
     telegram_id: int
     username_trello: str
@@ -92,3 +92,4 @@ class Consultation:
 @dataclass(frozen=True)
 class ConsultationDueDate:
     due: Optional[str]
+    created: Optional[str]
