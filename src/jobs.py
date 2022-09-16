@@ -48,7 +48,7 @@ WEEKLY_STATISTIC_TEMPLATE = (
     "Закрыто заявок - *{closed_consultations}*\n"
     "В работе *{active_consultations}* {declination_consultation} за неделю\n\n"
     "Истекает срок у *{expiring_consultations}* {genitive_declination_consultation}\n"
-    "У *{expired_consultations}* заявок срок истек\n\n"
+    "У *{expired_consultations}* {genitive_declination_expired} срок истек\n\n"
     "[Открыть Trello](https://trello.com/{trello_id}/"
     "?filter=member:{username_trello}/)\n\n"
     "Мы рады работать в одной команде :)\n"
@@ -184,12 +184,15 @@ async def send_weekly_statistic_job(context: CallbackContext) -> None:
         message = WEEKLY_STATISTIC_TEMPLATE.format(
             trello_id=config.TRELLO_BORD_ID,
             **statistic.to_dict(),
+            declination_consultation=get_word_case(statistic.active_consultations, "заявка", "заявки", "заявок"),
+            genitive_declination_consultation=get_word_genitive(statistic.expiring_consultations, "заявки", "заявок"),
+            genitive_declination_expired=get_word_genitive(statistic.expired_consultations, "заявки", "заявок"),
         )
         await send_message(
             bot=context.bot,
             chat_id=statistic.telegram_id,
             text=message,
-            reply_markup=InlineKeyboardMarkup([[repeat_after_one_hour_button]]),
+            reply_markup=None,
         )
 
 
