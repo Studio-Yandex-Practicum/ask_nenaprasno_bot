@@ -10,35 +10,33 @@ from constants.timezone import MOSCOW_TIME_OFFSET
 from conversation.menu import format_average_user_answer_time, format_rating
 from core import config
 from core.send_message import send_message
-from core.utils import get_timezone_from_str
+from core.utils import build_consultation_url, build_trello_url, get_timezone_from_str
 from service.api_client import APIService
 from service.api_client.models import Consultation
 from service.repeat_message import repeat_after_one_hour_button
 
 REMINDER_BASE_TEMPLATE = (
-    "[Открыть заявку на сайте](https://ask-nnyp.klbrtest.ru"
-    "/consultation/redirect/{consultation_id})\n"
+    "[Открыть заявку на сайте]({site_url})\n"
     "----\n"
     "В работе **{active_consultations}** заявок\n"
     "Истекает срок у **{expired_consultations}** заявок\n\n"
-    "[Открыть Trello](https://trello.com/{trello_id}/"
-    "?filter=member:{trello_name}/?filter=overdue:true)"
+    "[Открыть Trello]({trello_overdue_url})"
 )
 
 DUE_REMINDER_TEMPLATE = (
-    "Нееееет! Срок ответа на заявку номер заявки истек :(\n" "Мы все очень ждем вашего ответа.\n\n"
+    "Нееееет! Срок ответа на заявку {consultation_number} истек :(\n" "Мы все очень ждем вашего ответа.\n\n"
 ) + REMINDER_BASE_TEMPLATE
 
 DUE_HOUR_REMINDER_TEMPLATE = (
-    "Час прошел, а наша надежда - нет :)\n" "Ответьте, пожалуйста, на заявку {consultation_id}\n\n"
+    "Час прошел, а наша надежда - нет :)\n" "Ответьте, пожалуйста, на заявку {consultation_number}\n\n"
 ) + REMINDER_BASE_TEMPLATE
 
 PAST_REMINDER_TEMPLATE = (
-    "Время и стекло 😎\n" "Заявка - {consultation_id}\n" "Верим и ждем.\n\n"
+    "Время и стекло 😎\n" "Заявка - {consultation_number}\n" "Верим и ждем.\n\n"
 ) + REMINDER_BASE_TEMPLATE
 
 FORWARD_REMINDER_TEMPLATE = (
-    "Пупупууу! Истекает срок ответа по заявке {consultation_id} 🔥\n"
+    "Пупупууу! Истекает срок ответа по заявке {consultation_number} 🔥\n"
     "У нас еще есть время, чтобы ответить человеку вовремя!\n\n"
 ) + REMINDER_BASE_TEMPLATE
 
@@ -49,8 +47,7 @@ WEEKLY_STATISTIC_TEMPLATE = (
     "В работе *{active_consultations}* заявок  за неделю\n\n"
     "Истекает срок у *{expiring_consultations}* заявок\n"
     "У *{expired_consultations}* заявок срок истек\n\n"
-    "[Открыть Trello](https://trello.com/{trello_id}/"
-    "?filter=member:{username_trello}/)\n\n"
+    "[Открыть Trello]({trello_url})\n\n"
     "Мы рады работать в одной команде :)\n"
     "Так держать!\n"
 )
@@ -61,8 +58,7 @@ MONTHLY_STATISTIC_TEMPLATE = (
     "Количество закрытых заявок - *{closed_consultations}*\n"
     "{rating}"
     "{average_user_answer_time}\n"
-    "[Открыть Trello](https://trello.com/{trello_id}/"
-    "?filter=member:{username_trello}/)\n\n"
+    "[Открыть Trello]({trello_url})\n\n"
     "Мы рады работать в одной команде :)\n"
     "Так держать!\n"
 )
@@ -200,8 +196,7 @@ async def send_monthly_statistic_job(context: CallbackContext) -> None:
         closed_consultations=statistic.closed_consultations,
         rating=format_rating(statistic.rating),
         average_user_answer_time=format_average_user_answer_time(statistic.average_user_answer_time),
-        trello_id=config.TRELLO_BORD_ID,
-        username_trello=statistic.username_trello,
+        trello_url=build_trello_url(statistic.username_trello),
     )
     await send_message(
         bot=context.bot,
@@ -260,10 +255,11 @@ async def send_reminder(context: CallbackContext) -> None:
 
         message = message_template.format(
             consultation_id=consultation.id,
+            consultation_number=consultation.number,
             active_consultations=active_cons.active_consultations,
             expired_consultations=expired_cons.expired_consultations,
-            trello_id=config.TRELLO_BORD_ID,
-            trello_name=consultation.username_trello,
+            site_url=build_consultation_url(consultation.id),
+            trello_overdue_url=build_trello_url(consultation.username_trello, True),
         )
         await send_message(bot=context.bot, chat_id=telegram_id, text=message)
 
