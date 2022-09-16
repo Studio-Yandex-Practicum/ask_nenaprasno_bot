@@ -10,7 +10,7 @@ from constants.timezone import MOSCOW_TIME_OFFSET
 from conversation.menu import format_average_user_answer_time, format_rating
 from core import config
 from core.send_message import send_message
-from core.utils import build_consultation_url, build_trello_url, get_timezone_from_str
+from core.utils import build_consultation_url, build_trello_url, get_timezone_from_str, get_word_case, get_word_genitive
 from service.api_client import APIService
 from service.api_client.models import Consultation
 from service.repeat_message import repeat_after_one_hour_button
@@ -18,8 +18,8 @@ from service.repeat_message import repeat_after_one_hour_button
 REMINDER_BASE_TEMPLATE = (
     "[Открыть заявку на сайте]({site_url})\n"
     "----\n"
-    "В работе **{active_consultations}** заявок\n"
-    "Истекает срок у **{expired_consultations}** заявок\n\n"
+    "В работе **{active_consultations}** {declination_consultation}\n"
+    "Истекает срок у **{expired_consultations}** {genitive_declination_consultation}\n\n"
     "[Открыть Trello]({trello_overdue_url})"
 )
 
@@ -42,11 +42,11 @@ FORWARD_REMINDER_TEMPLATE = (
 
 WEEKLY_STATISTIC_TEMPLATE = (
     "Вы делали добрые дела 7 дней!\n"
-    'Посмотрите, как прошла ваша неделя  в *"Просто спросить"*\n'
+    'Посмотрите, как прошла ваша неделя в *"Просто спросить"*\n'
     "Закрыто заявок - *{closed_consultations}*\n"
-    "В работе *{active_consultations}* заявок  за неделю\n\n"
-    "Истекает срок у *{expiring_consultations}* заявок\n"
-    "У *{expired_consultations}* заявок срок истек\n\n"
+    "В работе *{active_consultations}* {declination_consultation} за неделю\n\n"
+    "Истекает срок у *{expiring_consultations}* {genitive_declination_consultation}\n"
+    "У *{expired_consultations}* {genitive_declination_expired} срок истек\n\n"
     "[Открыть Trello]({trello_url})\n\n"
     "Мы рады работать в одной команде :)\n"
     "Так держать!\n"
@@ -180,12 +180,15 @@ async def send_weekly_statistic_job(context: CallbackContext) -> None:
         message = WEEKLY_STATISTIC_TEMPLATE.format(
             trello_id=config.TRELLO_BORD_ID,
             **statistic.to_dict(),
+            declination_consultation=get_word_case(statistic.active_consultations, "заявка", "заявки", "заявок"),
+            genitive_declination_consultation=get_word_genitive(statistic.expiring_consultations, "заявки", "заявок"),
+            genitive_declination_expired=get_word_genitive(statistic.expired_consultations, "заявки", "заявок"),
         )
         await send_message(
             bot=context.bot,
             chat_id=statistic.telegram_id,
             text=message,
-            reply_markup=InlineKeyboardMarkup([[repeat_after_one_hour_button]]),
+            reply_markup=None,
         )
 
 
@@ -260,6 +263,8 @@ async def send_reminder(context: CallbackContext) -> None:
             expired_consultations=expired_cons.expired_consultations,
             site_url=build_consultation_url(consultation.id),
             trello_overdue_url=build_trello_url(consultation.username_trello, True),
+            declination_consultation=get_word_case(active_cons.active_consultations, "заявка", "заявки", "заявок"),
+            genitive_declination_consultation=get_word_genitive(expired_cons.expired_consultations, "заявки", "заявок"),
         )
         await send_message(bot=context.bot, chat_id=telegram_id, text=message)
 
