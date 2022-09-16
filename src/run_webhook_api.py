@@ -144,7 +144,7 @@ async def consultation_message(request: Request) -> Response:
     active_conusult_list = active_conusult.active_consultations_data
     new_consultation_number = active_conusult_list[len(active_conusult_list)]["number"]
     consultations_in_work = active_conusult.active_consultations
-    expiring_consultations = active_conusult.expiring_consultation_ids
+    expiring_consultations = len(active_conusult.expiring_consultation_data)
     text = (
         f"Получено новое сообщение в чате заявки {new_consultation_number}\n"
         f"[Открыть заявку на сайте]({URL_ASK_NENAPRASNO}consultation/redirect/{request_data.consultation_id})\n"
