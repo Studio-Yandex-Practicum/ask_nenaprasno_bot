@@ -1,4 +1,5 @@
 from datetime import timedelta
+from urllib.parse import urljoin
 
 from telegram import Update
 from telegram.ext import (
@@ -80,7 +81,7 @@ async def init_webhook() -> Application:
     bot_app = create_bot()
     bot_app.updater = None
     await bot_app.bot.set_webhook(
-        url=f"{config.WEBHOOK_URL}/telegramWebhookApi", secret_token=config.SECRET_TELEGRAM_TOKEN
+        url=urljoin(config.WEBHOOK_URL, "telegramWebhookApi"), secret_token=config.SECRET_TELEGRAM_TOKEN
     )
     return bot_app
 

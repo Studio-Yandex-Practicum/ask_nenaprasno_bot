@@ -85,6 +85,7 @@ class Consultation:
     due: str
     telegram_id: int
     username_trello: str
+    number: str
 
 
 @dataclass_json

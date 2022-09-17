@@ -1,8 +1,10 @@
 import re
 from datetime import timedelta, timezone
 from typing import Optional
+from urllib.parse import urlencode, urljoin
 
 from constants.timezone import MOSCOW_TIME_OFFSET
+from core.config import TRELLO_BORD_ID, URL_ASK_NENAPRASNO
 
 
 def get_timezone_from_str(tz_string: Optional[str]) -> timezone:
@@ -36,3 +38,16 @@ def get_word_genitive(number, single, many):
     if num == 1:
         return single
     return many
+
+
+def build_trello_url(username_trello: str, overdue: bool = False) -> str:
+    trello_filter = [f"member:{username_trello}"]
+    if overdue:
+        trello_filter.append("overdue:true")
+    params = {"filter": ",".join(trello_filter)}
+
+    return "/?".join((urljoin("https://trello.com/", TRELLO_BORD_ID), urlencode(params)))
+
+
+def build_consultation_url(consultation_id: str) -> str:
+    return urljoin(URL_ASK_NENAPRASNO, f"/consultation/redirect/{consultation_id}")
