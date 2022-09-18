@@ -280,13 +280,13 @@ async def check_past_consultation_data(context: CallbackContext) -> Optional[Pas
 
     if len(consultations) == 0:
         # Nothin to do
-        return
+        return None
 
     if len(consultations) == 1:
         return consultations[0]
 
     await send_reminder_list_overdue_consultations(context.bot, telegram_id, consultations)
-    return
+    return None
 
 
 async def send_reminder(context: CallbackContext) -> None:
