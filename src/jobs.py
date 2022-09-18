@@ -275,7 +275,7 @@ async def send_reminder_list_overdue_consultations(bot: ExtBot, telegram_id: int
     else:
         message = await get_overdue_reminder_text(consultations, *cons_count)
 
-    await send_message(bot=bot, chat_id=209326081, text=message)
+    await send_message(bot=bot, chat_id=telegram_id, text=message)
 
 
 async def get_overdue_reminder_text(consultations: List, active_cons_count: int, expired_cons_count: int) -> str:
@@ -341,11 +341,8 @@ async def send_reminder_overdue(context: CallbackContext) -> None:
         if await single_consultation.is_valid():
             consultations.append(single_consultation)
 
-    if len(consultations) == 0:
-        return None
-
-    await send_reminder_list_overdue_consultations(context.bot, telegram_id, consultations)
-    return None
+    if len(consultations) > 0:
+        await send_reminder_list_overdue_consultations(context.bot, telegram_id, consultations)
 
 
 async def daily_overdue_consulations_reminder_job(
