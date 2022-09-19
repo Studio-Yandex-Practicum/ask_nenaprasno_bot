@@ -1,13 +1,15 @@
+# pylint: disable=no-member
+from collections import defaultdict
 from dataclasses import dataclass
 from datetime import date, datetime, timedelta, timezone
-from typing import Optional
+from typing import Dict, List, Optional, Tuple
 
 from telegram import InlineKeyboardButton, InlineKeyboardMarkup
-from telegram.ext import CallbackContext
+from telegram.ext import CallbackContext, ExtBot
 
 from constants.callback_data import CALLBACK_DONE_BILL_COMMAND, CALLBACK_SKIP_BILL_COMMAND
 from constants.timezone import MOSCOW_TIME_OFFSET
-from conversation.menu import format_average_user_answer_time, format_rating
+from conversation.menu import OVERDUE_TEMPLATE, format_average_user_answer_time, format_rating, make_consultations_list
 from core import config
 from core.send_message import send_message
 from core.utils import build_consultation_url, build_trello_url, get_timezone_from_str, get_word_case, get_word_genitive
@@ -32,7 +34,7 @@ DUE_HOUR_REMINDER_TEMPLATE = (
 ) + REMINDER_BASE_TEMPLATE
 
 PAST_REMINDER_TEMPLATE = (
-    "Время и стекло 😎\n" "Заявка - {consultation_number}\n" "Верим и ждем.\n\n"
+    "Время и стекло 😎\n" "Заявка от {created} - **{consultation_number}**\n" "Верим и ждем.\n\n"
 ) + REMINDER_BASE_TEMPLATE
 
 FORWARD_REMINDER_TEMPLATE = (
@@ -64,6 +66,7 @@ MONTHLY_STATISTIC_TEMPLATE = (
 )
 
 DATE_FORMAT = "%Y-%m-%dT%H:%M:%S.%fZ"
+NATIONAL_DATE_FORMAT = "%d.%m.%Y"
 
 service = APIService()
 
@@ -77,12 +80,18 @@ class BaseConsultationData:
     consultation: Consultation
     message_template: Optional[str]
 
-    async def get_due_date(self):
-        """Returns due date or None."""
+    async def _get_date(self, field: str) -> Optional[date]:
+        """Returns date or None."""
         consultation = await service.get_consultation(self.consultation.id)
-        if (consultation is None) or (consultation.due is None):
+        if consultation is None or getattr(consultation, field) is None:
             return None
-        return datetime.strptime(consultation.due, DATE_FORMAT).date()
+        return datetime.strptime(getattr(consultation, field), DATE_FORMAT).date()
+
+    async def get_due_date(self) -> date:
+        return await self._get_date("due")
+
+    async def get_created_date(self) -> date:
+        return await self._get_date("created")
 
 
 @dataclass(frozen=True)
@@ -142,7 +151,7 @@ async def weekly_stat_job(context: CallbackContext) -> None:
     week_statistics = await service.get_week_stat()
     # микропроблема: если у пользователя не выбрана таймзона, то в сете будет None,
     # который в send_weekly_statistic_job будет интрепретирован как таймзона по-умолчанию (МСК)
-    # Получаетcя на МСК будет 2 джобы
+    # Таким образом на МСК будет 2 джобы
     timezones = set(statistic.timezone for statistic in week_statistics)
 
     for tz_string in timezones:
@@ -244,29 +253,111 @@ async def daily_bill_remind_job(context: CallbackContext) -> None:
     )
 
 
-async def send_reminder(context: CallbackContext) -> None:
-    """Sends reminder to the user according to the message template.
-    Prior to that, check if the consultation is still relevant.
-    """
-    job_data = context.job.data
-    consultation = job_data.consultation
-    message_template = job_data.message_template
-    if await job_data.is_valid():
-        telegram_id = consultation.telegram_id
-        active_cons = await service.get_user_active_consultations(telegram_id)
-        expired_cons = await service.get_user_expired_consultations(telegram_id)
+async def get_consultations_count(telegram_id: int) -> Tuple:
+    """Gets count of active and expired consultations and returns it in tuple."""
+    active_cons_count = (await service.get_user_active_consultations(telegram_id=telegram_id)).active_consultations
+    expired_cons_count = (await service.get_user_expired_consultations(telegram_id=telegram_id)).expired_consultations
 
-        message = message_template.format(
-            consultation_id=consultation.id,
-            consultation_number=consultation.number,
-            active_consultations=active_cons.active_consultations,
-            expired_consultations=expired_cons.expired_consultations,
-            site_url=build_consultation_url(consultation.id),
-            trello_overdue_url=build_trello_url(consultation.username_trello, True),
-            declination_consultation=get_word_case(active_cons.active_consultations, "заявка", "заявки", "заявок"),
-            genitive_declination_consultation=get_word_genitive(expired_cons.expired_consultations, "заявки", "заявок"),
+    return active_cons_count, expired_cons_count
+
+
+async def send_reminder_list_overdue_consultations(bot: ExtBot, telegram_id: int, consultations: List):
+    """Send overdue-consultation reminder"""
+    cons_count = await get_consultations_count(telegram_id)
+
+    if len(consultations) == 1:
+        created = (await consultations[0].get_created_date()).strftime(NATIONAL_DATE_FORMAT)
+        message = await get_reminder_text(
+            consultations[0],
+            *cons_count,
+            created=created,
         )
-        await send_message(bot=context.bot, chat_id=telegram_id, text=message)
+    else:
+        message = await get_overdue_reminder_text(consultations, *cons_count)
+
+    await send_message(bot=bot, chat_id=telegram_id, text=message)
+
+
+async def get_overdue_reminder_text(consultations: List, active_cons_count: int, expired_cons_count: int) -> str:
+    """Returns overdue reminder text if user have more than one overdue consultations."""
+    link_nenaprasno = make_consultations_list(
+        [Consultation.to_dict(consultation.consultation) for consultation in consultations]
+    )
+    trello_url = build_trello_url(consultations[0].consultation.username_trello, overdue=True)
+
+    return OVERDUE_TEMPLATE.format(
+        active_consultations=active_cons_count,
+        expired_consultations=expired_cons_count,
+        link_nenaprasno=link_nenaprasno,
+        trello_url=trello_url,
+    )
+
+
+async def get_reminder_text(
+    data: [PastConsultationData | DueConsultationData | DueHourConsultationData | ForwardConsultationData],
+    active_cons_count: int,
+    expired_cons_count: int,
+    created: str = "",
+) -> str:
+    """Returns reminder text."""
+    message_template = data.message_template
+    consultation = data.consultation
+
+    return message_template.format(
+        consultation_id=consultation.id,
+        consultation_number=consultation.number,
+        created=created,
+        active_consultations=active_cons_count,
+        expired_consultations=expired_cons_count,
+        site_url=build_consultation_url(consultation.id),
+        trello_overdue_url=build_trello_url(consultation.username_trello, True),
+        declination_consultation=get_word_case(active_cons_count, "заявка", "заявки", "заявок"),
+        genitive_declination_consultation=get_word_genitive(expired_cons_count, "заявки", "заявок"),
+    )
+
+
+async def send_reminder(context: CallbackContext) -> None:
+    """Sends reminder to the user according to the message template."""
+    job_data = context.job.data
+
+    if await job_data.is_valid():
+        consultation = job_data.consultation
+        telegram_id = consultation.telegram_id
+
+        await send_message(
+            bot=context.bot,
+            chat_id=telegram_id,
+            text=await get_reminder_text(job_data, *(await get_consultations_count(telegram_id))),
+        )
+
+
+async def send_reminder_overdue(context: CallbackContext) -> None:
+    """Sends overdue reminder to the user."""
+    telegram_id, consultation_list = context.job.data
+    consultations = []
+
+    # Check due time once again and put every active consultations into the list
+    for single_consultation in consultation_list:
+        if await single_consultation.is_valid():
+            consultations.append(single_consultation)
+
+    if len(consultations) > 0:
+        await send_reminder_list_overdue_consultations(context.bot, telegram_id, consultations)
+
+
+async def daily_overdue_consulations_reminder_job(
+    context: CallbackContext, overdue: Dict, default_timezone: timezone
+) -> None:
+    """Creates tasks to send reminders for consultations expired at least one day ago."""
+    for telegram_id, consultations in overdue.items():
+        # Queue job for every doctor
+        context.job_queue.run_once(
+            send_reminder_overdue,
+            when=config.DAILY_CONSULTATIONS_REMINDER_TIME.replace(
+                tzinfo=context.bot_data.get(int(telegram_id), default_timezone)
+            ),
+            data=(telegram_id, consultations),
+        )
 
 
 async def daily_consulations_reminder_job(context: CallbackContext) -> None:
@@ -274,12 +365,13 @@ async def daily_consulations_reminder_job(context: CallbackContext) -> None:
     to one of the following scenarios:
     - the due date is tomorrow;
     - the due date has just expired;
-    - the due date expired one hour ago;
-    - the due date expired at least one day ago.
+    - the due date expired one hour ago.
     """
     now = datetime.utcnow()
     default_timezone = timezone(timedelta(hours=MOSCOW_TIME_OFFSET))
     consultations = await service.get_daily_consultations()
+    overdue = defaultdict(list)
+
     for consultation in consultations:
         user_timezone = context.bot_data.get(int(consultation.telegram_id), default_timezone)
         due_time = datetime.strptime(consultation.due, DATE_FORMAT)
@@ -289,14 +381,12 @@ async def daily_consulations_reminder_job(context: CallbackContext) -> None:
                 send_reminder, when=due_time + timedelta(hours=1), data=DueHourConsultationData(consultation)
             )
         elif due_time.date() < date.today():
-            context.job_queue.run_once(
-                send_reminder,
-                when=config.DAILY_CONSULTATIONS_REMINDER_TIME.replace(tzinfo=user_timezone),
-                data=PastConsultationData(consultation),
-            )
+            overdue[consultation.telegram_id].append(PastConsultationData(consultation))
         elif (due_time.date() - now.date()) == timedelta(days=1):
             context.job_queue.run_once(
                 send_reminder,
                 when=config.DAILY_CONSULTATIONS_REMINDER_TIME.replace(tzinfo=user_timezone),
                 data=ForwardConsultationData(consultation),
             )
+
+    await daily_overdue_consulations_reminder_job(context, overdue, default_timezone)
