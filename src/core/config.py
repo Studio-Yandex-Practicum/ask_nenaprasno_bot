@@ -46,6 +46,7 @@ def get_bool(setting: str) -> bool:
 # Параметры логгера
 LOG_NAME = get_string("LOG_NAME")
 LOG_PATH = BASE_DIR / "../logs" / LOG_NAME
+DEBUG_LOG_PATH = BASE_DIR / "../logs/debug.log"
 
 # Параметры локального сервера принимающего обновления от телеграм
 HOST = get_string("HOST")
@@ -90,3 +91,6 @@ TRELLO_BORD_ID = get_string("TRELLO_BORD_ID")
 FORM_URL_FUTURE_EXPERT = "https://forms.gle/DGMUm35bxZytE3QLA"
 URL_SERVICE_RULES = "https://docs.google.com/document/d/1hW2HUv9aWQMnUBuIE_YQEtmIDDbk8KhpychckbyaIEQ/edit"
 URL_ASK_NENAPRASNO = get_string("URL_ASK_NENAPRASNO")
+
+# Включить debug-режим
+DEBUG = False
