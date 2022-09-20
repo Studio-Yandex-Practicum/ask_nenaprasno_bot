@@ -1,0 +1,17 @@
+version: '3.8'
+
+services:
+  bot:
+    env_file:
+      - .env
+    image: ghcr.io/nenaprasno/nenaprasno-ask-bot:latest
+    restart: always
+    ports:
+      - "8000:8000"
+    volumes:
+      - ./logs:/code/logs
+      - ./persistence_data:/code/src/persistence_data
+
+volumes:
+  logs:
+  persistence_data:
