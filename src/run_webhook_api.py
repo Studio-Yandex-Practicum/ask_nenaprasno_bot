@@ -1,6 +1,6 @@
 # pylint: disable=W0612
-import os
 from json import JSONDecodeError
+from typing import Tuple
 
 import httpx
 import uvicorn
@@ -10,17 +10,16 @@ from starlette.middleware import Middleware
 from starlette.middleware.authentication import AuthenticationMiddleware
 from starlette.requests import Request
 from starlette.responses import JSONResponse, Response
-from starlette.routing import Mount, Route
-from starlette.staticfiles import StaticFiles
+from starlette.routing import Route
 from telegram import Bot, Update
 from telegram.error import TelegramError
 
 from bot import DAILY_CONSULTATIONS_REMINDER_JOB, init_webhook
 from core import config
-from core.config import TRELLO_BORD_ID, URL_ASK_NENAPRASNO
 from core.exceptions import BadRequestError
 from core.logger import logger
 from core.send_message import send_message
+from core.utils import build_consultation_url, build_trello_url
 from middleware import TokenAuthBackend
 from service.api_client import APIService
 from service.models import (
@@ -104,12 +103,10 @@ async def consultation_assign(request: Request) -> Response:
         return Response(status_code=httpx.codes.BAD_REQUEST)
     bot = api.state.bot_app.bot
     chat_id = request_data.telegram_id
-    text = (
-        f"Получена новая заявка\n"
-        f"[Открыть заявку на сайте]({URL_ASK_NENAPRASNO}consultation/redirect/{request_data.consultation_id})\n"
-        f"[Открыть Trello]"
-        f"(https://trello.com/{TRELLO_BORD_ID}/?filter=member:{request_data.username_trello})\n\n"
-    )
+    site_url = build_consultation_url(request_data.consultation_id)
+    trello_url = build_trello_url(request_data.username_trello)
+
+    text = f"Получена новая заявка\n" f"[Открыть заявку на сайте]({site_url})\n" f"[Открыть Trello]({trello_url})\n\n"
     await send_message(bot=bot, chat_id=chat_id, text=text)
     return Response(status_code=httpx.codes.OK)
 
@@ -125,7 +122,7 @@ async def consultation_close(request: Request) -> Response:
     bot_app = api.state.bot_app
     reminder_jobs = bot_app.job_queue.jobs()
     for job in reminder_jobs:
-        if job.data[0] == consultation_id:
+        if isinstance(job.data, Tuple) and job.data[0] == consultation_id:
             job.schedule_removal()
     return Response(status_code=httpx.codes.OK)
 
@@ -137,23 +134,21 @@ async def consultation_message(request: Request) -> Response:
     except BadRequestError as error:
         logger.error("Got a BadRequestError: %s", error)
         return Response(status_code=httpx.codes.BAD_REQUEST)
-    service = APIService()
+
     bot = api.state.bot_app.bot
-    chat_id = request_data.telegram_id
-    active_conusult = await service.get_user_active_consultations(telegram_id=chat_id)
-    active_conusult_list = active_conusult.active_consultations_data
-    new_consultation_number = active_conusult_list[len(active_conusult_list)]["number"]
-    consultations_in_work = active_conusult.active_consultations
-    expiring_consultations = len(active_conusult.expiring_consultation_data)
+    site_url = build_consultation_url(request_data.consultation_id)
+    trello_url = build_trello_url(request_data.username_trello)
+    service = APIService()
+    active_conusultations = await service.get_user_active_consultations(telegram_id=request_data.telegram_id)
+
     text = (
-        f"Получено новое сообщение в чате заявки {new_consultation_number}\n"
-        f"[Открыть заявку на сайте]({URL_ASK_NENAPRASNO}consultation/redirect/{request_data.consultation_id})\n"
-        f"[Открыть Trello]"
-        f"(https://trello.com/{TRELLO_BORD_ID}/?filter=member:{request_data.username_trello})\n"
-        f"Заявки в работе: {consultations_in_work}"
-        f"Из них у {expiring_consultations} завтра истекает срок ответа.\n\n"
+        f"Вау! Получено новое сообщение в чате заявки ***{request_data.consultation_number}***\n"
+        f"[Прочитать сообщение]({site_url})\n\n"
+        f"[Открыть Trello]({trello_url})\n\n"
+        f"Заявки в работе: {active_conusultations.active_consultations}\n\n"
+        f"Из них у {len(active_conusultations.expiring_consultations_data)} завтра истекает срок ответа."
     )
-    await send_message(bot=bot, chat_id=chat_id, text=text)
+    await send_message(bot=bot, chat_id=request_data.telegram_id, text=text)
     return Response(status_code=httpx.codes.OK)
 
 
@@ -164,15 +159,15 @@ async def consultation_feedback(request: Request) -> Response:
     except BadRequestError as error:
         logger.error("Got a BadRequestError: %s", error)
         return Response(status_code=httpx.codes.BAD_REQUEST)
+
     bot = api.state.bot_app.bot
-    chat_id = request_data.telegram_id
     text = (
-        f"Вы получили новый отзыв по заявке\n"
-        f"[Открыть заявку на сайте]({URL_ASK_NENAPRASNO}consultation/redirect/{request_data.consultation_id})\n"
-        f"[Открыть Trello](https://trello.com/{TRELLO_BORD_ID}"
-        f"/?filter=member:{request_data.username_trello},dueComplete:true)\n\n"
+        f"Воу-воу-воу, у вас отзыв!\n"
+        f"Ваша ***заявка {request_data.consultation_number}*** успешно закрыта пользователем!\n\n"
+        f"***{request_data.feedback}***\n\n"
+        f"Надеемся, он был вам полезен:)"
     )
-    await send_message(bot=bot, chat_id=chat_id, text=text)
+    await send_message(bot=bot, chat_id=request_data.telegram_id, text=text)
     return Response(status_code=httpx.codes.OK)
 
 
@@ -183,11 +178,6 @@ routes = [
     Route("/bot/consultation/close", consultation_close, methods=["POST"]),
     Route("/bot/consultation/message", consultation_message, methods=["POST"]),
     Route("/bot/consultation/feedback", consultation_feedback, methods=["POST"]),
-    Mount(
-        "/",
-        app=StaticFiles(directory=os.path.join(os.path.dirname(os.path.abspath(__file__)), "static")),
-        name="static",
-    ),
 ]
 
 middleware = [Middleware(AuthenticationMiddleware, backend=TokenAuthBackend())]

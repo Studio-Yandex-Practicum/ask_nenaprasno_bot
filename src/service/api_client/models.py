@@ -26,6 +26,7 @@ class UserMonthStat:
 class MonthStat:
     telegram_id: int
     timezone: str
+    username_trello: str
     closed_consultations: int
     rating: float
     average_user_answer_time: float
@@ -47,10 +48,21 @@ class WeekStat:
 
 @dataclass_json
 @dataclass(frozen=True)
+class ConsultationData:
+    id: str
+    number: int
+
+
+@dataclass_json
+@dataclass(frozen=True)
 class UserActiveConsultations:
     username_trello: str
     active_consultations: int
+    # оставил словарь, чтобы не вылез старый баг, но
+    # когда будем править сообщение регулярной недельной статистики
+    # предлагаю использовать ConsultationData
     active_consultations_data: List[Dict]
+    expiring_consultations_data: List[Dict]
 
 
 @dataclass_json
@@ -70,13 +82,15 @@ class BillStat:
 @dataclass_json
 @dataclass(frozen=True)
 class Consultation:
-    id: int
+    id: str
     due: str
     telegram_id: int
     username_trello: str
+    number: str
 
 
 @dataclass_json
 @dataclass(frozen=True)
 class ConsultationDueDate:
     due: Optional[str]
+    created: Optional[str]

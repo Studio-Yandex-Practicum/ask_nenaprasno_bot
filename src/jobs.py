@@ -1,117 +1,224 @@
-from datetime import date, datetime, timedelta
-from enum import Enum
-from string import Template
+# pylint: disable=no-member
+from collections import defaultdict
+from dataclasses import dataclass
+from datetime import date, datetime, timedelta, timezone
+from typing import Dict, List, Optional, Tuple
 
 from telegram import InlineKeyboardButton, InlineKeyboardMarkup
-from telegram.ext import CallbackContext
+from telegram.ext import CallbackContext, ExtBot
 
 from constants.callback_data import CALLBACK_DONE_BILL_COMMAND, CALLBACK_SKIP_BILL_COMMAND
+from constants.timezone import MOSCOW_TIME_OFFSET
+from conversation.menu import OVERDUE_TEMPLATE, format_average_user_answer_time, format_rating, make_consultations_list
 from core import config
-from core.send_message import send_message, send_statistics
+from core.send_message import send_message
+from core.utils import build_consultation_url, build_trello_url, get_timezone_from_str, get_word_case, get_word_genitive
 from service.api_client import APIService
+from service.api_client.models import Consultation
 from service.repeat_message import repeat_after_one_hour_button
 
 REMINDER_BASE_TEMPLATE = (
-    "Открыть заявку на сайте (https://ask-nnyp.klbrtest.ru"
-    "/consultation/redirect/{consultation_id})\n"
+    "[Открыть заявку на сайте]({site_url})\n"
     "----\n"
-    "В работе **{active_consultations}** заявок\n"
-    "Истекает срок у **{expired_consultations}** заявок\n\n"
-    "Открыть Trello (https://trello.com/{trello_id}/"
-    "?filter=member:{trello_name}/?filter=overdue:true)"
+    "В работе **{active_consultations}** {declination_consultation}\n"
+    "Истекает срок у **{expired_consultations}** {genitive_declination_consultation}\n\n"
+    "[Открыть Trello]({trello_overdue_url})"
 )
 
-HOURLY_REMINDER_TEMPLATE = (
-    "Час прошел, а наша надежда - нет :)\n" "Ответьте, пожалуйста, на заявку {consultation_id}\n\n"
+DUE_REMINDER_TEMPLATE = (
+    "Нееееет! Срок ответа на заявку {consultation_number} истек :(\n" "Мы все очень ждем вашего ответа.\n\n"
 ) + REMINDER_BASE_TEMPLATE
 
-DAILY_REMINDER_TEMPLATE = (
-    "Время истекло 😎\n" "Заявка - {consultation_id}\n" "Верим и ждем.\n\n"
+DUE_HOUR_REMINDER_TEMPLATE = (
+    "Час прошел, а наша надежда - нет :)\n" "Ответьте, пожалуйста, на заявку {consultation_number}\n\n"
+) + REMINDER_BASE_TEMPLATE
+
+PAST_REMINDER_TEMPLATE = (
+    "Время и стекло 😎\n" "Заявка от {created} - **{consultation_number}**\n" "Верим и ждем.\n\n"
 ) + REMINDER_BASE_TEMPLATE
 
 FORWARD_REMINDER_TEMPLATE = (
-    "Пупупууу! Истекает срок ответа по заявке {consultation_id} 🔥\n"
+    "Пупупууу! Истекает срок ответа по заявке {consultation_number} 🔥\n"
     "У нас еще есть время, чтобы ответить человеку вовремя!\n\n"
 ) + REMINDER_BASE_TEMPLATE
 
+WEEKLY_STATISTIC_TEMPLATE = (
+    "Вы делали добрые дела 7 дней!\n"
+    'Посмотрите, как прошла ваша неделя в *"Просто спросить"*\n'
+    "Закрыто заявок - *{closed_consultations}*\n"
+    "В работе *{active_consultations}* {declination_consultation} за неделю\n\n"
+    "Истекает срок у *{expiring_consultations}* {genitive_declination_consultation}\n"
+    "У *{expired_consultations}* {genitive_declination_expired} срок истек\n\n"
+    "[Открыть Trello]({trello_url})\n\n"
+    "Мы рады работать в одной команде :)\n"
+    "Так держать!\n"
+)
+
+MONTHLY_STATISTIC_TEMPLATE = (
+    "Это был отличный месяц!\n"
+    'Посмотрите, как он прошел в *"Просто спросить"* 🔥\n\n'
+    "Количество закрытых заявок - *{closed_consultations}*\n"
+    "{rating}"
+    "{average_user_answer_time}\n"
+    "[Открыть Trello]({trello_url})\n\n"
+    "Мы рады работать в одной команде :)\n"
+    "Так держать!\n"
+)
+
 DATE_FORMAT = "%Y-%m-%dT%H:%M:%S.%fZ"
+NATIONAL_DATE_FORMAT = "%d.%m.%Y"
 
 service = APIService()
 
 
-class DueStatus(Enum):
-    """Defines due status of a consultation:
-    - EXPIRED: due date at least one day ago;
-    - TODAY: due date is today;
-    - TOMORROW: due day is tomorrow.
+@dataclass(frozen=True)
+class BaseConsultationData:
+    """Stores structured data that is passed
+    within a job to the job_queue of the bot.
     """
 
-    EXPIRED = 1
-    TODAY = 2
-    TOMORROW = 3
+    consultation: Consultation
+    message_template: Optional[str]
+
+    async def _get_date(self, field: str) -> Optional[date]:
+        """Returns date or None."""
+        consultation = await service.get_consultation(self.consultation.id)
+        if consultation is None or getattr(consultation, field) is None:
+            return None
+        return datetime.strptime(getattr(consultation, field), DATE_FORMAT).date()
+
+    async def get_due_date(self) -> date:
+        return await self._get_date("due")
+
+    async def get_created_date(self) -> date:
+        return await self._get_date("created")
+
+
+@dataclass(frozen=True)
+class DueConsultationData(BaseConsultationData):
+    """Stores structured data to be passed
+    right upon expiration of the due time.
+    """
+
+    message_template: str = DUE_REMINDER_TEMPLATE
+
+    async def is_valid(self):
+        """Checks if consulation status is still valid."""
+        return await self.get_due_date() == date.today()
+
+
+@dataclass(frozen=True)
+class DueHourConsultationData(BaseConsultationData):
+    """Stores structured data to be passed
+    one hour after expiration of the due time.
+    """
+
+    message_template: str = DUE_HOUR_REMINDER_TEMPLATE
+
+    async def is_valid(self):
+        """Checks if consulation status is still valid."""
+        return await self.get_due_date() == date.today()
+
+
+@dataclass(frozen=True)
+class PastConsultationData(BaseConsultationData):
+    """Stores structured data to be passed
+    for consultations expired at least one day ago.
+    """
+
+    message_template: str = PAST_REMINDER_TEMPLATE
+
+    async def is_valid(self):
+        """Checks if consulation status is still valid."""
+        return await self.get_due_date() < date.today()
+
+
+@dataclass(frozen=True)
+class ForwardConsultationData(BaseConsultationData):
+    """Stores structured data to be passed
+    for consultations expiring tomorrow.
+    """
+
+    message_template: str = FORWARD_REMINDER_TEMPLATE
+
+    async def is_valid(self):
+        """Checks if consulation status is still valid."""
+        return await self.get_due_date() - date.today() == timedelta(days=1)
 
 
 async def weekly_stat_job(context: CallbackContext) -> None:
-    """
-    Send weekly statistics on the number of requests in the work
-    """
+    """Collects users timezones and adds statistic-sending jobs to queue."""
     week_statistics = await service.get_week_stat()
-    template_message = Template(
-        "Вы делали добрые дела 7 дней!\n"
-        'Посмотрите, как прошла ваша неделя  в *"Просто спросить"*\n'
-        "Закрыто заявок - *$closed_consultations*\n"
-        "В работе *$active_consultations* заявок  за неделю\n\n"
-        "Истекает срок у *$expiring_consultations* заявок\n"
-        "У *$expired_consultations* заявок срок истек\n\n"
-        f"[Открыть Trello](https://trello.com/{config.TRELLO_BORD_ID})\n\n"
-    )
-    alias_dict = dict(
-        closed_consultations="closed_consultations",
-        active_consultations="active_consultations",
-        expiring_consultations="expiring_consultations",
-        expired_consultations="expired_consultations",
-    )
-    await send_statistics(
-        context=context,
-        template_message=template_message,
-        template_attribute_aliases=alias_dict,
-        statistic=week_statistics,
-        reply_markup=InlineKeyboardMarkup([[repeat_after_one_hour_button]]),
-    )
+    # микропроблема: если у пользователя не выбрана таймзона, то в сете будет None,
+    # который в send_weekly_statistic_job будет интрепретирован как таймзона по-умолчанию (МСК)
+    # Таким образом на МСК будет 2 джобы
+    timezones = set(statistic.timezone for statistic in week_statistics)
+
+    for tz_string in timezones:
+        timezone_ = get_timezone_from_str(tz_string)
+        start_time = (
+            timedelta(microseconds=1)
+            if timezone_ == timezone.utc
+            else config.WEEKLY_STAT_TIME.replace(tzinfo=timezone_)
+        )
+        context.job_queue.run_once(send_weekly_statistic_job, when=start_time, data=tz_string)
 
 
 async def monthly_stat_job(context: CallbackContext) -> None:
-    """
-    Send monthly statistics on the number of successfully
-    closed requests.
-
-    Only if the user had requests.
-    """
+    """Collects users timezones and adds statistic-sending jobs to queue."""
     month_statistics = await service.get_month_stat()
-    template_message = Template(
-        "Это был отличный месяц!\n"
-        'Посмотрите, как он прошел в *"Просто спросить"* 🔥\n\n'
-        "Количество закрытых заявок - *$closed_consultations*\n"
-        "Рейтинг - *$rating*\n"
-        "Среднее время ответа - *$average_user_answer_time*\n\n"
-        f"[Открыть Trello](https://trello.com/{config.TRELLO_BORD_ID})\n\n"
+
+    for statistic in month_statistics:
+        if statistic.telegram_id is None:
+            continue
+        timezone_ = get_timezone_from_str(statistic.timezone)
+        start_time = (
+            timedelta(microseconds=1)
+            if timezone_ == timezone.utc
+            else config.MONTHLY_STAT_TIME.replace(tzinfo=timezone_)
+        )
+        context.job_queue.run_once(send_monthly_statistic_job, when=start_time, data=statistic)
+
+
+async def send_weekly_statistic_job(context: CallbackContext) -> None:
+    """Sends weekly statistics to users with specific timezone."""
+    current_tz = context.job.data
+    week_statistics = await service.get_week_stat()
+
+    for statistic in filter(lambda stat: stat.telegram_id is not None and stat.timezone == current_tz, week_statistics):
+        message = WEEKLY_STATISTIC_TEMPLATE.format(
+            trello_id=config.TRELLO_BORD_ID,
+            **statistic.to_dict(),
+            declination_consultation=get_word_case(statistic.active_consultations, "заявка", "заявки", "заявок"),
+            genitive_declination_consultation=get_word_genitive(statistic.expiring_consultations, "заявки", "заявок"),
+            genitive_declination_expired=get_word_genitive(statistic.expired_consultations, "заявки", "заявок"),
+        )
+        await send_message(
+            bot=context.bot,
+            chat_id=statistic.telegram_id,
+            text=message,
+            reply_markup=None,
+        )
+
+
+async def send_monthly_statistic_job(context: CallbackContext) -> None:
+    """Send monthly statistic to user."""
+    statistic = context.job.data
+    message = MONTHLY_STATISTIC_TEMPLATE.format(
+        closed_consultations=statistic.closed_consultations,
+        rating=format_rating(statistic.rating),
+        average_user_answer_time=format_average_user_answer_time(statistic.average_user_answer_time),
+        trello_url=build_trello_url(statistic.username_trello),
     )
-    alias_dict = dict(
-        closed_consultations="closed_consultations",
-        rating="rating",
-        average_user_answer_time="average_user_answer_time",
-    )
-    await send_statistics(
-        context=context,
-        template_message=template_message,
-        template_attribute_aliases=alias_dict,
-        statistic=month_statistics,
+    await send_message(
+        bot=context.bot,
+        chat_id=statistic.telegram_id,
+        text=message,
     )
 
 
 async def monthly_bill_reminder_job(context: CallbackContext) -> None:
-    """
-    Send monthly reminder about the receipt formation during payment
+    """Send monthly reminder about the receipt formation during payment
     Only for self-employed users
     """
     bill_stat = await service.get_bill()
@@ -121,8 +228,7 @@ async def monthly_bill_reminder_job(context: CallbackContext) -> None:
 
 
 async def daily_bill_remind_job(context: CallbackContext) -> None:
-    """
-    Send message every day until delete job from JobQueue
+    """Send message every day until delete job from JobQueue
     :param context:
     :return:
     """
@@ -147,70 +253,140 @@ async def daily_bill_remind_job(context: CallbackContext) -> None:
     )
 
 
-async def check_consultation(consultation_id: int, due_status: DueStatus) -> bool:
-    """Checks if consulation status is still valid."""
-    consultation = await service.get_consultation(consultation_id)
-    if consultation is None or consultation.due is None:
-        return False
+async def get_consultations_count(telegram_id: int) -> Tuple:
+    """Gets count of active and expired consultations and returns it in tuple."""
+    active_cons_count = (await service.get_user_active_consultations(telegram_id=telegram_id)).active_consultations
+    expired_cons_count = (await service.get_user_expired_consultations(telegram_id=telegram_id)).expired_consultations
 
-    due_time = datetime.strptime(consultation.due, DATE_FORMAT)
-    now = datetime.utcnow()
-    if due_status == DueStatus.TODAY:
-        return due_time.date() == now.date()
-    if due_status == DueStatus.EXPIRED:
-        return due_time.date() < date.today()
-    if due_status == DueStatus.TOMORROW:
-        return due_time.date() - now.date() == timedelta(days=1)
-    return False
+    return active_cons_count, expired_cons_count
+
+
+async def send_reminder_list_overdue_consultations(bot: ExtBot, telegram_id: int, consultations: List):
+    """Send overdue-consultation reminder"""
+    cons_count = await get_consultations_count(telegram_id)
+
+    if len(consultations) == 1:
+        created = (await consultations[0].get_created_date()).strftime(NATIONAL_DATE_FORMAT)
+        message = await get_reminder_text(
+            consultations[0],
+            *cons_count,
+            created=created,
+        )
+    else:
+        message = await get_overdue_reminder_text(consultations, *cons_count)
+
+    await send_message(bot=bot, chat_id=telegram_id, text=message)
+
+
+async def get_overdue_reminder_text(consultations: List, active_cons_count: int, expired_cons_count: int) -> str:
+    """Returns overdue reminder text if user have more than one overdue consultations."""
+    link_nenaprasno = make_consultations_list(
+        [Consultation.to_dict(consultation.consultation) for consultation in consultations]
+    )
+    trello_url = build_trello_url(consultations[0].consultation.username_trello, overdue=True)
+
+    return OVERDUE_TEMPLATE.format(
+        active_consultations=active_cons_count,
+        expired_consultations=expired_cons_count,
+        link_nenaprasno=link_nenaprasno,
+        trello_url=trello_url,
+    )
+
+
+async def get_reminder_text(
+    data: [PastConsultationData | DueConsultationData | DueHourConsultationData | ForwardConsultationData],
+    active_cons_count: int,
+    expired_cons_count: int,
+    created: str = "",
+) -> str:
+    """Returns reminder text."""
+    message_template = data.message_template
+    consultation = data.consultation
+
+    return message_template.format(
+        consultation_id=consultation.id,
+        consultation_number=consultation.number,
+        created=created,
+        active_consultations=active_cons_count,
+        expired_consultations=expired_cons_count,
+        site_url=build_consultation_url(consultation.id),
+        trello_overdue_url=build_trello_url(consultation.username_trello, True),
+        declination_consultation=get_word_case(active_cons_count, "заявка", "заявки", "заявок"),
+        genitive_declination_consultation=get_word_genitive(expired_cons_count, "заявки", "заявок"),
+    )
 
 
 async def send_reminder(context: CallbackContext) -> None:
-    """Sends reminder to the user according to the message tmeplate.
-    Prior to that, check if the consultation is still relevant."""
-    consultation, message_template, due_status = context.job.data
-    if await check_consultation(consultation.id, due_status):
-        telegram_id = consultation.telegram_id
-        active_cons = await service.get_user_active_consultations(telegram_id)
-        expired_cons = await service.get_user_expired_consultations(telegram_id)
+    """Sends reminder to the user according to the message template."""
+    job_data = context.job.data
 
-        message = message_template.format(
-            consultation_id=consultation.id,
-            active_consultations=active_cons.active_consultations,
-            expired_consultations=expired_cons.expired_consultations,
-            trello_id=config.TRELLO_BORD_ID,
-            trello_name=consultation.username_trello,
+    if await job_data.is_valid():
+        consultation = job_data.consultation
+        telegram_id = consultation.telegram_id
+
+        await send_message(
+            bot=context.bot,
+            chat_id=telegram_id,
+            text=await get_reminder_text(job_data, *(await get_consultations_count(telegram_id))),
         )
-        await send_message(bot=context.bot, chat_id=telegram_id, text=message)
+
+
+async def send_reminder_overdue(context: CallbackContext) -> None:
+    """Sends overdue reminder to the user."""
+    telegram_id, consultation_list = context.job.data
+    consultations = []
+
+    # Check due time once again and put every active consultations into the list
+    for single_consultation in consultation_list:
+        if await single_consultation.is_valid():
+            consultations.append(single_consultation)
+
+    if len(consultations) > 0:
+        await send_reminder_list_overdue_consultations(context.bot, telegram_id, consultations)
+
+
+async def daily_overdue_consulations_reminder_job(
+    context: CallbackContext, overdue: Dict, default_timezone: timezone
+) -> None:
+    """Creates tasks to send reminders for consultations expired at least one day ago."""
+    for telegram_id, consultations in overdue.items():
+        # Queue job for every doctor
+        context.job_queue.run_once(
+            send_reminder_overdue,
+            when=config.DAILY_CONSULTATIONS_REMINDER_TIME.replace(
+                tzinfo=context.bot_data.get(int(telegram_id), default_timezone)
+            ),
+            data=(telegram_id, consultations),
+        )
 
 
 async def daily_consulations_reminder_job(context: CallbackContext) -> None:
     """Adds a reminder job to the bot's job queue according
     to one of the following scenarios:
     - the due date is tomorrow;
-    - the due date has expired by one hour;
-    - the due date expired at least one day ago.
+    - the due date has just expired;
+    - the due date expired one hour ago.
     """
     now = datetime.utcnow()
+    default_timezone = timezone(timedelta(hours=MOSCOW_TIME_OFFSET))
     consultations = await service.get_daily_consultations()
+    overdue = defaultdict(list)
+
     for consultation in consultations:
+        user_timezone = context.bot_data.get(int(consultation.telegram_id), default_timezone)
         due_time = datetime.strptime(consultation.due, DATE_FORMAT)
         if due_time.date() == now.date():
-            message_template = HOURLY_REMINDER_TEMPLATE
-            when_ = due_time + timedelta(hours=1)
-            due_status = DueStatus.TODAY
+            context.job_queue.run_once(send_reminder, when=due_time, data=DueConsultationData(consultation))
+            context.job_queue.run_once(
+                send_reminder, when=due_time + timedelta(hours=1), data=DueHourConsultationData(consultation)
+            )
         elif due_time.date() < date.today():
-            message_template = DAILY_REMINDER_TEMPLATE
-            when_ = datetime.time(config.DAILY_CONSULTATIONS_REMINDER_TIME)
-            due_status = DueStatus.EXPIRED
-        elif due_time.date() - now.date() == timedelta(days=1):
-            message_template = FORWARD_REMINDER_TEMPLATE
-            when_ = datetime.time(config.DAILY_CONSULTATIONS_REMINDER_TIME)
-            due_status = DueStatus.TOMORROW
-        else:
-            continue
+            overdue[consultation.telegram_id].append(PastConsultationData(consultation))
+        elif (due_time.date() - now.date()) == timedelta(days=1):
+            context.job_queue.run_once(
+                send_reminder,
+                when=config.DAILY_CONSULTATIONS_REMINDER_TIME.replace(tzinfo=user_timezone),
+                data=ForwardConsultationData(consultation),
+            )
 
-        context.job_queue.run_once(
-            send_reminder,
-            when=when_,
-            data=(consultation, message_template, due_status),
-        )
+    await daily_overdue_consulations_reminder_job(context, overdue, default_timezone)

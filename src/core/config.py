@@ -45,7 +45,7 @@ def get_bool(setting: str) -> bool:
 
 # Параметры логгера
 LOG_NAME = get_string("LOG_NAME")
-LOG_PATH = BASE_DIR / "logs" / LOG_NAME
+LOG_PATH = BASE_DIR / "../logs" / LOG_NAME
 
 # Параметры локального сервера принимающего обновления от телеграм
 HOST = get_string("HOST")
@@ -68,11 +68,10 @@ MONTHLY_RECEIPT_REMINDER_DAY = get_int("MONTHLY_RECEIPT_REMINDER_DAY")
 
 # Параметры рассылки напоминаний
 DAILY_COLLECT_CONSULTATIONS_TIME = time(hour=0, minute=0, tzinfo=timezone.utc)
-DAILY_CONSULTATIONS_REMINDER_TIME = get_datetime("DAILY_REMINDER_FOR_OVERDUE_CONSULTATIONS")
-# suggested constant name: "DAILY_CONSULTATIONS_REMINDER_TIME"
+DAILY_CONSULTATIONS_REMINDER_TIME = get_time("DAILY_CONSULTATIONS_REMINDER_TIME")
 
 # Файл с сохраненными данными бота
-BOT_PERSISTENCE_FILE = get_string("BOT_PERSISTENCE_FILE")
+BOT_PERSISTENCE_FILE = BASE_DIR / "persistence_data" / get_string("BOT_PERSISTENCE_FILE")
 
 # Настройка отладки
 IS_FAKE_API = get_bool("IS_FAKE_API")

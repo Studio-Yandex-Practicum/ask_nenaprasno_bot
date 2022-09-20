@@ -1,0 +1,35 @@
+version: '3.8'
+
+services:
+  bot:
+    env_file:
+      - .env
+    image: agamova/ask_nenaprasno_bot:latest
+    restart: always
+    expose:
+      - 8000
+    volumes:
+      - ./logs:/code/logs
+      - configuration_volume:/code/infrastructure/nginx
+      - web_files:/code/infrastructure/www
+      - persistence_data:/code/src/persistence_data
+  nginx:
+    image: nginx:1.19.3
+    hostname: agamova.nenaprasno.ru
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - configuration_volume:/etc/nginx/conf.d/
+      - web_files:/var/www/
+      - ./logs:/var/logs/
+      - /etc/letsencrypt/options-ssl-nginx.conf:/etc/letsencrypt/options-ssl-nginx.conf
+      - /etc/letsencrypt/ssl-dhparams.pem:/etc/letsencrypt/ssl-dhparams.pem
+      - /etc/letsencrypt/archive/nenaprasno.agamova.ru/:/etc/letsencrypt/archive/nenaprasno.agamova.ru/
+    depends_on:
+      - bot
+
+volumes:
+  configuration_volume:
+  web_files:
+  persistence_data:

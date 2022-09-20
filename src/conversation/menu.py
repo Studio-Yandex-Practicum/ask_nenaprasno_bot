@@ -6,10 +6,21 @@ from telegram.ext import CallbackQueryHandler, CommandHandler, ContextTypes, Con
 
 from constants import callback_data, states
 from conversation.timezone import set_timezone_from_keyboard, timezone_conversation
-from core.config import TRELLO_BORD_ID, URL_ASK_NENAPRASNO, URL_SERVICE_RULES
+from core.config import URL_SERVICE_RULES
 from core.send_message import reply_message
+from core.utils import build_consultation_url, build_trello_url, get_word_case
 from decorators.logger import async_error_logger
 from service.api_client import APIService
+
+OVERDUE_TEMPLATE = (
+    "Время и стекло 😎\n"
+    "Ваше количество просроченных заявок - {expired_consultations}\n"
+    "Верим и ждем.\n\n"
+    "Посмотреть заявки на сайте:\n{link_nenaprasno}\n"
+    "----\n"
+    "В работе количество заявок - {active_consultations}\n"
+    "[Открыть Trello]({trello_url})\n\n"
+)
 
 
 @async_error_logger(name="conversation.menu_commands.menu")
@@ -57,8 +68,10 @@ def format_average_user_answer_time(time: float | None) -> str:
     average_answer_time = timedelta(days=0, hours=0, milliseconds=time)
     days = average_answer_time.days
     hours = average_answer_time.seconds // 3600
+    output_days = get_word_case(days, "день", "дня", "дней")
+    output_hours = get_word_case(hours, "час", "часа", "часов")
 
-    return f"***Среднее время ответа*** - {days} дней {hours} часа\n"
+    return f"***Среднее время ответа*** - {days} {output_days} {hours} {output_hours}\n"
 
 
 def format_rating(rating: float | None) -> str:
@@ -97,12 +110,10 @@ async def button_statistic_month_callback(update: Update, context: ContextTypes.
 
 
 def make_consultations_list(consultations_list: List[Dict]) -> str:
-    url_base = f"{URL_ASK_NENAPRASNO}/doctor/consultation/"
-
     return (
         "\n".join(
             [
-                f"{number}. [Заявка №{consultation['number']}]({url_base}{consultation['id']})"
+                f"{number}. [Заявка {consultation['number']}]" f"({build_consultation_url(consultation['id'])})"
                 for number, consultation in enumerate(consultations_list, start=1)
             ]
         )
@@ -123,15 +134,16 @@ async def button_actual_requests_callback(update: Update, context: ContextTypes.
         await update.callback_query.message.reply_text(text="Данные недоступны!")
         return
 
-    username_trello = active_consultations.username_trello
     active_consultations_list = active_consultations.active_consultations_data
-    link_neneprasno = make_consultations_list(active_consultations_list)
+    link_nenaprasno = make_consultations_list(active_consultations_list)
+    declination_consultation = get_word_case(active_consultations.active_consultations, "заявка", "заявки", "заявок")
+
+    trello_url = build_trello_url(active_consultations.username_trello, overdue=True)
 
     message = (
-        f"У вас в работе {active_consultations.active_consultations} заявок.\n"
-        f"Посмотреть заявки на сайте:\n{link_neneprasno}\n"
-        f"[Открыть Trello](https://trello.com/{TRELLO_BORD_ID}/?filter=member:"
-        f"{username_trello}/?filter=overdue:true)\n\n"
+        f"У вас в работе {active_consultations.active_consultations} {declination_consultation}.\n"
+        f"Посмотреть заявки на сайте:\n{link_nenaprasno}\n"
+        f"[Открыть Trello]({trello_url})\n\n"
     )
     await reply_message(update=update, text=message)
 
@@ -150,19 +162,15 @@ async def button_overdue_requests_callback(update: Update, context: ContextTypes
         await update.callback_query.message.reply_text(text="Данные недоступны")
         return
 
-    username_trello = expired_consultations.username_trello
     expired_consultations_list = expired_consultations.expired_consultations_data
-    link_neneprasno = make_consultations_list(expired_consultations_list)
+    link_nenaprasno = make_consultations_list(expired_consultations_list)
+    trello_url = build_trello_url(expired_consultations.username_trello, overdue=True)
 
-    message = (
-        f"Время и стекло 😎\n"
-        f"Ваше количество просроченных заявок - {expired_consultations.expired_consultations}\n"
-        f"Верим и ждем.\n\n"
-        f"Посмотреть заявки на сайте:\n{link_neneprasno}\n"
-        f"----\n"
-        f"В работе количество заявок - {active_consultations.active_consultations}\n"
-        f"Открыть [Trello](https://trello.com/{TRELLO_BORD_ID}/?filter=member:"
-        f"{username_trello}/?filter=overdue:true)\n\n"
+    message = OVERDUE_TEMPLATE.format(
+        expired_consultations=expired_consultations.expired_consultations,
+        link_nenaprasno=link_nenaprasno,
+        active_consultations=active_consultations.active_consultations,
+        trello_url=trello_url,
     )
     await reply_message(update=update, text=message)
 
