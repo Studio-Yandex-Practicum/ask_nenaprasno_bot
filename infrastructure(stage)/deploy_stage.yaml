@@ -9,7 +9,7 @@ on:
 env:
   REGISTRY: ghcr.io
   IMAGE_NAME: nenaprasno-ask-bot
-  DEPLOY_PATH: /LUBIMOVKA
+  DEPLOY_PATH: /ask/practicum_bot
 
 defaults:
   run:
@@ -61,7 +61,7 @@ jobs:
           key: ${{ secrets.STAGE_SSH_KEY }}
           passphrase: ${{ secrets.PASSPHRASE }}
           script: |
-            cd /ask/practicum_bot
+            cd ${{ env.DEPLOY_PATH }}
             sudo rm -f .env
             touch .env
             echo TELEGRAM_TOKEN=${{ secrets.TELEGRAM_TOKEN }} >> .env
