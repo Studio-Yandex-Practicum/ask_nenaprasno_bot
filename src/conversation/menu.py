@@ -22,6 +22,12 @@ OVERDUE_TEMPLATE = (
     "[Открыть Trello]({trello_url})\n\n"
 )
 
+ACTUAL_TEMPLATE = (
+    "У вас в работе {active_consultations} {declination_consultation}.\n"
+    "{link_nenaprasno}\n"
+    "[Открыть Trello]({trello_url})\n\n"
+)
+
 
 @async_error_logger(name="conversation.menu_commands.menu")
 async def menu(update: Update, context: ContextTypes.DEFAULT_TYPE) -> str:
@@ -143,10 +149,11 @@ async def button_actual_requests_callback(update: Update, context: ContextTypes.
 
     trello_url = build_trello_url(active_consultations.username_trello, overdue=True)
 
-    message = (
-        f"У вас в работе {active_consultations.active_consultations} {declination_consultation}.\n"
-        f"{link_nenaprasno}\n"
-        f"[Открыть Trello]({trello_url})\n\n"
+    message = ACTUAL_TEMPLATE.format(
+        active_consultations=active_consultations.active_consultations,
+        declination_consultation=declination_consultation,
+        link_nenaprasno=link_nenaprasno,
+        trello_url=trello_url,
     )
     await reply_message(update=update, text=message)
 
