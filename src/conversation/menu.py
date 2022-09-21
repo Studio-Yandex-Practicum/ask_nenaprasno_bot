@@ -110,15 +110,18 @@ async def button_statistic_month_callback(update: Update, context: ContextTypes.
 
 
 def make_consultations_list(consultations_list: List[Dict]) -> str:
-    return (
-        "\n".join(
-            [
-                f"{number}. [Заявка {consultation['number']}]" f"({build_consultation_url(consultation['id'])})"
-                for number, consultation in enumerate(consultations_list, start=1)
-            ]
+    if any(consultations_list):
+        return (
+            "Посмотреть заявки на сайте:\n"
+            + "\n".join(
+                [
+                    f"{number}. [Заявка {consultation['number']}]({build_consultation_url(consultation['id'])})"
+                    for number, consultation in enumerate(consultations_list, start=1)
+                ]
+            )
+            + "\n"
         )
-        + "\n"
-    )
+    return ""
 
 
 @async_error_logger(name="conversation.requests.button_actual_requests_callback")
@@ -142,7 +145,7 @@ async def button_actual_requests_callback(update: Update, context: ContextTypes.
 
     message = (
         f"У вас в работе {active_consultations.active_consultations} {declination_consultation}.\n"
-        f"Посмотреть заявки на сайте:\n{link_nenaprasno}\n"
+        f"{link_nenaprasno}\n"
         f"[Открыть Trello]({trello_url})\n\n"
     )
     await reply_message(update=update, text=message)
