@@ -64,10 +64,10 @@ jobs:
             cd ${{ env.DEPLOY_PATH }}
             sudo rm -f .env
             touch .env
-            echo TELEGRAM_TOKEN=${{ secrets.TELEGRAM_TOKEN }} >> .env
-            echo BOT_PORT=${{ secrets.BOT_PORT }} >> .env
-            echo WEBHOOK_URL=${{ secrets.WEBHOOK_URL }} >> .env
-            echo HOST=${{ secrets.HOST }} >> .env
+            echo TELEGRAM_TOKEN=${{ secrets.STAGE_TELEGRAM_TOKEN }} >> .env
+            echo BOT_PORT=${{ secrets.STAGE_BOT_PORT }} >> .env
+            echo WEBHOOK_URL=${{ secrets.STAGE_WEBHOOK_URL }} >> .env
+            echo HOST=${{ secrets.STAGE_HOST }} >> .env
             echo SECRET_TELEGRAM_TOKEN=${{ secrets.SECRET_TELEGRAM_TOKEN }} >> .env
             echo WEEKLY_STAT_TIME=${{ secrets.WEEKLY_STAT_TIME }} >> .env
             echo WEEKLY_STAT_WEEK_DAYS=${{ secrets.WEEKLY_STAT_WEEK_DAYS }} >> .env
@@ -78,14 +78,14 @@ jobs:
             echo DAYLY_COLLECT_CONSULTATIONS_TIME=${{ secrets.DAYLY_COLLECT_CONSULTATIONS_TIME }} >> .env
             echo DAILY_CONSULTATIONS_REMINDER_TIME=${{ secrets.DAILY_CONSULTATIONS_REMINDER_TIME }} >> .env
             echo BOT_PERSISTENCE_FILE=${{ secrets.BOT_PERSISTENCE_FILE }} >> .env
-            echo SITE_API_URL=${{ secrets.SITE_API_URL }} >> .env
-            echo IS_FAKE_API=${{ secrets.IS_FAKE_API }} >> .env
-            echo SITE_API_BOT_TOKEN=${{ secrets.SITE_API_BOT_TOKEN }} >> .env
+            echo SITE_API_URL=${{ secrets.STAGE_SITE_API_URL }} >> .env
+            echo IS_FAKE_API=${{ secrets.STAGE_IS_FAKE_API }} >> .env
+            echo SITE_API_BOT_TOKEN=${{ secrets.STAGE_SITE_API_BOT_TOKEN }} >> .env
             echo LOG_NAME=${{ secrets.LOG_NAME }} >> .env
-            echo TRELLO_API_KEY=${{ secrets.TRELLO_API_KEY }} >> .env
-            echo TRELLO_ID_MODEL=${{ secrets.TRELLO_ID_MODEL }} >> .env
-            echo TRELLO_TOKEN=${{ secrets.TRELLO_TOKEN }} >> .env
-            echo TRELLO_BORD_ID=${{ secrets.TRELLO_BORD_ID }} >> .env
+            echo TRELLO_API_KEY=${{ secrets.STAGE_TRELLO_API_KEY }} >> .env
+            echo TRELLO_ID_MODEL=${{ secrets.STAGE_TRELLO_ID_MODEL }} >> .env
+            echo TRELLO_TOKEN=${{ secrets.STAGE_TRELLO_TOKEN }} >> .env
+            echo TRELLO_BORD_ID=${{ secrets.STAGE_TRELLO_BORD_ID }} >> .env
             echo URL_ASK_NENAPRASNO=${{ secrets.URL_ASK_NENAPRASNO }} >> .env
 
             sudo docker image prune -f
