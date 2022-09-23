@@ -16,9 +16,15 @@ OVERDUE_TEMPLATE = (
     "Время и стекло 😎\n"
     "Ваше количество просроченных заявок - {expired_consultations}\n"
     "Верим и ждем.\n\n"
-    "Посмотреть заявки на сайте:\n{link_nenaprasno}\n"
+    "{link_nenaprasno}\n"
     "----\n"
     "В работе количество заявок - {active_consultations}\n"
+    "[Открыть Trello]({trello_url})\n\n"
+)
+
+ACTUAL_TEMPLATE = (
+    "У вас в работе {active_consultations} {declination_consultation}.\n"
+    "{link_nenaprasno}\n"
     "[Открыть Trello]({trello_url})\n\n"
 )
 
@@ -110,15 +116,18 @@ async def button_statistic_month_callback(update: Update, context: ContextTypes.
 
 
 def make_consultations_list(consultations_list: List[Dict]) -> str:
-    return (
-        "\n".join(
-            [
-                f"{number}. [Заявка {consultation['number']}]" f"({build_consultation_url(consultation['id'])})"
-                for number, consultation in enumerate(consultations_list, start=1)
-            ]
+    if any(consultations_list):
+        return (
+            "Посмотреть заявки на сайте:\n"
+            + "\n".join(
+                [
+                    f"{number}. [Заявка {consultation['number']}]({build_consultation_url(consultation['id'])})"
+                    for number, consultation in enumerate(consultations_list, start=1)
+                ]
+            )
+            + "\n"
         )
-        + "\n"
-    )
+    return ""
 
 
 @async_error_logger(name="conversation.requests.button_actual_requests_callback")
@@ -140,10 +149,11 @@ async def button_actual_requests_callback(update: Update, context: ContextTypes.
 
     trello_url = build_trello_url(active_consultations.username_trello, overdue=True)
 
-    message = (
-        f"У вас в работе {active_consultations.active_consultations} {declination_consultation}.\n"
-        f"Посмотреть заявки на сайте:\n{link_nenaprasno}\n"
-        f"[Открыть Trello]({trello_url})\n\n"
+    message = ACTUAL_TEMPLATE.format(
+        active_consultations=active_consultations.active_consultations,
+        declination_consultation=declination_consultation,
+        link_nenaprasno=link_nenaprasno,
+        trello_url=trello_url,
     )
     await reply_message(update=update, text=message)
 
