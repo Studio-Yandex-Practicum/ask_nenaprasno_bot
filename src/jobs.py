@@ -345,16 +345,16 @@ async def send_reminder_overdue(context: CallbackContext) -> None:
         await send_reminder_list_overdue_consultations(context.bot, telegram_id, consultations)
 
 
-async def daily_overdue_consulations_reminder_job(
-    context: CallbackContext, overdue: Dict, default_timezone: timezone
-) -> None:
+async def daily_overdue_consulations_reminder_job(context: CallbackContext, overdue: Dict) -> None:
     """Creates tasks to send reminders for consultations expired at least one day ago."""
-    for telegram_id, consultations in overdue.items():
+    for data, consultations in overdue.items():
         # Queue job for every doctor
+        telegram_id, user_timezone = data
+
         context.job_queue.run_once(
             send_reminder_overdue,
             when=config.DAILY_CONSULTATIONS_REMINDER_TIME.replace(
-                tzinfo=context.bot_data.get(int(telegram_id), default_timezone)
+                tzinfo=context.bot_data.get(int(telegram_id), user_timezone)
             ),
             data=(telegram_id, consultations),
         )
@@ -381,7 +381,7 @@ async def daily_consulations_reminder_job(context: CallbackContext) -> None:
                 send_reminder, when=due_time + timedelta(hours=1), data=DueHourConsultationData(consultation)
             )
         elif due_time.date() < date.today():
-            overdue[consultation.telegram_id].append(PastConsultationData(consultation))
+            overdue[(consultation.telegram_id, user_timezone)].append(PastConsultationData(consultation))
         elif (due_time.date() - now.date()) == timedelta(days=1):
             context.job_queue.run_once(
                 send_reminder,
@@ -389,4 +389,4 @@ async def daily_consulations_reminder_job(context: CallbackContext) -> None:
                 data=ForwardConsultationData(consultation),
             )
 
-    await daily_overdue_consulations_reminder_job(context, overdue, default_timezone)
+    await daily_overdue_consulations_reminder_job(context, overdue)
