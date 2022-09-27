@@ -27,7 +27,7 @@ class SiteAPIService(AbstractAPIService):
     """
 
     def __init__(self):
-        self.site_url: str = config.SITE_API_URL
+        self.site_url: str = config.URL_ASK_NENAPRASNO_API
         self.bot_token: str = config.SITE_API_BOT_TOKEN
 
     async def get_bill(self) -> BillStat:

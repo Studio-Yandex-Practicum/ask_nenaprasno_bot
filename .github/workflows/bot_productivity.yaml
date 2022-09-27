@@ -53,8 +53,6 @@ jobs:
           DAYLY_COLLECT_CONSULTATIONS_TIME: 00:00
           DAILY_CONSULTATIONS_REMINDER_TIME: 17:00
 
-          BOT_PERSISTENCE_FILE: bot_persistence_file
-
           SITE_API_BOT_TOKEN: ${{ secrets.SITE_API_BOT_TOKEN }}
           URL_ASK_NENAPRASNO_API: https://api.ask.nenaprasno.ru
           IS_FAKE_API: True

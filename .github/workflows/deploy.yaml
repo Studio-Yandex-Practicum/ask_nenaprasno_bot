@@ -51,21 +51,25 @@ jobs:
             echo WEBHOOK_URL=${{ secrets.WEBHOOK_URL }} >> .env
             echo HOST=${{ secrets.HOST }} >> .env
             echo SECRET_TELEGRAM_TOKEN=${{ secrets.SECRET_TELEGRAM_TOKEN }} >> .env
+            echo LOG_NAME=${{ secrets.LOG_NAME }} >> .env
+
             echo WEEKLY_STAT_TIME=${{ secrets.WEEKLY_STAT_TIME }} >> .env
             echo WEEKLY_STAT_WEEK_DAYS=${{ secrets.WEEKLY_STAT_WEEK_DAYS }} >> .env
             echo MONTHLY_STAT_TIME=${{ secrets.MONTHLY_STAT_TIME }} >> .env
             echo MONTHLY_STAT_DAY=${{ secrets.MONTHLY_STAT_DAY }} >> .env
+
             echo MONTHLY_RECEIPT_REMINDER_TIME=${{ secrets.MONTHLY_RECEIPT_REMINDER_TIME }} >> .env
             echo MONTHLY_RECEIPT_REMINDER_DAY=${{ secrets.MONTHLY_RECEIPT_REMINDER_DAY }} >> .env
+
             echo DAYLY_COLLECT_CONSULTATIONS_TIME=${{ secrets.DAYLY_COLLECT_CONSULTATIONS_TIME }} >> .env
             echo DAILY_CONSULTATIONS_REMINDER_TIME=${{ secrets.DAILY_CONSULTATIONS_REMINDER_TIME }} >> .env
-            echo BOT_PERSISTENCE_FILE=${{ secrets.BOT_PERSISTENCE_FILE }} >> .env
-            echo URL_ASK_NENAPRASNO_API=${{ secrets.URL_ASK_NENAPRASNO_API }} >> .env
+
             echo IS_FAKE_API=${{ secrets.IS_FAKE_API }} >> .env
-            echo SITE_API_BOT_TOKEN=${{ secrets.SITE_API_BOT_TOKEN }} >> .env
-            echo LOG_NAME=${{ secrets.LOG_NAME }} >> .env
-            echo TRELLO_BORD_ID=${{ secrets.TRELLO_BORD_ID }} >> .env
+
             echo URL_ASK_NENAPRASNO=${{ secrets.URL_ASK_NENAPRASNO }} >> .env
+            echo URL_ASK_NENAPRASNO_API=${{ secrets.URL_ASK_NENAPRASNO_API }} >> .env
+            echo SITE_API_BOT_TOKEN=${{ secrets.SITE_API_BOT_TOKEN }} >> .env
+            echo TRELLO_BORD_ID=${{ secrets.TRELLO_BORD_ID }} >> .env
 
             sudo docker image prune -f
             sudo docker pull ${{ secrets.DOCKER_USERNAME }}/ask_nenaprasno_bot:latest

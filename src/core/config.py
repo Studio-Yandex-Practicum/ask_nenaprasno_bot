@@ -45,12 +45,17 @@ def get_bool(setting: str) -> bool:
 
 # Параметры логгера
 LOG_NAME = get_string("LOG_NAME")
+LOG_NAME = LOG_NAME if LOG_NAME is not None else "bot.log"
+
 LOG_PATH = BASE_DIR / "../logs" / LOG_NAME
 
 # Параметры локального сервера принимающего обновления от телеграм
 HOST = get_string("HOST")
 WEBHOOK_URL = get_string("WEBHOOK_URL")
+
 PORT = get_int("BOT_PORT")
+PORT = PORT if PORT is not None else 8000
+
 TOKEN = get_string("TELEGRAM_TOKEN")
 
 # Параметры для аутентификации телеграма
@@ -71,17 +76,18 @@ DAILY_COLLECT_CONSULTATIONS_TIME = time(hour=0, minute=0, tzinfo=timezone.utc)
 DAILY_CONSULTATIONS_REMINDER_TIME = get_time("DAILY_CONSULTATIONS_REMINDER_TIME")
 
 # Файл с сохраненными данными бота
-BOT_PERSISTENCE_FILE = BASE_DIR / "persistence_data" / get_string("BOT_PERSISTENCE_FILE")
+BOT_PERSISTENCE_FILE = BASE_DIR / "persistence_data" / "bot_persistence_file"
 
 # Настройка отладки
 IS_FAKE_API = get_bool("IS_FAKE_API")
-
-# Параметры api
-URL_ASK_NENAPRASNO_API = get_string("URL_ASK_NENAPRASNO_API")
-SITE_API_BOT_TOKEN = get_string("SITE_API_BOT_TOKEN")
+IS_FAKE_API = IS_FAKE_API if IS_FAKE_API is not None else False
 
 # Параметры trello
 TRELLO_BORD_ID = get_string("TRELLO_BORD_ID")
+
+# Параметры внешнего api
+URL_ASK_NENAPRASNO_API = get_string("URL_ASK_NENAPRASNO_API")
+SITE_API_BOT_TOKEN = get_string("SITE_API_BOT_TOKEN")
 
 # URL nenaprasno
 FORM_URL_FUTURE_EXPERT = "https://forms.gle/DGMUm35bxZytE3QLA"
