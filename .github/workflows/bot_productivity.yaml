@@ -56,12 +56,9 @@ jobs:
           BOT_PERSISTENCE_FILE: bot_persistence_file
 
           SITE_API_BOT_TOKEN: ${{ secrets.SITE_API_BOT_TOKEN }}
-          SITE_API_URL: https://api.ask.nenaprasno.ru
+          URL_ASK_NENAPRASNO_API: https://api.ask.nenaprasno.ru
           IS_FAKE_API: True
 
-          TRELLO_API_KEY: ${{ secrets.TRELLO_API_KEY }}
-          TRELLO_ID_MODEL: trello_model_id
-          TRELLO_TOKEN: ${{ secrets.TRELLO_TOKEN }}
           TRELLO_BORD_ID: 14nNNGRp
 
           URL_ASK_NENAPRASNO: ${{ secrets.URL_ASK_NENAPRASNO }}

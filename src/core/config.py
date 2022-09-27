@@ -77,7 +77,7 @@ BOT_PERSISTENCE_FILE = BASE_DIR / "persistence_data" / get_string("BOT_PERSISTEN
 IS_FAKE_API = get_bool("IS_FAKE_API")
 
 # Параметры api
-SITE_API_URL = get_string("SITE_API_URL")
+URL_ASK_NENAPRASNO_API = get_string("URL_ASK_NENAPRASNO_API")
 SITE_API_BOT_TOKEN = get_string("SITE_API_BOT_TOKEN")
 
 # Параметры trello
