@@ -1,4 +1,4 @@
-from datetime import timedelta
+from datetime import time, timedelta
 from urllib.parse import urljoin
 
 from telegram import Update
@@ -12,11 +12,17 @@ from telegram.ext import (
 )
 
 from constants import callback_data
-from constants.jobs import DAILY_CONSULTATIONS_REMINDER_JOB
+from constants.jobs import DAILY_CONSULTATIONS_REMINDER_JOB, DAILY_OVERDUE_CONSULTATIONS_REMINDER_JOB
 from conversation import start_conversation
 from core import config
 from core.send_message import edit_message
-from jobs import daily_consulations_reminder_job, monthly_bill_reminder_job, monthly_stat_job, weekly_stat_job
+from jobs import (
+    daily_consulations_duedate_is_today_reminder_job,
+    daily_consulations_reminder_job,
+    monthly_bill_reminder_job,
+    monthly_stat_job,
+    weekly_stat_job,
+)
 from service.repeat_message import repeat_message_after_1_hour_callback
 
 
@@ -65,8 +71,15 @@ def create_bot():
         monthly_bill_reminder_job, when=config.MONTHLY_RECEIPT_REMINDER_TIME, day=config.MONTHLY_RECEIPT_REMINDER_DAY
     )
     bot_app.job_queue.run_monthly(monthly_stat_job, when=config.MONTHLY_STAT_TIME, day=config.MONTHLY_STAT_DAY)
-    bot_app.job_queue.run_daily(
+
+    bot_app.job_queue.run_repeating(
         daily_consulations_reminder_job,
+        interval=timedelta(hours=1),
+        first=time(hour=0, minute=0, second=0),
+        name=DAILY_OVERDUE_CONSULTATIONS_REMINDER_JOB,
+    )
+    bot_app.job_queue.run_daily(
+        daily_consulations_duedate_is_today_reminder_job,
         time=config.DAILY_COLLECT_CONSULTATIONS_TIME,
         name=DAILY_CONSULTATIONS_REMINDER_JOB,
     )
