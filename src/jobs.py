@@ -362,6 +362,8 @@ async def daily_overdue_consulations_reminder_job(context: CallbackContext, over
             data=(telegram_id, consultations),
         )
 
+    return None
+
 
 async def daily_consulations_duedate_is_today_reminder_job(context: CallbackContext) -> None:
     """Adds a reminder job to the bot's job queue according to the scenario:
