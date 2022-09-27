@@ -81,9 +81,6 @@ SITE_API_URL = get_string("SITE_API_URL")
 SITE_API_BOT_TOKEN = get_string("SITE_API_BOT_TOKEN")
 
 # Параметры trello
-TRELLO_API_KEY = get_string("TRELLO_API_KEY")
-TRELLO_ID_MODEL = get_string("TRELLO_ID_MODEL")
-TRELLO_TOKEN = get_string("TRELLO_TOKEN")
 TRELLO_BORD_ID = get_string("TRELLO_BORD_ID")
 
 # URL nenaprasno
