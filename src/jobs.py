@@ -352,7 +352,7 @@ async def send_reminder_overdue(context: CallbackContext) -> None:
 async def daily_overdue_consulations_reminder_job(context: CallbackContext, overdue: Dict) -> None:
     """Creates tasks to send reminders for consultations expired at least one day ago."""
     if not overdue:
-        return None
+        return
 
     for telegram_id, consultations in overdue.items():
         # Send reminder job for every doctor
@@ -361,8 +361,6 @@ async def daily_overdue_consulations_reminder_job(context: CallbackContext, over
             when=timedelta(seconds=1),
             data=(telegram_id, consultations),
         )
-
-    return None
 
 
 async def daily_consulations_duedate_is_today_reminder_job(context: CallbackContext) -> None:
