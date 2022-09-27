@@ -110,7 +110,7 @@ async def button_statistic_month_callback(update: Update, context: ContextTypes.
             "Так держать!"
         )
     else:
-        message = "К сожалению у вас не было отвеченных завок :(\nМы верим, что в следующем месяце все изменится! :)"
+        message = "К сожалению у вас не было отвеченных заявок :(\nМы верим, что в следующем месяце все изменится! :)"
 
     await reply_message(update=update, text=message)
 
