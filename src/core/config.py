@@ -15,8 +15,8 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 env = dotenv_values()
 
 
-def get_string(setting: str) -> str:
-    return env.get(setting) or os.getenv(setting)
+def get_string(setting: str, default: str = None) -> str:
+    return env.get(setting) or os.getenv(setting, default)
 
 
 @safe_conversion
@@ -39,8 +39,8 @@ def get_datetime_tuple(setting: str) -> tuple:
     return tuple(map(int, list(filter(None, get_string(setting).split(",")))))
 
 
-def get_bool(setting: str) -> bool:
-    return get_string(setting) == "True"
+def get_bool(setting: str, default: str = "False") -> bool:
+    return get_string(setting, default) == "True"
 
 
 # Параметры логгера
@@ -50,7 +50,7 @@ LOG_NAME = LOG_NAME if LOG_NAME is not None else "bot.log"
 LOG_PATH = BASE_DIR / "../logs" / LOG_NAME
 
 # Параметры локального сервера принимающего обновления от телеграм
-HOST = get_string("HOST")
+HOST = get_string("HOST", "0.0.0.0")
 WEBHOOK_URL = get_string("WEBHOOK_URL")
 
 PORT = 8000
@@ -78,8 +78,7 @@ DAILY_CONSULTATIONS_REMINDER_TIME = get_time("DAILY_CONSULTATIONS_REMINDER_TIME"
 BOT_PERSISTENCE_FILE = BASE_DIR / "persistence_data" / "bot_persistence_file"
 
 # Настройка отладки
-IS_FAKE_API = get_bool("IS_FAKE_API")
-IS_FAKE_API = IS_FAKE_API if IS_FAKE_API is not None else False
+IS_FAKE_API = get_bool("IS_FAKE_API", "False")
 
 # Параметры trello
 TRELLO_BORD_ID = get_string("TRELLO_BORD_ID")
