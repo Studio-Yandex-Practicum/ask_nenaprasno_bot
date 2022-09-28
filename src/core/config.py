@@ -16,7 +16,7 @@ env = dotenv_values()
 
 
 def get_string(setting: str, default: str = None) -> str:
-    return env.get(setting) or os.getenv(setting) or default
+    return env.get(setting) or os.getenv(setting, default)
 
 
 @safe_conversion
