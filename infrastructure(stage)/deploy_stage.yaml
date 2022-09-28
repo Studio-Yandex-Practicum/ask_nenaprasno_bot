@@ -68,7 +68,6 @@ jobs:
             touch .env
             echo TELEGRAM_TOKEN=${{ secrets.TELEGRAM_TOKEN }} >> .env
             echo WEBHOOK_URL=${{ secrets.WEBHOOK_URL }} >> .env
-            echo HOST=${{ secrets.HOST }} >> .env
             echo SECRET_TELEGRAM_TOKEN=${{ secrets.SECRET_TELEGRAM_TOKEN }} >> .env
 
             echo WEEKLY_STAT_TIME=${{ secrets.WEEKLY_STAT_TIME }} >> .env
