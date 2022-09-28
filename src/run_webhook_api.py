@@ -138,11 +138,15 @@ async def consultation_message(request: Request) -> Response:
     bot = api.state.bot_app.bot
     site_url = build_consultation_url(request_data.consultation_id)
     trello_url = build_trello_url(request_data.username_trello)
+    service = APIService()
+    active_conusultations = await service.get_user_active_consultations(telegram_id=request_data.telegram_id)
 
     text = (
         f"Вау! Получено новое сообщение в чате заявки ***{request_data.consultation_number}***\n"
         f"[Прочитать сообщение]({site_url})\n\n"
         f"[Открыть Trello]({trello_url})\n\n"
+        f"Заявки в работе: {active_conusultations.active_consultations}\n\n"
+        f"Из них у {len(active_conusultations.expiring_consultations_data)} завтра истекает срок ответа."
     )
     await send_message(bot=bot, chat_id=request_data.telegram_id, text=text)
     return Response(status_code=httpx.codes.OK)
