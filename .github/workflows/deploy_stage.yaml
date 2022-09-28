@@ -3,7 +3,7 @@ name: ask_nenaprasno_bot_deploy
 on:
   pull_request:
     branches:
-      - develop
+      - feature/customer_test_deploy
     types: [closed]
 
 env:
@@ -47,7 +47,7 @@ jobs:
             ${{ env.REGISTRY }}/${{ env.REP_OWNER }}/${{ env.IMAGE_NAME }}:latest,
             ${{ env.REGISTRY }}/${{ env.REP_OWNER }}/${{ env.IMAGE_NAME }}:${{ github.sha }}
 
-  deploy_env_file_creation:
+  deploy_file_creation:
     if: github.event.pull_request.merged == true
     name: Deploy
     runs-on: ubuntu-latest
@@ -55,7 +55,7 @@ jobs:
       name: Stage
     needs: build_and_push_ask_nenaprasno_bot_image
     steps:
-      - name: executing remote ssh commands to deploy
+      - name: executing remote ssh commands to create env file
         uses: appleboy/ssh-action@master
         with:
           host: ${{ secrets.HOST }}
@@ -87,6 +87,17 @@ jobs:
             echo URL_ASK_NENAPRASNO_API=${{ secrets.URL_ASK_NENAPRASNO_API }} >> .env
             echo SITE_API_BOT_TOKEN=${{ secrets.SITE_API_BOT_TOKEN }} >> .env
             echo TRELLO_BORD_ID=${{ secrets.TRELLO_BORD_ID }} >> .env
+      - name: copy file via ssh password
+        uses: appleboy/scp-action@master
+        with:
+          host: ${{ secrets.HOST }}
+          username: ${{ secrets.USER }}
+          key: ${{ secrets.SSH_KEY }}
+          passphrase: ${{ secrets.PASSPHRASE }}
+          source: "infrastructure(stage)/docker-compose.bot.yaml"
+          target: ${{ env.DEPLOY_PATH }}
+          strip_components: 1
+          overwrite: true
 
   deploy_start_application:
     if: github.event.pull_request.merged == true
@@ -94,7 +105,7 @@ jobs:
     runs-on: ubuntu-latest
     environment:
       name: Stage
-    needs: build_and_push_ask_nenaprasno_bot_image
+    needs: deploy_file_creation
     steps:
       - name: executing remote ssh commands to deploy
         uses: appleboy/ssh-action@master
