@@ -93,4 +93,4 @@ URL_SERVICE_RULES = "https://docs.google.com/document/d/1hW2HUv9aWQMnUBuIE_YQEtm
 URL_ASK_NENAPRASNO = get_string("URL_ASK_NENAPRASNO")
 
 # Включить debug-режим
-DEBUG = False
+DEBUG = get_bool("DEBUG")
