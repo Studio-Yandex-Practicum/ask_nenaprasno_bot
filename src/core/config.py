@@ -53,8 +53,7 @@ LOG_PATH = BASE_DIR / "../logs" / LOG_NAME
 HOST = get_string("HOST")
 WEBHOOK_URL = get_string("WEBHOOK_URL")
 
-PORT = get_int("BOT_PORT")
-PORT = PORT if PORT is not None else 8000
+PORT = 8000
 
 TOKEN = get_string("TELEGRAM_TOKEN")
 
