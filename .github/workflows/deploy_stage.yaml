@@ -1,10 +1,9 @@
 name: ask_nenaprasno_bot_deploy
 
 on:
-  pull_request:
+  push:
     branches:
       - feature/customer_test_deploy
-    types: [closed]
 
 env:
   REGISTRY: ghcr.io
