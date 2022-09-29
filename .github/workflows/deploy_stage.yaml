@@ -25,6 +25,8 @@ jobs:
     steps:
       - name: Check out the repo
         uses: actions/checkout@v2
+        with:
+          ref: feature/customer_test_deploy
       - name: Docker login
         uses: docker/login-action@v1
         with:
