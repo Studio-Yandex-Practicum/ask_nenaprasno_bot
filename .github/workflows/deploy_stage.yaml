@@ -1,4 +1,4 @@
-name: ask_nenaprasno_bot_deploy
+name: ask_nenaprasno_bot_deploy_on_test
 
 on:
   push:
