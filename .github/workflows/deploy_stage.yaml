@@ -18,15 +18,13 @@ jobs:
   build_and_push_ask_nenaprasno_bot_image:
     # if: github.event.pull_request.merged == true
     name: Push Docker image to GitHub Packages
-    runs-on: ubuntu-latestexit
+    runs-on: ubuntu-latest
     permissions:
       contents: read
       packages: write
     steps:
       - name: Check out the repo
         uses: actions/checkout@v2
-        with:
-          ref: feature/customer_test_deploy
       - name: Docker login
         uses: docker/login-action@v1
         with:
