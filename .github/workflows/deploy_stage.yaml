@@ -16,7 +16,7 @@ defaults:
 
 jobs:
   build_and_push_ask_nenaprasno_bot_image:
-    if: github.event.pull_request.merged == true
+    # if: github.event.pull_request.merged == true
     name: Push Docker image to GitHub Packages
     runs-on: ubuntu-latestexit
     permissions:
@@ -47,7 +47,7 @@ jobs:
             ${{ env.REGISTRY }}/${{ env.REP_OWNER }}/${{ env.IMAGE_NAME }}:${{ github.sha }}
 
   deploy_file_creation:
-    if: github.event.pull_request.merged == true
+    # if: github.event.pull_request.merged == true
     name: Deploy
     runs-on: ubuntu-latest
     environment:
@@ -99,7 +99,7 @@ jobs:
           overwrite: true
 
   deploy_start_application:
-    if: github.event.pull_request.merged == true
+    # if: github.event.pull_request.merged == true
     name: Deploy
     runs-on: ubuntu-latest
     environment:
