@@ -8,7 +8,7 @@ on:
 env:
   REGISTRY: ghcr.io
   IMAGE_NAME: nenaprasno-ask-bot
-  DEPLOY_PATH: /ask/practicum_bot
+  DEPLOY_PATH: $HOME/ask/practicum_bot
 
 defaults:
   run:
@@ -125,6 +125,6 @@ jobs:
 
             sudo docker image prune -f
             sudo docker pull ${{ env.REGISTRY }}/${{ env.REP_OWNER }}/${{ env.IMAGE_NAME }}:latest
-            sudo docker compose --file docker-compose.bot.yaml stop
-            sudo docker compose --file docker-compose.bot.yaml rm bot -f
-            sudo docker compose --file docker-compose.bot.yaml up -d
+            sudo docker compose --file docker-compose.test.yaml stop
+            sudo docker compose --file docker-compose.test.yaml rm bot -f
+            sudo docker compose --file docker-compose.test.yaml up -d
