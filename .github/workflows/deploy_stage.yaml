@@ -91,7 +91,6 @@ jobs:
           host: ${{ secrets.HOST }}
           username: ${{ secrets.USER }}
           key: ${{ secrets.SSH_KEY }}
-          passphrase: ${{ secrets.PASSPHRASE }}
           source: "infrastructure(stage)/docker-compose.bot.yaml"
           target: ${{ env.DEPLOY_PATH }}
           strip_components: 1
@@ -99,7 +98,7 @@ jobs:
 
   deploy_start_application:
     # if: github.event.pull_request.merged == true
-    name: Deploy
+    name: Application Start                                              -Up
     runs-on: ubuntu-latest
     environment:
       name: Stage
