@@ -5,7 +5,7 @@ from datetime import date, datetime, timedelta, timezone
 from typing import Dict, List, Optional, Tuple
 
 from telegram import InlineKeyboardButton, InlineKeyboardMarkup
-from telegram.ext import CallbackContext, ExtBot
+from telegram.ext import CallbackContext
 
 from constants.callback_data import CALLBACK_DONE_BILL_COMMAND, CALLBACK_SKIP_BILL_COMMAND
 from constants.timezone import MOSCOW_TIME_OFFSET
@@ -261,24 +261,6 @@ async def get_consultations_count(telegram_id: int) -> Tuple:
     return active_cons_count, expired_cons_count
 
 
-async def send_reminder_list_overdue_consultations(bot: ExtBot, telegram_id: int, consultations: List):
-    """Send overdue-consultation reminder"""
-    active_cons_count, expired_cons_count = await get_consultations_count(telegram_id)
-
-    if len(consultations) == 1:
-        created = (await consultations[0].get_created_date()).strftime(NATIONAL_DATE_FORMAT)
-        message = get_reminder_text(
-            consultations[0],
-            active_cons_count,
-            expired_cons_count,
-            created,
-        )
-    else:
-        message = await get_overdue_reminder_text(consultations, active_cons_count, expired_cons_count)
-
-    await send_message(bot=bot, chat_id=telegram_id, text=message)
-
-
 async def get_overdue_reminder_text(consultations: List, active_cons_count: int, expired_cons_count: int) -> str:
     """Returns overdue reminder text if user have more than one overdue consultations."""
     link_nenaprasno = make_consultations_list(
@@ -340,27 +322,35 @@ async def send_reminder_now(context: CallbackContext) -> None:
 
 
 async def send_reminder_overdue(context: CallbackContext) -> None:
-    """Sends overdue reminder to the user."""
+    """Send overdue-consultation reminder"""
+    # await send_reminder_list_overdue_consultations(context.bot, *context.job.data)
     telegram_id, consultations = context.job.data
+    active_cons_count, expired_cons_count = await get_consultations_count(telegram_id)
 
-    if not consultations:
-        return
+    if len(consultations) == 1:
+        created = (await consultations[0].get_created_date()).strftime(NATIONAL_DATE_FORMAT)
+        message = get_reminder_text(
+            consultations[0],
+            active_cons_count,
+            expired_cons_count,
+            created,
+        )
+    else:
+        message = await get_overdue_reminder_text(consultations, active_cons_count, expired_cons_count)
 
-    await send_reminder_list_overdue_consultations(context.bot, telegram_id, consultations)
+    await send_message(bot=context.bot, chat_id=telegram_id, text=message)
 
 
 async def daily_overdue_consulations_reminder_job(context: CallbackContext, overdue: Dict) -> None:
     """Creates tasks to send reminders for consultations expired at least one day ago."""
-    if not overdue:
-        return
-
     for telegram_id, consultations in overdue.items():
-        # Send reminder job for every doctor
-        context.job_queue.run_once(
-            send_reminder_overdue,
-            when=timedelta(seconds=1),
-            data=(telegram_id, consultations),
-        )
+        if consultations:
+            # Send reminder job for every doctor
+            context.job_queue.run_once(
+                send_reminder_overdue,
+                when=timedelta(seconds=1),
+                data=(telegram_id, consultations),
+            )
 
 
 async def daily_consulations_duedate_is_today_reminder_job(context: CallbackContext) -> None:
@@ -404,6 +394,7 @@ async def daily_consulations_reminder_job(context: CallbackContext) -> None:
         due_time = datetime.strptime(consultation.due, DATE_FORMAT)
         user_time = datetime.now(tz=user_timezone)
 
+        # Important. This job starts every hour at 0 minutes 0 seconds, so we need to check only hour
         if user_time.hour == config.DAILY_CONSULTATIONS_REMINDER_TIME.hour:
             # Check consultation in right timezone
             if due_time.date() < date.today():
@@ -417,4 +408,5 @@ async def daily_consulations_reminder_job(context: CallbackContext) -> None:
                     data=ForwardConsultationData(consultation),
                 )
 
-    await daily_overdue_consulations_reminder_job(context, overdue)
+    if overdue:
+        await daily_overdue_consulations_reminder_job(context, overdue)
