@@ -7,7 +7,6 @@ import httpx
 
 from core import config
 from core.logger import logger
-from decorators.debug import async_log_api_requests
 from service.api_client.base import AbstractAPIService
 from service.api_client.models import (
     BillStat,
@@ -98,7 +97,6 @@ class SiteAPIService(AbstractAPIService):
             return None
         return ConsultationDueDate.from_dict(consultation)
 
-    @async_log_api_requests
     async def __get_json_data(self, url: str) -> Optional[dict]:
         headers = {"Authorization": self.bot_token}
         async with httpx.AsyncClient() as client:
