@@ -15,15 +15,14 @@ defaults:
     working-directory: .
 
 jobs:
-  build_and_push_ask_nenaprasno_bot_image:
-    # if: github.event.pull_request.merged == true
+  build_and_push:
     name: Push Docker image to GitHub Packages
     runs-on: ubuntu-latest
     permissions:
       contents: read
       packages: write
     steps:
-      - name: Check out the repo
+      - name: Check out repository
         uses: actions/checkout@v2
       - name: Docker login
         uses: docker/login-action@v1
@@ -31,7 +30,7 @@ jobs:
           registry: ${{ env.REGISTRY }}
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
-      - name: Set variables
+      - name: Set owner variables
         run: |
           echo REP_OWNER=$(echo ${{ github.repository_owner }} | tr '[:upper:]' '[:lower:]') >> $GITHUB_ENV
       - name: Build and push
@@ -46,15 +45,17 @@ jobs:
             ${{ env.REGISTRY }}/${{ env.REP_OWNER }}/${{ env.IMAGE_NAME }}:latest,
             ${{ env.REGISTRY }}/${{ env.REP_OWNER }}/${{ env.IMAGE_NAME }}:${{ github.sha }}
 
-  deploy_file_creation:
-    # if: github.event.pull_request.merged == true
+  deploy:
     name: Deploy
     runs-on: ubuntu-latest
     environment:
       name: Test
-    needs: build_and_push_ask_nenaprasno_bot_image
-    steps:
-      - name: copy file via ssh password
+    needs: build_and_push
+    steps:    
+      - name: Set owner variables
+        run: |
+          echo REP_OWNER=$(echo ${{ github.repository_owner }} | tr '[:upper:]' '[:lower:]') >> $GITHUB_ENV
+      - name: Copy docker-compose file
         uses: appleboy/scp-action@master
         with:
           host: ${{ secrets.HOST }}
@@ -64,9 +65,9 @@ jobs:
           target: ${{ env.DEPLOY_PATH }}
           strip_components: 1
           overwrite: true
-      - name: Check out the repo
+      - name: Check out repository
         uses: actions/checkout@v2
-      - name: executing remote ssh commands to create env file
+      - name: Create .env file
         uses: appleboy/ssh-action@master
         with:
           host: ${{ secrets.HOST }}
@@ -98,14 +99,17 @@ jobs:
             echo SITE_API_BOT_TOKEN=${{ secrets.SITE_API_BOT_TOKEN }} >> .env
             echo TRELLO_BORD_ID=${{ secrets.TRELLO_BORD_ID }} >> .env
 
-  deploy_start_application:
-    # if: github.event.pull_request.merged == true
-    name: Application Start-Up
+  start_application:
+    name: Start application
     runs-on: ubuntu-latest
     environment:
       name: Test
+    needs: deploy
     steps:
-      - name: executing remote ssh commands to deploy
+      - name: Set owner variables
+        run: |
+          echo REP_OWNER=$(echo ${{ github.repository_owner }} | tr '[:upper:]' '[:lower:]') >> $GITHUB_ENV
+      - name: Start appication
         uses: appleboy/ssh-action@master
         with:
           host: ${{ secrets.HOST }}
