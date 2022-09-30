@@ -55,7 +55,6 @@ jobs:
       - name: Set owner variables
         run: |
           echo REP_OWNER=$(echo ${{ github.repository_owner }} | tr '[:upper:]' '[:lower:]') >> $GITHUB_ENV
-          overwrite: true
       - name: Check out repository
         uses: actions/checkout@v2
       - name: Copy docker-compose file
