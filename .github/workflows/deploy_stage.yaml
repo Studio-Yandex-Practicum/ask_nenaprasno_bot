@@ -51,7 +51,7 @@ jobs:
     name: Deploy
     runs-on: ubuntu-latest
     environment:
-      name: Stage
+      name: Test
     needs: build_and_push_ask_nenaprasno_bot_image
     steps:
       - name: copy file via ssh password
@@ -103,7 +103,7 @@ jobs:
     name: Application Start-Up
     runs-on: ubuntu-latest
     environment:
-      name: Stage
+      name: Test
     steps:
       - name: executing remote ssh commands to deploy
         uses: appleboy/ssh-action@master
