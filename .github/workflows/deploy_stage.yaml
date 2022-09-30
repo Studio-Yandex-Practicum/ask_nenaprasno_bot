@@ -85,6 +85,8 @@ jobs:
             echo URL_ASK_NENAPRASNO_API=${{ secrets.URL_ASK_NENAPRASNO_API }} >> .env
             echo SITE_API_BOT_TOKEN=${{ secrets.SITE_API_BOT_TOKEN }} >> .env
             echo TRELLO_BORD_ID=${{ secrets.TRELLO_BORD_ID }} >> .env
+      - name: Check out the repo
+        uses: actions/checkout@v2
       - name: copy file via ssh password
         uses: appleboy/scp-action@master
         with:
