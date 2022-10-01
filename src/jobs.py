@@ -397,7 +397,7 @@ async def daily_consulations_reminder_job(context: CallbackContext) -> None:
         # Important. This job starts every hour at 0 minutes 0 seconds, so we need to check only hour
         if user_time.hour == config.DAILY_CONSULTATIONS_REMINDER_TIME.hour:
             # Check consultation in right timezone
-            if due_time.date() < date.today():
+            if due_time.date() < now.today():
                 # Group overdue consultations by doctor
                 overdue[consultation.telegram_id].append(PastConsultationData(consultation))
             elif due_time.date() - now.date() == timedelta(days=1):
