@@ -90,3 +90,6 @@ TRELLO_BORD_ID = get_string("TRELLO_BORD_ID")
 FORM_URL_FUTURE_EXPERT = "https://forms.gle/DGMUm35bxZytE3QLA"
 URL_SERVICE_RULES = "https://docs.google.com/document/d/1hW2HUv9aWQMnUBuIE_YQEtmIDDbk8KhpychckbyaIEQ/edit"
 URL_ASK_NENAPRASNO = get_string("URL_ASK_NENAPRASNO")
+
+# Включить debug-режим
+DEBUG = get_bool("DEBUG")
