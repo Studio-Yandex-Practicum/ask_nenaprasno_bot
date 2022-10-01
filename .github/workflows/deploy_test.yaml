@@ -9,6 +9,7 @@ env:
   REGISTRY: ghcr.io
   IMAGE_NAME: nenaprasno-ask-bot
   DEPLOY_PATH: /ask/practicum_bot
+  REP_OWNER: studio-yandex-practicum
 
 defaults:
   run:
@@ -30,9 +31,6 @@ jobs:
           registry: ${{ env.REGISTRY }}
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
-      - name: Set owner variables
-        run: |
-          echo REP_OWNER=$(echo ${{ github.repository_owner }} | tr '[:upper:]' '[:lower:]') >> $GITHUB_ENV
       - name: Build and push
         uses: docker/build-push-action@v2
         with:
@@ -41,7 +39,6 @@ jobs:
           labels: runnumber=${GITHUB_RUN_ID}
           push: true
           tags: |
-            ${{ env.REGISTRY }}/${{ env.REP_OWNER }}/${{ env.IMAGE_NAME }}:stage,
             ${{ env.REGISTRY }}/${{ env.REP_OWNER }}/${{ env.IMAGE_NAME }}:latest,
             ${{ env.REGISTRY }}/${{ env.REP_OWNER }}/${{ env.IMAGE_NAME }}:${{ github.sha }}
 
@@ -52,9 +49,6 @@ jobs:
       name: Test
     needs: build_and_push
     steps:
-      - name: Set owner variables
-        run: |
-          echo REP_OWNER=$(echo ${{ github.repository_owner }} | tr '[:upper:]' '[:lower:]') >> $GITHUB_ENV
       - name: Check out repository
         uses: actions/checkout@v2
       - name: Copy docker-compose file
@@ -91,8 +85,6 @@ jobs:
             echo DAYLY_COLLECT_CONSULTATIONS_TIME=${{ secrets.DAYLY_COLLECT_CONSULTATIONS_TIME }} >> .env
             echo DAILY_CONSULTATIONS_REMINDER_TIME=${{ secrets.DAILY_CONSULTATIONS_REMINDER_TIME }} >> .env
 
-            echo IS_FAKE_API=${{ secrets.IS_FAKE_API }} >> .env
-
             echo URL_ASK_NENAPRASNO=${{ secrets.URL_ASK_NENAPRASNO }} >> .env
             echo URL_ASK_NENAPRASNO_API=${{ secrets.URL_ASK_NENAPRASNO_API }} >> .env
             echo SITE_API_BOT_TOKEN=${{ secrets.SITE_API_BOT_TOKEN }} >> .env
@@ -105,15 +97,6 @@ jobs:
       name: Test
     needs: deploy
     steps:
-      - name: Docker login
-        uses: docker/login-action@v1
-        with:
-          registry: ${{ env.REGISTRY }}
-          username: ${{ github.actor }}
-          password: ${{ secrets.GITHUB_TOKEN }}
-      - name: Set owner variables
-        run: |
-          echo REP_OWNER=$(echo ${{ github.repository_owner }} | tr '[:upper:]' '[:lower:]') >> $GITHUB_ENV
       - name: Start appication
         uses: appleboy/ssh-action@master
         with:
