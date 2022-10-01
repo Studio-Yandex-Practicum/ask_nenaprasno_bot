@@ -92,7 +92,7 @@ async def support_or_consult_callback(update: Update, context: CallbackContext) 
     """
     keyboard = [
         [
-            InlineKeyboardButton("Получить онлайн консультацию", url=config.URL_ASK_NENAPRASNO),
+            InlineKeyboardButton("Получить онлайн-консультацию", url=config.URL_ASK_NENAPRASNO),
             InlineKeyboardButton("Поддержать проект", url=f"{config.URL_ASK_NENAPRASNO}/#donation"),
         ]
     ]
