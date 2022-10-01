@@ -1,1 +1,2 @@
 DAILY_CONSULTATIONS_REMINDER_JOB = "daily_consulations_reminder_job"
+DAILY_OVERDUE_CONSULTATIONS_REMINDER_JOB = "daily_overdue_consulations_reminder_job"
