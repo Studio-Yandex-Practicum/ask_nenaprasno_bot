@@ -45,9 +45,7 @@ async def get_timezone(update: Update, context: CallbackContext) -> str:
 
 
 @async_error_logger(name="conversation.timezone.check_timezone")
-async def check_timezone(
-    update: Update, context: ContextTypes.DEFAULT_TYPE, timezone: str
-) -> str:  # pylint: disable=maybe-no-member
+async def check_timezone(update: Update, context: ContextTypes.DEFAULT_TYPE, timezone: str) -> str:
     """
     Sends a message after a successful timezone installation.
     Return state for ConversationHandler.
@@ -161,10 +159,8 @@ timezone_conversation = ConversationHandler(
     ],
     states={
         states.TIMEZONE_STATE: [
-            MessageHandler(filters.LOCATION, get_timezone_from_location_callback),  # pylint: disable=maybe-no-member
-            MessageHandler(
-                filters.TEXT & ~filters.COMMAND, get_timezone_from_text_message_callback
-            ),  # pylint: disable=maybe-no-member
+            MessageHandler(filters.LOCATION, get_timezone_from_location_callback),
+            MessageHandler(filters.TEXT & ~filters.COMMAND, get_timezone_from_text_message_callback),
         ],
     },
     fallbacks=[],

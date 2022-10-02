@@ -1,5 +1,4 @@
 # pylint: disable=W0612
-# pylint: disable=E0401
 from json import JSONDecodeError
 from typing import Tuple
 
