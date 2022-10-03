@@ -13,7 +13,7 @@ on:
 env:
   REGISTRY: ghcr.io
   IMAGE_NAME: nenaprasno-ask-bot
-  DEPLOY_PATH: /opt/ASK_BOT
+  DEPLOY_PATH: /opt/ask-bot
   REP_OWNER: studio-yandex-practicum
 
 defaults:
@@ -25,9 +25,6 @@ jobs:
     # if: github.event.pull_request.merged == true
     name: Push Docker image to GitHub Packages
     runs-on: ubuntu-latest
-    # permissions:
-    #   contents: read
-    #   packages: write
     steps:
       - name: Check out repository
         uses: actions/checkout@v2
