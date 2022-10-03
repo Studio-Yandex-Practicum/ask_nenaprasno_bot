@@ -187,7 +187,7 @@ async def send_weekly_statistic_job(context: CallbackContext) -> None:
 
     for statistic in filter(lambda stat: stat.telegram_id is not None and stat.timezone == current_tz, week_statistics):
         message = WEEKLY_STATISTIC_TEMPLATE.format(
-            trello_id=config.TRELLO_BORD_ID,
+            trello_url=build_trello_url(statistic.username_trello),
             **statistic.to_dict(),
             declination_consultation=get_word_case(statistic.active_consultations, "заявка", "заявки", "заявок"),
             genitive_declination_consultation=get_word_genitive(statistic.expiring_consultations, "заявки", "заявок"),
