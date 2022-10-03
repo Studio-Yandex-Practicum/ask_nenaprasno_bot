@@ -6,7 +6,8 @@ on:
   #     - develop
   #   types: [closed]
   push:
-  - feature/customer_test_deploy
+    branches:
+      - feature/customer_test_deploy
 
 
 env:
