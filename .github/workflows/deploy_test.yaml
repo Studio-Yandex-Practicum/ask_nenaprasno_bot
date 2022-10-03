@@ -1,9 +1,10 @@
 name: ask_nenaprasno_bot_deploy_on_test
 
 on:
-  push:
+  pull_request:
     branches:
-      - feature/customer_test_deploy
+      - develop
+    types: [closed]
 
 env:
   REGISTRY: ghcr.io
@@ -17,6 +18,7 @@ defaults:
 
 jobs:
   build_and_push:
+    if: github.event.pull_request.merged == true
     name: Push Docker image to GitHub Packages
     runs-on: ubuntu-latest
     permissions:
@@ -43,6 +45,7 @@ jobs:
             ${{ env.REGISTRY }}/${{ env.REP_OWNER }}/${{ env.IMAGE_NAME }}:${{ github.sha }}
 
   deploy:
+    if: github.event.pull_request.merged == true
     name: Deploy
     runs-on: ubuntu-latest
     environment:
@@ -91,6 +94,7 @@ jobs:
             echo TRELLO_BORD_ID=${{ secrets.TRELLO_BORD_ID }} >> .env
 
   start_application:
+    if: github.event.pull_request.merged == true
     name: Start application
     runs-on: ubuntu-latest
     environment:
