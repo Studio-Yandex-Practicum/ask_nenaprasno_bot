@@ -5,7 +5,7 @@ services:
     container_name: ask_bot
     env_file:
       - .env
-    image: ghcr.io/studio-yandex-practicum/nenaprasno-ask-bot:latest
+    image: ghcr.io/studio-yandex-practicum/nenaprasno-ask-bot:test
     restart: always
     ports:
       - "8000:8000"

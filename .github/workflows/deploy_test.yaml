@@ -1,10 +1,13 @@
 name: ask_nenaprasno_bot_deploy_on_test
 
 on:
-  pull_request:
-    branches:
-      - develop
-    types: [closed]
+  # pull_request:
+  #   branches:
+  #     - develop
+  #   types: [closed]
+  push:
+  - feature/customer_test_deploy
+
 
 env:
   REGISTRY: ghcr.io
@@ -18,12 +21,12 @@ defaults:
 
 jobs:
   build_and_push:
-    if: github.event.pull_request.merged == true
+    # if: github.event.pull_request.merged == true
     name: Push Docker image to GitHub Packages
     runs-on: ubuntu-latest
-    permissions:
-      contents: read
-      packages: write
+    # permissions:
+    #   contents: read
+    #   packages: write
     steps:
       - name: Check out repository
         uses: actions/checkout@v2
@@ -41,11 +44,11 @@ jobs:
           labels: runnumber=${GITHUB_RUN_ID}
           push: true
           tags: |
-            ${{ env.REGISTRY }}/${{ env.REP_OWNER }}/${{ env.IMAGE_NAME }}:latest,
+            ${{ env.REGISTRY }}/${{ env.REP_OWNER }}/${{ env.IMAGE_NAME }}:test,
             ${{ env.REGISTRY }}/${{ env.REP_OWNER }}/${{ env.IMAGE_NAME }}:${{ github.sha }}
 
   deploy:
-    if: github.event.pull_request.merged == true
+    # if: github.event.pull_request.merged == true
     name: Deploy
     runs-on: ubuntu-latest
     environment:
@@ -94,7 +97,7 @@ jobs:
             echo TRELLO_BORD_ID=${{ secrets.TRELLO_BORD_ID }} >> .env
 
   start_application:
-    if: github.event.pull_request.merged == true
+    # if: github.event.pull_request.merged == true
     name: Start application
     runs-on: ubuntu-latest
     environment:
@@ -111,7 +114,7 @@ jobs:
             cd ${{ env.DEPLOY_PATH }}
 
             sudo docker image prune -f
-            sudo docker pull ${{ env.REGISTRY }}/${{ env.REP_OWNER }}/${{ env.IMAGE_NAME }}:latest
+            sudo docker pull ${{ env.REGISTRY }}/${{ env.REP_OWNER }}/${{ env.IMAGE_NAME }}:test
             sudo docker compose --file docker-compose.test.yaml stop
             sudo docker compose --file docker-compose.test.yaml rm bot -f
             sudo docker compose --file docker-compose.test.yaml up -d
