@@ -9,7 +9,7 @@ on:
 env:
   REGISTRY: ghcr.io
   IMAGE_NAME: nenaprasno-ask-bot
-  DEPLOY_PATH: /ask/practicum_bot
+  DEPLOY_PATH: /opt/ASK_BOT
   REP_OWNER: studio-yandex-practicum
 
 defaults:

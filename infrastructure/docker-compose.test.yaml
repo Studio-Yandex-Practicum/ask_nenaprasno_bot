@@ -2,6 +2,7 @@ version: '3.8'
 
 services:
   bot:
+    container_name: ask_bot
     env_file:
       - .env
     image: ghcr.io/studio-yandex-practicum/nenaprasno-ask-bot:latest
@@ -9,8 +10,8 @@ services:
     ports:
       - "8000:8000"
     volumes:
-      - ./logs:/code/logs
-      - ./persistence_data:/code/src/persistence_data
+      - ./.data/logs:/code/logs
+      - ./.data/persistence_data:/code/src/persistence_data
 
 volumes:
   logs:
