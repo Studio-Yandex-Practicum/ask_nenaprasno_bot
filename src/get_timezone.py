@@ -6,14 +6,14 @@ from telegram import Update
 from telegram.ext import CallbackContext
 from timezonefinder import TimezoneFinder
 
+from constants.timezone import DEFAULT_TIMEZONE, TIME_ZONE
 from core.utils import get_timezone_from_str
 from service.api_client import APIService
 
-TIME_ZONE = "UTC"
+api = APIService()
 
 
 async def set_timezone(telegram_id: int, text_utc: str, context: CallbackContext):
-    api = APIService()
     await api.set_user_timezone(telegram_id=telegram_id, user_time_zone=text_utc)
     context.bot_data.update({telegram_id: get_timezone_from_str(text_utc)})
 
@@ -50,3 +50,19 @@ async def get_timezone_from_text_message(update: Update, context: CallbackContex
     text_utc = f"UTC{timezone_sign}{format(timezone[3], '0>2')}:00"
     await set_timezone(update.effective_chat.id, text_utc, context)
     return text_utc
+
+
+async def get_user_timezone(telegram_id: int, context: CallbackContext) -> datetime.timezone:
+    """
+    Return user timezone.
+
+    If user doesn't set timezone - returns default timezone.
+    """
+    user_tz = context.bot_data.get(telegram_id, None)
+
+    if user_tz is None:
+        user_data = await api.authenticate_user(telegram_id)
+        user_tz = get_timezone_from_str(user_data.timezone or DEFAULT_TIMEZONE)
+        context.bot_data.update({telegram_id: user_tz})
+
+    return user_tz
