@@ -19,7 +19,7 @@ from constants import callback_data, states
 from core.config import URL_SERVICE_RULES
 from core.send_message import reply_message
 from decorators.logger import async_error_logger
-from get_timezone import get_timezone_from_location, get_timezone_from_text_message
+from get_timezone import get_timezone_from_location, get_timezone_from_text_message, set_timezone
 from menu_button import COMMANDS, menu_button
 
 ASK_FLAG = "ask_flag"
@@ -122,6 +122,7 @@ async def set_default_timezone(update: Update, context: CallbackContext) -> str:
     Sets default timezone (Moscow).
     """
     timezone = DEFAULT_TIME
+    await set_timezone(update.effective_chat.id, timezone, context)
     return await check_timezone(update, context, timezone)
 
 

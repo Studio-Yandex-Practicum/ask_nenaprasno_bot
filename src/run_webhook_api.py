@@ -105,8 +105,11 @@ async def consultation_assign(request: Request) -> Response:
     chat_id = request_data.telegram_id
     site_url = build_consultation_url(request_data.consultation_id)
     trello_url = build_trello_url(request_data.username_trello)
-
-    text = f"Получена новая заявка\n" f"[Открыть заявку на сайте]({site_url})\n" f"[Открыть Trello]({trello_url})\n\n"
+    text = (
+        f"Ура! Вам назначена новая заявка\n"
+        f"[Открыть заявку на сайте]({site_url})\n"
+        f"[Открыть Trello]({trello_url})\n\n"
+    )
     await send_message(bot=bot, chat_id=chat_id, text=text)
     return Response(status_code=httpx.codes.OK)
 
