@@ -84,6 +84,7 @@ class BillStat:
 class Consultation:
     id: str
     due: str
+    created: str
     telegram_id: int
     username_trello: str
     number: str
