@@ -21,7 +21,7 @@ defaults:
 
 jobs:
   build_and_push:
-    if: github.event.pull_request.merged == true
+    # if: github.event.pull_request.merged == true
     name: Push Docker image to GitHub Packages
     runs-on: ubuntu-latest
     steps:
@@ -45,7 +45,7 @@ jobs:
             ${{ env.REGISTRY }}/${{ env.REP_OWNER }}/${{ env.IMAGE_NAME }}:${{ github.sha }}
 
   deploy:
-    if: github.event.pull_request.merged == true
+    # if: github.event.pull_request.merged == true
     name: Deploy
     runs-on: ubuntu-latest
     environment:
@@ -94,7 +94,7 @@ jobs:
             echo TRELLO_BORD_ID=${{ secrets.TRELLO_BORD_ID }} >> .env
 
   start_application:
-    if: github.event.pull_request.merged == true
+    # if: github.event.pull_request.merged == true
     name: Start application
     runs-on: ubuntu-latest
     environment:
