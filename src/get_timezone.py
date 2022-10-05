@@ -62,7 +62,7 @@ async def get_user_timezone(telegram_id: int, context: CallbackContext) -> datet
 
     if user_tz is None:
         user_data = await api.authenticate_user(telegram_id)
-        user_tz = get_timezone_from_str(user_data.timezone or DEFAULT_TIMEZONE)
+        user_tz = get_timezone_from_str(user_data.timezone if hasattr(user_data, "timezone") else DEFAULT_TIMEZONE)
         context.bot_data.update({telegram_id: user_tz})
 
     return user_tz
