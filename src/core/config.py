@@ -51,7 +51,7 @@ LOG_PATH = BASE_DIR / "../logs" / LOG_NAME
 
 # Параметры локального сервера принимающего обновления от телеграм
 HOST = get_string("HOST", "0.0.0.0")
-WEBHOOK_URL = get_string("WEBHOOK_URL")
+APPLICATION_URL = get_string("APPLICATION_URL")
 
 PORT = 8000
 
