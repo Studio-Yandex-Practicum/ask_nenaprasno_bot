@@ -30,8 +30,12 @@ class SiteAPIService(AbstractAPIService):
         self.site_url: str = config.URL_ASK_NENAPRASNO_API
         self.bot_token: str = config.SITE_API_BOT_TOKEN
 
-    async def get_bill(self) -> BillStat:
-        ...
+    async def get_bill(self) -> Optional[BillStat]:
+        url = urljoin(self.site_url, "/tgbot/bill")
+        users = await self.__get_json_data(url=url)
+        if users is None:
+            return None
+        return BillStat.from_dict(users)
 
     async def get_week_stat(self) -> Optional[list[WeekStat]]:
         url = urljoin(self.site_url, "/tgbot/stat/weekly")

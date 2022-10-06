@@ -12,7 +12,11 @@ from telegram.ext import (
 )
 
 from constants import callback_data
-from constants.jobs import DAILY_CONSULTATIONS_REMINDER_JOB, DAILY_OVERDUE_CONSULTATIONS_REMINDER_JOB
+from constants.jobs import (
+    DAILY_CONSULTATIONS_REMINDER_JOB,
+    DAILY_OVERDUE_CONSULTATIONS_REMINDER_JOB,
+    USER_BILL_REMINDER_TEMPLATE,
+)
 from conversation.authorization import authorization_conversation
 from core import config
 from core.send_message import edit_message
@@ -27,18 +31,17 @@ from service.repeat_message import repeat_message_after_1_hour_callback
 
 
 async def skip_bill_callback_handler(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
-    """Delete button under message"""
+    """Delete button under message."""
     await edit_message(update=update, new_text=update.callback_query.message.text_markdown_v2_urled)
     await update.callback_query.answer()  # close progress bar in chat
 
 
 async def done_bill_callback_handler(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
-    """
-    Delete job from JobQueue
-    """
+    """Delete job from JobQueue."""
     query = update.callback_query
     user_id = query.from_user.id
-    current_jobs = context.job_queue.get_jobs_by_name(f"send_{user_id}_bill_until_complete")
+    job_name = USER_BILL_REMINDER_TEMPLATE.format(user_id)
+    current_jobs = context.job_queue.get_jobs_by_name(job_name)
     for job in current_jobs:
         job.schedule_removal()
     await edit_message(update=update, new_text="Не будем напоминать до следующего месяца")
