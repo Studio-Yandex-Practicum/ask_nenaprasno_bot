@@ -32,7 +32,7 @@ curl -X POST -d '@src/example/trello_request.json' -H "Content-Type: application
 > ngrok config add-authtoken TOKEN  # (TOKEN). - токен с сайта ngrok
 - запустить ngrok
 > ngrok http 8000 --host-header=site.local
-- скопировать адрес сайта из консоли, наподобие: https://8250-31-148-16-235.eu.ngrok.io в файл .env: APPLICATION_URL=https://8250-31-148-16-235.eu.ngrok.io
+- скопировать адрес сайта из консоли, наподобие: https://8250-31-148-16-235.eu.ngrok.io в файл .env: APPLICATION_URL=https://8250-31-148-16-235.eu.ngrok.io/
 - запустить приложение (см. выше).
 ### Больше информации по ngrok на [сайте](https://ngrok.com/docs/getting-started)
 
