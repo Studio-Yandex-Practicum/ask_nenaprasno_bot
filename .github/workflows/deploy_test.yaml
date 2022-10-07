@@ -74,7 +74,7 @@ jobs:
             sudo rm -f .env
             touch .env
             echo TELEGRAM_TOKEN=${{ secrets.TELEGRAM_TOKEN }} >> .env
-            echo WEBHOOK_URL=${{ secrets.WEBHOOK_URL }} >> .env
+            echo APPLICATION_URL=${{ secrets.APPLICATION_URL }} >> .env
             echo SECRET_TELEGRAM_TOKEN=${{ secrets.SECRET_TELEGRAM_TOKEN }} >> .env
 
             echo WEEKLY_STAT_TIME=${{ secrets.WEEKLY_STAT_TIME }} >> .env
