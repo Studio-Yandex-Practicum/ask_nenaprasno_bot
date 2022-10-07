@@ -38,7 +38,7 @@ jobs:
           LOG_NAME: bot.log
 
           BOT_PORT: 8000
-          WEBHOOK_URL: ${{ secrets.WEBHOOK_URL }}
+          APPLICATION_URL: ${{ secrets.APPLICATION_URL }}
           HOST: 127.0.0.1
 
           WEEKLY_STAT_TIME: 13:00

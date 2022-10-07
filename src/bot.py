@@ -72,14 +72,24 @@ def create_bot():
         ]
     )
     # Once per week bot sends current week statistics (default: friday)
-    bot_app.job_queue.run_daily(weekly_stat_job, time=config.WEEKLY_STAT_TIME, days=config.WEEKLY_STAT_WEEK_DAYS)
+    bot_app.job_queue.run_daily(
+        weekly_stat_job,
+        time=config.STAT_COLLECTION_TIME,
+        days=config.WEEKLY_STAT_WEEK_DAYS,
+    )
     # Once per month bot sends bill reminder (default: 1st day of month)
     bot_app.job_queue.run_monthly(
-        monthly_bill_reminder_job, when=config.MONTHLY_RECEIPT_REMINDER_TIME, day=config.MONTHLY_RECEIPT_REMINDER_DAY
+        monthly_bill_reminder_job,
+        when=config.STAT_COLLECTION_TIME,
+        day=config.MONTHLY_RECEIPT_REMINDER_DAY,
     )
 
     # Once per month bot sends previous month statistics
-    bot_app.job_queue.run_monthly(monthly_stat_job, when=config.MONTHLY_STAT_TIME, day=config.MONTHLY_STAT_DAY)
+    bot_app.job_queue.run_monthly(
+        monthly_stat_job,
+        when=config.STAT_COLLECTION_TIME,
+        day=config.MONTHLY_STAT_DAY,
+    )
 
     # Once per day (but for every time zone) bot collects overdue consultations and send reminder
     # Doctor receives reminder at DAILY_OVERDUE_CONSULTATIONS_REMINDER_JOB his time zone
@@ -108,7 +118,7 @@ async def init_webhook() -> Application:
     bot_app = create_bot()
     bot_app.updater = None
     await bot_app.bot.set_webhook(
-        url=urljoin(config.WEBHOOK_URL, "telegramWebhookApi"), secret_token=config.SECRET_TELEGRAM_TOKEN
+        url=urljoin(config.APPLICATION_URL, "telegramWebhookApi"), secret_token=config.SECRET_TELEGRAM_TOKEN
     )
     return bot_app
 
