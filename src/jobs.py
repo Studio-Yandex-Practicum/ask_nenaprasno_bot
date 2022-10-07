@@ -156,11 +156,7 @@ async def weekly_stat_job(context: CallbackContext) -> None:
 
     for tz_string in timezones:
         timezone_ = get_timezone_from_str(tz_string)
-        start_time = (
-            timedelta(microseconds=1)
-            if timezone_ == timezone.utc
-            else config.WEEKLY_STAT_TIME.replace(tzinfo=timezone_)
-        )
+        start_time = config.WEEKLY_STAT_TIME.replace(tzinfo=timezone_)
         context.job_queue.run_once(send_weekly_statistic_job, when=start_time, data=tz_string)
 
 
@@ -172,11 +168,7 @@ async def monthly_stat_job(context: CallbackContext) -> None:
         if statistic.telegram_id is None:
             continue
         timezone_ = get_timezone_from_str(statistic.timezone)
-        start_time = (
-            timedelta(microseconds=1)
-            if timezone_ == timezone.utc
-            else config.MONTHLY_STAT_TIME.replace(tzinfo=timezone_)
-        )
+        start_time = config.MONTHLY_STAT_TIME.replace(tzinfo=timezone_)
         context.job_queue.run_once(send_monthly_statistic_job, when=start_time, data=statistic)
 
 
