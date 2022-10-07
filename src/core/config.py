@@ -1,6 +1,7 @@
 import os
 from datetime import datetime, time, timezone
 from pathlib import Path
+from zoneinfo import ZoneInfo
 
 from dotenv import dotenv_values
 
@@ -73,6 +74,10 @@ MONTHLY_RECEIPT_REMINDER_DAY = get_int("MONTHLY_RECEIPT_REMINDER_DAY", "20")
 # Параметры рассылки напоминаний
 DAILY_COLLECT_CONSULTATIONS_TIME = time(hour=0, minute=0, tzinfo=timezone.utc)
 DAILY_CONSULTATIONS_REMINDER_TIME = get_time("DAILY_CONSULTATIONS_REMINDER_TIME", "17:00")
+
+# Параметры запуска сбора недельной и месячной статистики - по умолчанию, полночь GTM+12
+STAT_COLLECTION_TIMEZONE = "Asia/Kamchatka"
+STAT_COLLECTION_TIME = time(hour=0, minute=0, second=0, tzinfo=ZoneInfo(STAT_COLLECTION_TIMEZONE))
 
 # Файл с сохраненными данными бота
 BOT_PERSISTENCE_FILE = BASE_DIR / "persistence_data" / "bot_persistence_file"

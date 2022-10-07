@@ -1,6 +1,5 @@
 from datetime import time, timedelta
 from urllib.parse import urljoin
-from zoneinfo import ZoneInfo
 
 from telegram import Update
 from telegram.ext import (
@@ -75,20 +74,20 @@ def create_bot():
     # Once per week bot sends current week statistics (default: friday)
     bot_app.job_queue.run_daily(
         weekly_stat_job,
-        time=time(hour=0, minute=0, second=0, tzinfo=ZoneInfo("Asia/Kamchatka")),
+        time=config.STAT_COLLECTION_TIME,
         days=config.WEEKLY_STAT_WEEK_DAYS,
     )
     # Once per month bot sends bill reminder (default: 1st day of month)
     bot_app.job_queue.run_monthly(
         monthly_bill_reminder_job,
-        when=time(hour=0, minute=0, second=0, tzinfo=ZoneInfo("Asia/Kamchatka")),
+        when=config.STAT_COLLECTION_TIME,
         day=config.MONTHLY_RECEIPT_REMINDER_DAY,
     )
 
     # Once per month bot sends previous month statistics
     bot_app.job_queue.run_monthly(
         monthly_stat_job,
-        when=time(hour=0, minute=0, second=0, tzinfo=ZoneInfo("Asia/Kamchatka")),
+        when=config.STAT_COLLECTION_TIME,
         day=config.MONTHLY_STAT_DAY,
     )
 
