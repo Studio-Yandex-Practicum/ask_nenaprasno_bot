@@ -1,3 +1,5 @@
+from urllib.parse import urljoin
+
 from telegram import InlineKeyboardButton, InlineKeyboardMarkup, Update
 from telegram.ext import CallbackContext, CallbackQueryHandler, CommandHandler, ConversationHandler
 
@@ -93,7 +95,7 @@ async def support_or_consult_callback(update: Update, context: CallbackContext) 
     keyboard = [
         [
             InlineKeyboardButton("Получить онлайн-консультацию", url=config.URL_ASK_NENAPRASNO),
-            InlineKeyboardButton("Поддержать проект", url=f"{config.URL_ASK_NENAPRASNO}/#donation"),
+            InlineKeyboardButton("Поддержать проект", url=urljoin(config.URL_ASK_NENAPRASNO, "/#donation")),
         ]
     ]
     reply_markup = InlineKeyboardMarkup(keyboard)
