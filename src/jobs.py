@@ -67,8 +67,6 @@ MONTHLY_STATISTIC_TEMPLATE = (
     "Так держать!\n"
 )
 
-DAILY_BILL_REMINDER = "Вы активно работали весь месяц! Не забудьте отправить чек нашему кейс-менеджеру"
-
 DATE_FORMAT = "%Y-%m-%dT%H:%M:%S.%fZ"
 NATIONAL_DATE_FORMAT = "%d.%m.%Y"
 
@@ -251,10 +249,14 @@ async def monthly_bill_reminder_job(context: CallbackContext) -> None:
 async def daily_bill_remind_job(context: CallbackContext) -> None:
     """Send message every day until delete job from JobQueue."""
     job = context.job
-    message = DAILY_BILL_REMINDER
-    bill_done_button = InlineKeyboardButton(text="✅ Уже отправил(а)", callback_data=CALLBACK_DONE_BILL_COMMAND)
-    bill_skip_button = InlineKeyboardButton(text="🕑 Скоро отправлю", callback_data=CALLBACK_SKIP_BILL_COMMAND)
-    menu = InlineKeyboardMarkup([[bill_done_button], [repeat_after_one_hour_button], [bill_skip_button]])
+    message = "Вы активно работали весь месяц! Не забудьте отправить чек нашему кейс-менеджеру"
+    menu = InlineKeyboardMarkup(
+        [
+            [InlineKeyboardButton(text="✅ Уже отправил(а)", callback_data=CALLBACK_DONE_BILL_COMMAND)],
+            [repeat_after_one_hour_button],
+            [InlineKeyboardButton(text="🕑 Скоро отправлю", callback_data=CALLBACK_SKIP_BILL_COMMAND)],
+        ]
+    )
     await send_message(bot=context.bot, chat_id=job.chat_id, text=message, reply_markup=menu)
 
 
