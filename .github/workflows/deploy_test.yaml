@@ -1,0 +1,117 @@
+name: ask_nenaprasno_bot_deploy_on_test
+
+on:
+  push:
+    branches:
+      - feature/customer_test_deploy
+  pull_request:
+    branches:
+      - develop
+    types: [closed]
+
+env:
+  REGISTRY: ghcr.io
+  IMAGE_NAME: nenaprasno-ask-bot
+  DEPLOY_PATH: /opt/ask-bot
+  REP_OWNER: studio-yandex-practicum
+
+defaults:
+  run:
+    working-directory: .
+
+jobs:
+  build_and_push:
+    # if: github.event.pull_request.merged == true
+    name: Push Docker image to GitHub Packages
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v2
+      - name: Docker login
+        uses: docker/login-action@v1
+        with:
+          registry: ${{ env.REGISTRY }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+      - name: Build and push
+        uses: docker/build-push-action@v2
+        with:
+          context: .
+          file: Dockerfile
+          labels: runnumber=${GITHUB_RUN_ID}
+          push: true
+          tags: |
+            ${{ env.REGISTRY }}/${{ env.REP_OWNER }}/${{ env.IMAGE_NAME }}:test,
+            ${{ env.REGISTRY }}/${{ env.REP_OWNER }}/${{ env.IMAGE_NAME }}:${{ github.sha }}
+
+  deploy:
+    # if: github.event.pull_request.merged == true
+    name: Deploy
+    runs-on: ubuntu-latest
+    environment:
+      name: Test
+    needs: build_and_push
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v2
+      - name: Copy docker-compose file
+        uses: appleboy/scp-action@master
+        with:
+          host: ${{ secrets.HOST }}
+          username: ${{ secrets.USER }}
+          key: ${{ secrets.SSH_KEY }}
+          source: "infrastructure/docker-compose.test.yaml"
+          target: ${{ env.DEPLOY_PATH }}
+          strip_components: 1
+      - name: Create .env file
+        uses: appleboy/ssh-action@master
+        with:
+          host: ${{ secrets.HOST }}
+          username: ${{ secrets.USER }}
+          key: ${{ secrets.SSH_KEY }}
+          script: |
+            cd ${{ env.DEPLOY_PATH }}
+            sudo rm -f .env
+            touch .env
+            echo TELEGRAM_TOKEN=${{ secrets.TELEGRAM_TOKEN }} >> .env
+            echo WEBHOOK_URL=${{ secrets.WEBHOOK_URL }} >> .env
+            echo SECRET_TELEGRAM_TOKEN=${{ secrets.SECRET_TELEGRAM_TOKEN }} >> .env
+
+            echo WEEKLY_STAT_TIME=${{ secrets.WEEKLY_STAT_TIME }} >> .env
+            echo WEEKLY_STAT_WEEK_DAYS=${{ secrets.WEEKLY_STAT_WEEK_DAYS }} >> .env
+            echo MONTHLY_STAT_TIME=${{ secrets.MONTHLY_STAT_TIME }} >> .env
+            echo MONTHLY_STAT_DAY=${{ secrets.MONTHLY_STAT_DAY }} >> .env
+
+            echo MONTHLY_RECEIPT_REMINDER_TIME=${{ secrets.MONTHLY_RECEIPT_REMINDER_TIME }} >> .env
+            echo MONTHLY_RECEIPT_REMINDER_DAY=${{ secrets.MONTHLY_RECEIPT_REMINDER_DAY }} >> .env
+
+            echo DAYLY_COLLECT_CONSULTATIONS_TIME=${{ secrets.DAYLY_COLLECT_CONSULTATIONS_TIME }} >> .env
+            echo DAILY_CONSULTATIONS_REMINDER_TIME=${{ secrets.DAILY_CONSULTATIONS_REMINDER_TIME }} >> .env
+
+            echo URL_ASK_NENAPRASNO=${{ secrets.URL_ASK_NENAPRASNO }} >> .env
+            echo URL_ASK_NENAPRASNO_API=${{ secrets.URL_ASK_NENAPRASNO_API }} >> .env
+            echo SITE_API_BOT_TOKEN=${{ secrets.SITE_API_BOT_TOKEN }} >> .env
+            echo TRELLO_BORD_ID=${{ secrets.TRELLO_BORD_ID }} >> .env
+
+  start_application:
+    # if: github.event.pull_request.merged == true
+    name: Start application
+    runs-on: ubuntu-latest
+    environment:
+      name: Test
+    needs: deploy
+    steps:
+      - name: Start appication
+        uses: appleboy/ssh-action@master
+        with:
+          host: ${{ secrets.HOST }}
+          username: ${{ secrets.USER }}
+          key: ${{ secrets.SSH_KEY }}
+          script: |
+            cd ${{ env.DEPLOY_PATH }}
+
+            sudo docker image prune -f
+            sudo docker pull ${{ env.REGISTRY }}/${{ env.REP_OWNER }}/${{ env.IMAGE_NAME }}:test
+            sudo docker compose --file docker-compose.test.yaml stop
+            sudo docker compose --file docker-compose.test.yaml rm bot -f
+            sudo docker compose --file docker-compose.test.yaml up -d

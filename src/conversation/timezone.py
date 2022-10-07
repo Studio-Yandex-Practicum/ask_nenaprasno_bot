@@ -16,6 +16,7 @@ from telegram.ext import (
 )
 
 from constants import callback_data, states
+from constants.timezone import DEFAULT_TIMEZONE
 from core.config import URL_SERVICE_RULES
 from core.send_message import reply_message
 from decorators.logger import async_error_logger
@@ -23,7 +24,6 @@ from get_timezone import get_timezone_from_location, get_timezone_from_text_mess
 from menu_button import COMMANDS, menu_button
 
 ASK_FLAG = "ask_flag"
-DEFAULT_TIME = "UTC+03:00"
 
 
 @async_error_logger(name="conversation.timezone.get_timezone")
@@ -121,7 +121,7 @@ async def set_default_timezone(update: Update, context: CallbackContext) -> str:
     """
     Sets default timezone (Moscow).
     """
-    timezone = DEFAULT_TIME
+    timezone = DEFAULT_TIMEZONE
     await set_timezone(update.effective_chat.id, timezone, context)
     return await check_timezone(update, context, timezone)
 
