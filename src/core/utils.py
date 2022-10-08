@@ -44,9 +44,8 @@ def build_trello_url(username_trello: str, overdue: bool = False) -> str:
     trello_filter = [f"member:{username_trello}"]
     if overdue:
         trello_filter.append("overdue:true")
-    params = {"filter": ",".join(trello_filter)}
 
-    return "/?".join((urljoin("https://trello.com/b/", TRELLO_BORD_ID), urlencode(params)))
+    return urljoin("https://trello.com/b/", TRELLO_BORD_ID) + "/?" + urlencode({"filter": ",".join(trello_filter)})
 
 
 def build_consultation_url(consultation_id: str) -> str:
