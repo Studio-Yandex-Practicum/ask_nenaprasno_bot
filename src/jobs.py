@@ -284,7 +284,8 @@ def get_reminder_text(
 
 async def check_consultation_status_and_send_reminder(context: CallbackContext) -> None:
     """Sends reminder after check."""
-    if context.job.data.consultation_in_valid_time_range():
+    consultation = context.job.data
+    if consultation.consultation_in_valid_time_range():
         await send_reminder_now(context)
 
 
