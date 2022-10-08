@@ -1,7 +1,7 @@
 import re
 from datetime import timedelta, timezone
 from typing import Optional
-from urllib.parse import urlencode, urljoin
+from urllib.parse import urljoin
 
 from constants.timezone import MOSCOW_TIME_OFFSET
 from core.config import TRELLO_BORD_ID, URL_ASK_NENAPRASNO
@@ -41,11 +41,11 @@ def get_word_genitive(number, single, many):
 
 
 def build_trello_url(username_trello: str, overdue: bool = False) -> str:
-    trello_filter = [f"member:{username_trello}"]
+    trello_filter = f"member:{username_trello}"
     if overdue:
-        trello_filter.append("overdue:true")
+        trello_filter += ",overdue:true"
 
-    return urljoin("https://trello.com/b/", TRELLO_BORD_ID) + "/?" + urlencode({"filter": ",".join(trello_filter)})
+    return urljoin("https://trello.com/b/", TRELLO_BORD_ID) + f"/?filter={trello_filter}"
 
 
 def build_consultation_url(consultation_id: str) -> str:
