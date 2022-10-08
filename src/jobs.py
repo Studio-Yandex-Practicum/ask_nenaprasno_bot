@@ -252,12 +252,12 @@ async def daily_bill_remind_job(context: CallbackContext) -> None:
     message = "Вы активно работали весь месяц! Не забудьте отправить чек нашему кейс-менеджеру"
     menu = InlineKeyboardMarkup(
         [
-            [InlineKeyboardButton(text="✅ Уже отправил(а)", callback_data=CALLBACK_DONE_BILL_COMMAND)],
+            [InlineKeyboardButton("✅ Уже отправил(а)", callback_data=CALLBACK_DONE_BILL_COMMAND)],
             [repeat_after_one_hour_button],
-            [InlineKeyboardButton(text="🕑 Скоро отправлю", callback_data=CALLBACK_SKIP_BILL_COMMAND)],
+            [InlineKeyboardButton("🕑 Скоро отправлю", callback_data=CALLBACK_SKIP_BILL_COMMAND)],
         ]
     )
-    await send_message(bot=context.bot, chat_id=job.chat_id, text=message, reply_markup=menu)
+    await send_message(context.bot, job.chat_id, message, menu)
 
 
 async def get_consultations_count(telegram_id: int) -> Tuple:

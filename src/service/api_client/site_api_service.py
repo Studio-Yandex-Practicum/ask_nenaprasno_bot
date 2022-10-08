@@ -32,7 +32,7 @@ class SiteAPIService(AbstractAPIService):
 
     async def get_bill(self) -> Optional[BillStat]:
         url = urljoin(self.site_url, "/tgbot/bill")
-        users = await self.__get_json_data(url=url)
+        users = await self.__get_json_data(url)
         if users is None:
             return None
         return BillStat.from_dict(users)
