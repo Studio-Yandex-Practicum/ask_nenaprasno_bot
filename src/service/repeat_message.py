@@ -11,28 +11,22 @@ from telegram import InlineKeyboardButton, Update
 from telegram.ext import CallbackContext, ContextTypes
 
 from constants.callback_data import CALLBACK_REPEAT_COMMAND
-from core.send_message import edit_message, reply_message
+from core.send_message import edit_message, send_message
 
 
 async def repeat_message_after_1_hour_callback(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
-    """
-    Add a repeat message task to the queue.
-    """
+    """Add a repeat message task to the queue."""
     query = update.callback_query
     data = query.message
-    context.job_queue.run_once(callback=repeat_message_job, when=timedelta(hours=1), data=data)
-    await edit_message(update=update, new_text=data.text_markdown_v2_urled)
+    context.job_queue.run_once(repeat_message_job, when=timedelta(hours=1), data=data, chat_id=query.message.chat.id)
+    await edit_message(update, data.text_markdown)
     await query.answer()  # close progress bar in chat
 
 
-async def repeat_message_job(update: Update, context: CallbackContext) -> None:
-    """
-    Repeat delayed message.
-    Instead this function should use 'send message' function from Slava
-    Kramorenko
-    """
+async def repeat_message_job(context: CallbackContext) -> None:
+    """Repeat delayed message."""
     data = context.job.data
-    await reply_message(update=update, text=data.text_markdown_v2_urled, reply_markup=data.reply_markup)
+    await send_message(context.bot, context.job.chat_id, data.text_markdown, data.reply_markup)
 
 
-repeat_after_one_hour_button = InlineKeyboardButton(text="🕑 Напомнить через час", callback_data=CALLBACK_REPEAT_COMMAND)
+repeat_after_one_hour_button = InlineKeyboardButton("🕑 Напомнить через час", callback_data=CALLBACK_REPEAT_COMMAND)
