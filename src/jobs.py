@@ -98,7 +98,7 @@ class DueConsultationData(BaseConsultationData):
 
     message_template: str = DUE_REMINDER_TEMPLATE
 
-    def consultation_in_valid_time_range(self) -> bool:
+    def in_valid_time_range(self) -> bool:
         return self.due_date() == datetime.utcnow().date()
 
 
@@ -110,7 +110,7 @@ class DueHourConsultationData(BaseConsultationData):
 
     message_template: str = DUE_HOUR_REMINDER_TEMPLATE
 
-    def consultation_in_valid_time_range(self) -> bool:
+    def in_valid_time_range(self) -> bool:
         return self.due_date() == datetime.utcnow().date()
 
 
@@ -122,7 +122,7 @@ class PastConsultationData(BaseConsultationData):
 
     message_template: str = PAST_REMINDER_TEMPLATE
 
-    def consultation_in_valid_time_range(self) -> bool:
+    def in_valid_time_range(self) -> bool:
         return self.due_date() < datetime.utcnow().date()
 
 
@@ -134,7 +134,7 @@ class ForwardConsultationData(BaseConsultationData):
 
     message_template: str = FORWARD_REMINDER_TEMPLATE
 
-    def consultation_in_valid_time_range(self) -> bool:
+    def in_valid_time_range(self) -> bool:
         return self.due_date() - datetime.utcnow().date() == timedelta(days=1)
 
 
@@ -285,7 +285,7 @@ def get_reminder_text(
 async def check_consultation_status_and_send_reminder(context: CallbackContext) -> None:
     """Sends reminder after check."""
     consultation = context.job.data
-    if consultation.consultation_in_valid_time_range():
+    if consultation.in_valid_time_range():
         await send_reminder_now(context)
 
 
