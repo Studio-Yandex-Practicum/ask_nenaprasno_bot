@@ -82,18 +82,14 @@ class BaseConsultationData:
     consultation: Consultation
     message_template: Optional[str]
 
-    async def _get_date(self, field: str) -> Optional[date]:
-        """Returns date or None."""
-        consultation = await service.get_consultation(self.consultation.id)
-        if consultation is None or getattr(consultation, field) is None:
-            return None
-        return datetime.strptime(getattr(consultation, field), DATE_FORMAT).date()
+    def __get_date(self, prop: str) -> date:
+        return datetime.strptime(getattr(self.consultation, prop), DATE_FORMAT).date()
 
-    async def get_due_date(self) -> date:
-        return await self._get_date("due")
+    def due_date(self) -> date:
+        return self.__get_date("due")
 
-    async def get_created_date(self) -> date:
-        return await self._get_date("created")
+    def created_date(self) -> date:
+        return self.__get_date("created")
 
 
 @dataclass(frozen=True)
@@ -104,9 +100,8 @@ class DueConsultationData(BaseConsultationData):
 
     message_template: str = DUE_REMINDER_TEMPLATE
 
-    async def is_valid(self):
-        """Checks if consulation status is still valid."""
-        return await self.get_due_date() == date.today()
+    def in_valid_time_range(self) -> bool:
+        return self.due_date() == datetime.utcnow().date()
 
 
 @dataclass(frozen=True)
@@ -117,9 +112,8 @@ class DueHourConsultationData(BaseConsultationData):
 
     message_template: str = DUE_HOUR_REMINDER_TEMPLATE
 
-    async def is_valid(self):
-        """Checks if consulation status is still valid."""
-        return await self.get_due_date() == date.today()
+    def in_valid_time_range(self) -> bool:
+        return self.due_date() == datetime.utcnow().date()
 
 
 @dataclass(frozen=True)
@@ -130,9 +124,8 @@ class PastConsultationData(BaseConsultationData):
 
     message_template: str = PAST_REMINDER_TEMPLATE
 
-    async def is_valid(self):
-        """Checks if consulation status is still valid."""
-        return await self.get_due_date() < date.today()
+    def in_valid_time_range(self) -> bool:
+        return self.due_date() < datetime.utcnow().date()
 
 
 @dataclass(frozen=True)
@@ -143,9 +136,8 @@ class ForwardConsultationData(BaseConsultationData):
 
     message_template: str = FORWARD_REMINDER_TEMPLATE
 
-    async def is_valid(self):
-        """Checks if consulation status is still valid."""
-        return await self.get_due_date() - date.today() == timedelta(days=1)
+    def in_valid_time_range(self) -> bool:
+        return self.due_date() - datetime.utcnow().date() == timedelta(days=1)
 
 
 async def weekly_stat_job(context: CallbackContext) -> None:
@@ -279,7 +271,6 @@ def get_reminder_text(
     data: [PastConsultationData | DueConsultationData | DueHourConsultationData | ForwardConsultationData],
     active_cons_count: int,
     expired_cons_count: int,
-    created: str = "",
 ) -> str:
     """Returns reminder text."""
     message_template = data.message_template
@@ -288,7 +279,7 @@ def get_reminder_text(
     return message_template.format(
         consultation_id=consultation.id,
         consultation_number=consultation.number,
-        created=created,
+        created=data.created_date,
         active_consultations=active_cons_count,
         expired_consultations=expired_cons_count,
         site_url=build_consultation_url(consultation.id),
@@ -300,7 +291,8 @@ def get_reminder_text(
 
 async def check_consultation_status_and_send_reminder(context: CallbackContext) -> None:
     """Sends reminder after check."""
-    if await context.job.data.is_valid():
+    consultation = context.job.data
+    if consultation.in_valid_time_range():
         await send_reminder_now(context)
 
 
@@ -322,17 +314,14 @@ async def send_reminder_now(context: CallbackContext) -> None:
 
 async def send_reminder_overdue(context: CallbackContext) -> None:
     """Send overdue-consultation reminder"""
-    # await send_reminder_list_overdue_consultations(context.bot, *context.job.data)
     telegram_id, consultations = context.job.data
     active_cons_count, expired_cons_count = await get_consultations_count(telegram_id)
 
     if len(consultations) == 1:
-        created = (await consultations[0].get_created_date()).strftime(NATIONAL_DATE_FORMAT)
         message = get_reminder_text(
             consultations[0],
             active_cons_count,
             expired_cons_count,
-            created,
         )
     else:
         message = await get_overdue_reminder_text(consultations, active_cons_count, expired_cons_count)
