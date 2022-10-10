@@ -2,11 +2,10 @@ name: Check bot productivity
 
 on:
   push:
-#    types:
-#      - opened
+    types:
+      - opened
     branches:
-#      - develop
-      - fix-bot-productivity-5
+      - develop
   pull_request:
     types:
       - opened
