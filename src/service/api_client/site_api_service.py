@@ -1,6 +1,6 @@
 # pylint: disable=no-member
 import json
-from typing import Optional
+from typing import Optional, Tuple
 from urllib.parse import urljoin
 
 import httpx
@@ -22,10 +22,6 @@ from service.api_client.models import (
 
 
 class SiteAPIService(AbstractAPIService):
-    """
-    TODO: development after Frontend API creation
-    """
-
     def __init__(self):
         self.site_url: str = config.URL_ASK_NENAPRASNO_API
         self.bot_token: str = config.SITE_API_BOT_TOKEN
@@ -64,6 +60,13 @@ class SiteAPIService(AbstractAPIService):
         if exp_consultations is None:
             return None
         return UserExpiredConsultations.from_dict(exp_consultations)
+
+    async def get_consultations_count(self, telegram_id: int) -> Tuple:
+        """Gets count of active and expired consultations and returns it in tuple."""
+        active_cons_count = (await self.get_user_active_consultations(telegram_id=telegram_id)).active_consultations
+        expired_cons_count = (await self.get_user_expired_consultations(telegram_id=telegram_id)).expired_consultations
+
+        return active_cons_count, expired_cons_count
 
     async def get_user_month_stat(self, telegram_id: int) -> Optional[UserMonthStat]:
         url = urljoin(self.site_url, f"/tgbot/stat/monthly/user/{telegram_id}")
