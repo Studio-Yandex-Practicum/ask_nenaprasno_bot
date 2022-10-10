@@ -144,25 +144,21 @@ async def consultation_close(request: Request) -> Response:
 @requires("authenticated", status_code=401)
 async def consultation_message(request: Request) -> Response:
     try:
-        request_data = await deserialize(request, ConsultationModel)
+        consultation = await deserialize(request, ConsultationModel)
     except BadRequestError as error:
         logger.error("Got a BadRequestError: %s", error)
         return Response(status_code=httpx.codes.BAD_REQUEST)
 
-    bot = api.state.bot_app.bot
-    site_url = build_consultation_url(request_data.consultation_id)
-    trello_url = build_trello_url(request_data.username_trello)
-    service = APIService()
-    active_conusultations = await service.get_user_active_consultations(telegram_id=request_data.telegram_id)
+    site_url = build_consultation_url(consultation.consultation_id)
+    trello_url = build_trello_url(consultation.username_trello)
 
     text = (
-        f"Вау! Получено новое сообщение в чате заявки ***{request_data.consultation_number}***\n"
-        f"[Прочитать сообщение]({site_url})\n\n"
-        f"[Открыть Trello]({trello_url})\n\n"
-        f"Заявки в работе: {active_conusultations.active_consultations}\n\n"
-        f"Из них у {len(active_conusultations.expiring_consultations_data)} завтра истекает срок ответа."
+        f"Вау! Получено новое сообщение в чате заявки ***{consultation.consultation_number}***\n"
+        f"[Прочитать сообщение]({site_url})\n"
+        f"\n"
+        f"[Открыть Trello]({trello_url})"
     )
-    await send_message(bot=bot, chat_id=request_data.telegram_id, text=text)
+    await send_message(api.state.bot_app.bot, consultation.telegram_id, text)
     return Response(status_code=httpx.codes.OK)
 
 
