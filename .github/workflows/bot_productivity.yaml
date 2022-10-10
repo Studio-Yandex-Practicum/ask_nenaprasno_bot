@@ -2,10 +2,11 @@ name: Check bot productivity
 
 on:
   push:
-    types:
-      - opened
+#    types:
+#      - opened
     branches:
-      - develop
+#      - develop
+      - fix-bot-productivity-5
   pull_request:
     types:
       - opened
@@ -16,6 +17,8 @@ on:
 jobs:
   build_and_run_bot:
     name: Startup bot
+    environment:
+      name: Test
     runs-on: ubuntu-latest
     steps:
       - name: Checkout repo
