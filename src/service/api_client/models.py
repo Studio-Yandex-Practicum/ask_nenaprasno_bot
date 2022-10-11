@@ -48,19 +48,9 @@ class WeekStat:
 
 @dataclass_json
 @dataclass(frozen=True)
-class ConsultationData:
-    id: str
-    number: int
-
-
-@dataclass_json
-@dataclass(frozen=True)
 class UserActiveConsultations:
     username_trello: str
     active_consultations: int
-    # оставил словарь, чтобы не вылез старый баг, но
-    # когда будем править сообщение регулярной недельной статистики
-    # предлагаю использовать ConsultationData
     active_consultations_data: List[Dict]
     expiring_consultations_data: List[Dict]
 
@@ -87,7 +77,7 @@ class Consultation:
     created: str
     telegram_id: int
     username_trello: str
-    number: str
+    number: int
 
 
 @dataclass_json
