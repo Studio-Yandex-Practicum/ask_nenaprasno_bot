@@ -2,7 +2,7 @@
 from collections import defaultdict
 from dataclasses import dataclass
 from datetime import date, datetime, timedelta
-from typing import Dict, List, Optional, Tuple
+from typing import Dict, List, Optional
 
 from telegram import InlineKeyboardButton, InlineKeyboardMarkup
 from telegram.ext import CallbackContext
@@ -243,14 +243,6 @@ async def daily_bill_remind_job(context: CallbackContext) -> None:
     await send_message(context.bot, job.chat_id, message, menu)
 
 
-async def get_consultations_count(telegram_id: int) -> Tuple:
-    """Gets count of active and expired consultations and returns it in tuple."""
-    active_cons_count = (await service.get_user_active_consultations(telegram_id=telegram_id)).active_consultations
-    expired_cons_count = (await service.get_user_expired_consultations(telegram_id=telegram_id)).expired_consultations
-
-    return active_cons_count, expired_cons_count
-
-
 async def get_overdue_reminder_text(consultations: List, active_cons_count: int, expired_cons_count: int) -> str:
     """Returns overdue reminder text if user have more than one overdue consultations."""
     link_nenaprasno = make_consultations_list(
@@ -301,7 +293,7 @@ async def send_reminder_now(context: CallbackContext) -> None:
 
     consultation = job_data.consultation
     telegram_id = consultation.telegram_id
-    consultation_count = await get_consultations_count(telegram_id)
+    consultation_count = await service.get_consultations_count(telegram_id)
     text = get_reminder_text(job_data, *consultation_count)
 
     await send_message(
@@ -314,7 +306,7 @@ async def send_reminder_now(context: CallbackContext) -> None:
 async def send_reminder_overdue(context: CallbackContext) -> None:
     """Send overdue-consultation reminder"""
     telegram_id, consultations = context.job.data
-    active_cons_count, expired_cons_count = await get_consultations_count(telegram_id)
+    active_cons_count, expired_cons_count = await service.get_consultations_count(telegram_id)
 
     if len(consultations) == 1:
         message = get_reminder_text(
