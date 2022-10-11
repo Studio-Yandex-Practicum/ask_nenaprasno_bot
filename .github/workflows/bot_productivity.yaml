@@ -16,6 +16,8 @@ on:
 jobs:
   build_and_run_bot:
     name: Startup bot
+    environment:
+      name: Test
     runs-on: ubuntu-latest
     steps:
       - name: Checkout repo
@@ -34,32 +36,20 @@ jobs:
       - name: Start the bot
         env:
           TELEGRAM_TOKEN: ${{ secrets.TELEGRAM_TOKEN }}
-
-          LOG_NAME: bot.log
-
-          BOT_PORT: 8000
           APPLICATION_URL: ${{ secrets.APPLICATION_URL }}
           HOST: 127.0.0.1
-
           WEEKLY_STAT_TIME: 13:00
           WEEKLY_STAT_WEEK_DAYS: 0
-
           MONTHLY_STAT_TIME: 13:00
           MONTHLY_STAT_DAY: 19
-
           MONTHLY_RECEIPT_REMINDER_TIME: 13:00
           MONTHLY_RECEIPT_REMINDER_DAY: 19
-
-          DAYLY_COLLECT_CONSULTATIONS_TIME: 00:00
           DAILY_CONSULTATIONS_REMINDER_TIME: 17:00
-
-          SITE_API_BOT_TOKEN: ${{ secrets.SITE_API_BOT_TOKEN }}
-          URL_ASK_NENAPRASNO_API: https://api.ask.nenaprasno.ru
-          IS_FAKE_API: True
-
-          TRELLO_BORD_ID: 14nNNGRp
-
           URL_ASK_NENAPRASNO: ${{ secrets.URL_ASK_NENAPRASNO }}
+          URL_ASK_NENAPRASNO_API: ${{ secrets.URL_ASK_NENAPRASNO_API }}
+          SITE_API_BOT_TOKEN: ${{ secrets.SITE_API_BOT_TOKEN }}
+          TRELLO_BORD_ID: 14nNNGRp
+          IS_FAKE_API: True
 
         run: |
           python3 src/run_bot.py & sleep 15 && pkill -9 python
