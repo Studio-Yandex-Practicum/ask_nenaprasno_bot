@@ -1,7 +1,7 @@
 # pylint: disable=no-member
 from collections import defaultdict
 from dataclasses import dataclass
-from datetime import date, datetime, timedelta, timezone
+from datetime import date, datetime, timedelta
 from typing import Dict, List, Optional
 
 from telegram import InlineKeyboardButton, InlineKeyboardMarkup
@@ -9,7 +9,6 @@ from telegram.ext import CallbackContext
 
 from constants.callback_data import CALLBACK_DONE_BILL_COMMAND, CALLBACK_SKIP_BILL_COMMAND
 from constants.jobs import USER_BILL_REMINDER_TEMPLATE
-from constants.timezone import MOSCOW_TIME_OFFSET
 from conversation.menu import OVERDUE_TEMPLATE, format_average_user_answer_time, format_rating, make_consultations_list
 from core import config
 from core.send_message import send_message
@@ -364,13 +363,12 @@ async def daily_consulations_reminder_job(context: CallbackContext) -> None:
     - the due date expired one hour ago.
     """
     now = datetime.utcnow()
-    default_timezone = timezone(timedelta(hours=MOSCOW_TIME_OFFSET))
     consultations = await service.get_daily_consultations()
     overdue = defaultdict(list)
 
     for consultation in consultations:
         # Check every consultation
-        user_timezone = context.bot_data.get(int(consultation.telegram_id), default_timezone)
+        user_timezone = await get_user_timezone(int(consultation.telegram_id), context)
         due_time = datetime.strptime(consultation.due, DATE_FORMAT)
         user_time = datetime.now(tz=user_timezone)
 
