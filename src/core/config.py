@@ -54,7 +54,7 @@ LOG_PATH = BASE_DIR / "../logs" / LOG_NAME
 HOST = get_string("HOST", "0.0.0.0")
 APPLICATION_URL = get_string("APPLICATION_URL")
 
-PORT = get_int("BOT_PORT", "8000")
+PORT = 8000
 
 TOKEN = get_string("TELEGRAM_TOKEN")
 
