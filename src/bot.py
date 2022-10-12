@@ -40,7 +40,7 @@ async def done_bill_callback_handler(update: Update, context: ContextTypes.DEFAU
     """Delete job from JobQueue."""
     query = update.callback_query
     user_id = query.from_user.id
-    job_name = USER_BILL_REMINDER_TEMPLATE.format(user_id)
+    job_name = USER_BILL_REMINDER_TEMPLATE.format(telegram_id=user_id)
     current_jobs = context.job_queue.get_jobs_by_name(job_name)
     for job in current_jobs:
         job.schedule_removal()
