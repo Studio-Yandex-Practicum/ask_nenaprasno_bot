@@ -14,3 +14,5 @@ services:
       - ./.data/persistence_data:/code/src/persistence_data
 
 volumes:
+  logs:
+  persistence_data:
