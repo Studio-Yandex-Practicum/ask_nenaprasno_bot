@@ -25,7 +25,7 @@ class UserMonthStat:
 @dataclass(frozen=True)
 class MonthStat:
     telegram_id: int
-    timezone: str
+    timezone: Optional[str]
     username_trello: str
     closed_consultations: int
     rating: float
@@ -36,7 +36,7 @@ class MonthStat:
 @dataclass(frozen=True)
 class WeekStat:
     telegram_id: int
-    timezone: str
+    timezone: Optional[str]
     username_trello: str
     closed_consultations: int
     not_expiring_consultations: int

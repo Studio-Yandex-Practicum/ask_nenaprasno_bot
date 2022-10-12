@@ -215,7 +215,7 @@ async def monthly_bill_reminder_job(context: CallbackContext) -> None:
     user_ids = bill_stat.telegram_ids
     for telegram_id in user_ids:
         user_tz = await get_user_timezone(int(telegram_id), context)
-        job_name = USER_BILL_REMINDER_TEMPLATE.format(telegram_id)
+        job_name = USER_BILL_REMINDER_TEMPLATE.format(telegram_id=telegram_id)
 
         current_jobs = context.job_queue.get_jobs_by_name(job_name)
         for job in current_jobs:
