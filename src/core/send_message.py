@@ -1,4 +1,3 @@
-import logging
 from string import Template
 from typing import List, Optional
 
@@ -7,6 +6,7 @@ from telegram.constants import ParseMode
 from telegram.error import TelegramError
 from telegram.ext import CallbackContext
 
+from core.logger import logger
 from service.api_client.models import MonthStat, WeekStat
 
 
@@ -32,7 +32,7 @@ async def send_message(
         )
         return True
     except TelegramError:
-        logging.exception("The error sending the message to the chat: %s", chat_id)
+        logger.exception("The error sending the message to the chat: %s", chat_id)
         return False
 
 
@@ -55,7 +55,7 @@ async def edit_message(
         )
         return True
     except TelegramError:
-        logging.exception("The error editing the message to the chat: %d", update.effective_chat.id)
+        logger.exception("The error editing the message to the chat: %d", update.effective_chat.id)
         return False
 
 
@@ -75,7 +75,7 @@ async def reply_message(
         await message.reply_markdown(text=text, reply_markup=reply_markup)
         return True
     except TelegramError:
-        logging.exception("The error reply on the message to the chat: %d", update.effective_chat.id)
+        logger.exception("The error reply on the message to the chat: %d", update.effective_chat.id)
         return False
 
 
