@@ -110,6 +110,11 @@ def create_bot():
         time=config.DAILY_COLLECT_CONSULTATIONS_TIME,
         name=DAILY_CONSULTATIONS_REMINDER_JOB,
     )
+
+    # Initial data collection for daily consultation on bot start up
+    bot_app.job_queue.run_once(daily_consulations_reminder_job, when=timedelta(seconds=1))
+    bot_app.job_queue.run_once(daily_consulations_duedate_is_today_reminder_job, when=timedelta(seconds=1))
+
     return bot_app
 
 
@@ -132,6 +137,4 @@ def init_polling() -> None:
     :return: Initiated application
     """
     bot_app = create_bot()
-    bot_app.job_queue.run_once(daily_consulations_reminder_job, when=timedelta(seconds=1))
-    bot_app.job_queue.run_once(daily_consulations_duedate_is_today_reminder_job, when=timedelta(seconds=1))
     bot_app.run_polling()
