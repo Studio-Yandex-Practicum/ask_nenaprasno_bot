@@ -3,7 +3,7 @@ from core.logger import logger
 
 
 def async_error_logger(name):
-    """Logs errors in wrapped asyc functions."""
+    """Logs errors in wrapped async functions."""
 
     def log(func):
         async def wrapper(*args, **kwargs):

@@ -1,9 +1,10 @@
+import logging
 from string import Template
 from typing import List, Optional
 
 from telegram import Bot, InlineKeyboardMarkup, ReplyKeyboardMarkup, Update
 from telegram.constants import ParseMode
-from telegram.error import TelegramError
+from telegram.error import Forbidden, TelegramError
 from telegram.ext import CallbackContext
 
 from core.logger import logger
@@ -31,9 +32,11 @@ async def send_message(
             reply_markup=reply_markup,
         )
         return True
+    except Forbidden:
+        logger.warning("Forbidden: bot was blocked by the user: %s", chat_id)
     except TelegramError:
-        logger.exception("The error sending the message to the chat: %s", chat_id)
-        return False
+        logging.exception("The error sending the message to the chat: %s", chat_id)
+    return False
 
 
 async def edit_message(
