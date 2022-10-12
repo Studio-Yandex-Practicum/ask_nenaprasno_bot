@@ -12,8 +12,8 @@ from constants.jobs import USER_BILL_REMINDER_TEMPLATE
 from conversation.menu import OVERDUE_TEMPLATE, format_average_user_answer_time, format_rating, make_consultations_list
 from core import config
 from core.send_message import send_message
-from core.utils import build_consultation_url, build_trello_url, get_timezone_from_str, get_word_case, get_word_genitive
-from get_timezone import get_user_timezone
+from core.utils import build_consultation_url, build_trello_url, get_word_case, get_word_genitive
+from get_timezone import get_timezone_from_str, get_user_timezone
 from service.api_client import APIService
 from service.api_client.models import Consultation
 from service.repeat_message import repeat_after_one_hour_button

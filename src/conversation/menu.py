@@ -10,6 +10,7 @@ from core.config import URL_SERVICE_RULES
 from core.send_message import reply_message
 from core.utils import build_consultation_url, build_trello_url, get_word_case
 from decorators.logger import async_error_logger
+from get_timezone import get_user_timezone
 from service.api_client import APIService
 
 OVERDUE_TEMPLATE = (
@@ -34,6 +35,7 @@ async def menu(update: Update, context: ContextTypes.DEFAULT_TYPE) -> str:
     """
     Displays the menu.
     """
+    user_tz = await get_user_timezone(int(update.effective_user.id), context)
     menu_buttons = [
         [
             InlineKeyboardButton(
@@ -50,7 +52,8 @@ async def menu(update: Update, context: ContextTypes.DEFAULT_TYPE) -> str:
         ],
         [
             InlineKeyboardButton(
-                text="Настроить часовой пояс", callback_data=callback_data.CALLBACK_CONFIGURATE_TIMEZONE_COMMAND
+                text=f"Настроить часовой пояс (сейчас {user_tz})",
+                callback_data=callback_data.CALLBACK_CONFIGURATE_TIMEZONE_COMMAND,
             )
         ],
     ]
