@@ -132,4 +132,6 @@ def init_polling() -> None:
     :return: Initiated application
     """
     bot_app = create_bot()
+    bot_app.job_queue.run_once(daily_consulations_reminder_job, when=timedelta(seconds=1))
+    bot_app.job_queue.run_once(daily_consulations_duedate_is_today_reminder_job, when=timedelta(seconds=1))
     bot_app.run_polling()
