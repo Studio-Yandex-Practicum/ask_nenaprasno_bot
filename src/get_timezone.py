@@ -14,7 +14,7 @@ api = APIService()
 
 
 def get_timezone_from_str(tz_string: Optional[str]) -> datetime.timezone:
-    """Returns timezone based on user.timezone."""
+    """Returns datetime.timezone based on string in format UTC+00:00."""
     if tz_string is None:
         return datetime.timezone(datetime.timedelta(hours=MOSCOW_TIME_OFFSET))
 
@@ -24,7 +24,7 @@ def get_timezone_from_str(tz_string: Optional[str]) -> datetime.timezone:
     return datetime.timezone(tz_delta) if sign == "+" else datetime.timezone(-tz_delta)
 
 
-async def set_timezone(telegram_id: int, text_utc: str, context: CallbackContext):
+async def set_timezone(telegram_id: int, text_utc: str, context: CallbackContext) -> None:
     await api.set_user_timezone(telegram_id=telegram_id, user_time_zone=text_utc)
     context.bot_data.update({telegram_id: get_timezone_from_str(text_utc)})
 
@@ -57,7 +57,7 @@ async def get_timezone_from_text_message(update: Update, context: CallbackContex
     timezone = re.search(r"(UTC)?([-+]?)(\d{1,2})(:\d{1,2}|)$", update.message.text, flags=re.IGNORECASE)
     if timezone is None:
         return None
-    if int(timezone[3]) > 24:
+    if int(timezone[3]) > 12:
         return None
     timezone_sign = "+" if timezone[2] == "" else timezone[2]
     text_utc = f"UTC{timezone_sign}{format(timezone[3], '0>2')}:00"
