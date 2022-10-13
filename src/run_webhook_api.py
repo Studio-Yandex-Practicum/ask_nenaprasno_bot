@@ -14,7 +14,7 @@ from starlette.routing import Route
 from telegram import Bot, Update
 from telegram.error import TelegramError
 
-from bot import DAILY_CONSULTATIONS_REMINDER_JOB, init_webhook
+from bot import init_webhook
 from core import config
 from core.exceptions import BadRequestError
 from core.logger import logger
@@ -35,8 +35,6 @@ async def start_bot() -> None:
     bot_app = await init_webhook()
     await bot_app.initialize()
     await bot_app.start()
-    overdue_reminder = bot_app.job_queue.get_jobs_by_name(DAILY_CONSULTATIONS_REMINDER_JOB)[0]
-    await overdue_reminder.run(bot_app)
 
     # provide bot started bot application to server via global state variable
     # https://www.starlette.io/applications/#storing-state-on-the-app-instance
