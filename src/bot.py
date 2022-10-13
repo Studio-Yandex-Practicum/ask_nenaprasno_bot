@@ -32,7 +32,7 @@ from service.repeat_message import repeat_message_after_1_hour_callback
 
 async def skip_bill_callback_handler(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     """Delete button under message."""
-    await edit_message(update=update, new_text=update.callback_query.message.text_markdown_v2_urled)
+    await edit_message(update, update.callback_query.message.text_markdown_v2_urled)
     await update.callback_query.answer()  # close progress bar in chat
 
 
@@ -44,7 +44,7 @@ async def done_bill_callback_handler(update: Update, context: ContextTypes.DEFAU
     current_jobs = context.job_queue.get_jobs_by_name(job_name)
     for job in current_jobs:
         job.schedule_removal()
-    await edit_message(update=update, new_text="Не будем напоминать до следующего месяца")
+    await edit_message(update, "Не будем напоминать до следующего месяца")
     await query.answer()  # close progress bar in chat
 
 

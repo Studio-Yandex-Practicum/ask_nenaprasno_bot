@@ -25,12 +25,7 @@ async def send_message(
     :param reply_markup: ReplyKeyboardMarkup | None
     """
     try:
-        await bot.send_message(
-            chat_id=chat_id,
-            text=text,
-            parse_mode=ParseMode.MARKDOWN,
-            reply_markup=reply_markup,
-        )
+        await bot.send_message(chat_id, text, ParseMode.MARKDOWN_V2, reply_markup=reply_markup)
         return True
     except Forbidden:
         logger.warning("Forbidden: bot was blocked by the user: %s", chat_id)
@@ -51,11 +46,7 @@ async def edit_message(
     :param reply_markup: ReplyKeyboardMarkup | None
     """
     try:
-        await update.callback_query.edit_message_text(
-            text=new_text,
-            parse_mode=ParseMode.MARKDOWN,
-            reply_markup=reply_markup,
-        )
+        await update.callback_query.edit_message_text(new_text, ParseMode.MARKDOWN_V2, reply_markup=reply_markup)
         return True
     except TelegramError:
         logger.exception("The error editing the message to the chat: %d", update.effective_chat.id)
@@ -75,7 +66,7 @@ async def reply_message(
     """
     try:
         message = update.callback_query.message if update.message is None else update.message
-        await message.reply_markdown(text=text, reply_markup=reply_markup)
+        await message.reply_markdown(text, reply_markup=reply_markup)
         return True
     except TelegramError:
         logger.exception("The error reply on the message to the chat: %d", update.effective_chat.id)
