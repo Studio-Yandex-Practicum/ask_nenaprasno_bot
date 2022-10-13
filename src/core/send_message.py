@@ -17,13 +17,7 @@ async def send_message(
     text: str,
     reply_markup: Optional[ReplyKeyboardMarkup | InlineKeyboardMarkup] = None,
 ) -> bool:
-    """
-    Send simple text message.
-    :param bot: Bot
-    :param chat_id: int
-    :param text: str
-    :param reply_markup: ReplyKeyboardMarkup | None
-    """
+    """Send simple text message."""
     try:
         await bot.send_message(chat_id, text, ParseMode.MARKDOWN_V2, reply_markup=reply_markup)
         return True
@@ -39,12 +33,7 @@ async def edit_message(
     new_text: str,
     reply_markup: Optional[ReplyKeyboardMarkup | InlineKeyboardMarkup] = None,
 ) -> bool:
-    """
-    Edit text message.
-    :param update: Update
-    :param new_text: str
-    :param reply_markup: ReplyKeyboardMarkup | None
-    """
+    """Edit text message."""
     try:
         await update.callback_query.edit_message_text(new_text, ParseMode.MARKDOWN_V2, reply_markup=reply_markup)
         return True
@@ -58,12 +47,7 @@ async def reply_message(
     text: str,
     reply_markup: Optional[ReplyKeyboardMarkup | InlineKeyboardMarkup] = None,
 ) -> bool:
-    """
-    Reply on the message.
-    :param update: Update
-    :param text: str
-    :param reply_markup: ReplyKeyboardMarkup | None
-    """
+    """Reply on the message."""
     try:
         message = update.callback_query.message if update.message is None else update.message
         await message.reply_markdown(text, reply_markup=reply_markup)
