@@ -16,7 +16,7 @@ async def send_message(
 ) -> bool:
     """Send simple text message."""
     try:
-        await bot.send_message(chat_id, text, ParseMode.MARKDOWN_V2, reply_markup=reply_markup)
+        await bot.send_message(chat_id, text, ParseMode.MARKDOWN, reply_markup=reply_markup)
         return True
     except Forbidden:
         logger.warning("Forbidden: bot was blocked by the user: %s", chat_id)
@@ -32,7 +32,7 @@ async def edit_message(
 ) -> bool:
     """Edit text message."""
     try:
-        await update.callback_query.edit_message_text(new_text, ParseMode.MARKDOWN_V2, reply_markup=reply_markup)
+        await update.callback_query.edit_message_text(new_text, ParseMode.MARKDOWN, reply_markup=reply_markup)
         return True
     except TelegramError:
         logger.exception("The error editing the message to the chat: %d", update.effective_chat.id)

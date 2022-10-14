@@ -19,14 +19,14 @@ async def repeat_message_after_1_hour_callback(update: Update, context: ContextT
     query = update.callback_query
     data = query.message
     context.job_queue.run_once(repeat_message_job, when=timedelta(hours=1), data=data, chat_id=query.message.chat.id)
-    await edit_message(update, data.text_markdown_v2_urled)
+    await edit_message(update, data.text_markdown_urled)
     await query.answer()  # close progress bar in chat
 
 
 async def repeat_message_job(context: CallbackContext) -> None:
     """Repeat delayed message."""
     data = context.job.data
-    await send_message(context.bot, context.job.chat_id, data.text_markdown_v2_urled, data.reply_markup)
+    await send_message(context.bot, context.job.chat_id, data.text_markdown_urled, data.reply_markup)
 
 
 repeat_after_one_hour_button = InlineKeyboardButton("🕑 Напомнить через час", callback_data=CALLBACK_REPEAT_COMMAND)
