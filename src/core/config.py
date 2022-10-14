@@ -45,10 +45,8 @@ def get_bool(setting: str, default: str = "False") -> bool:
 
 
 # Параметры логгера
-LOG_NAME = get_string("LOG_NAME")
-LOG_NAME = LOG_NAME if LOG_NAME is not None else "bot.log"
-
-LOG_PATH = BASE_DIR / "../logs" / LOG_NAME
+LOG_PATH = BASE_DIR / ".." / "logs" / "bot.log"
+LOG_LEVEL_STR = get_string("LOG_LEVEL", "INFO")
 
 # Параметры локального сервера принимающего обновления от телеграм
 HOST = get_string("HOST", "0.0.0.0")
@@ -98,6 +96,3 @@ SITE_API_BOT_TOKEN = get_string("SITE_API_BOT_TOKEN")
 FORM_URL_FUTURE_EXPERT = "https://forms.gle/DGMUm35bxZytE3QLA"
 URL_SERVICE_RULES = "https://docs.google.com/document/d/1hW2HUv9aWQMnUBuIE_YQEtmIDDbk8KhpychckbyaIEQ/edit"
 URL_ASK_NENAPRASNO = get_string("URL_ASK_NENAPRASNO")
-
-# Включить debug-режим
-DEBUG = get_bool("DEBUG")

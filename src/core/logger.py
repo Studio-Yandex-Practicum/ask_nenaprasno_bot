@@ -1,9 +1,10 @@
 import logging
 from logging.handlers import TimedRotatingFileHandler
 
-from core.config import LOG_PATH
+from core.config import LOG_LEVEL_STR, LOG_PATH
 
 FORMATTER = "%(asctime)s %(levelname)s %(name)s:\t%(message)s"
+LOG_LEVEL = logging.getLevelName(LOG_LEVEL_STR)
 
 
 def get_file_handler():
@@ -21,6 +22,6 @@ def get_stream_handler():
 
 
 logger = logging.getLogger(__name__)
-logger.setLevel(logging.INFO)
+logger.setLevel(LOG_LEVEL)
 logger.addHandler(get_file_handler())
 logger.addHandler(get_stream_handler())
