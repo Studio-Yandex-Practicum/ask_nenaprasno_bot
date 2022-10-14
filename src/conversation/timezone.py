@@ -39,7 +39,16 @@ async def get_timezone(update: Update, context: CallbackContext) -> str:
         ],
     ]
     markup = ReplyKeyboardMarkup(keyboard, resize_keyboard=True, one_time_keyboard=True)
-    message = "Расшарьте геолокацию или напишите свою таймзону в формате UTC+03:00."
+    message = (
+        "Расшарьте геолокацию или напишите свою таймзону в любом формате относительно часового пояса UTC. "
+        "Вот возможные варианты для Москвы:\n"
+        "UTC+03:00\n"
+        "utc3:0\n"
+        "3:0\n"
+        "+3\n"
+        "3\n"
+        "Подробнее о часовых поясах РФ можно почитать на [Википедии](https://ru.wikipedia.org/wiki/Время_в_России)"
+    )
     await reply_message(update=update, text=message, reply_markup=markup)
     return states.TIMEZONE_STATE
 
@@ -55,7 +64,12 @@ async def check_timezone(update: Update, context: ContextTypes.DEFAULT_TYPE, tim
             update=update,
             text=(
                 "Не удалось определить часовой пояс. "
-                "Пожалуйста, введите его вручную. Например: UTC+03:00, UTC-03:00, utc3:0 и даже 3:0\n"
+                "Пожалуйста, введите его вручную. Вот возможные варианты для Москвы:\n"
+                "UTC+03:00\n"
+                "utc3:0\n"
+                "3:0\n"
+                "+3\n"
+                "3\n"
                 "[Википедия](https://ru.wikipedia.org/wiki/Время_в_России)"
             ),
         )

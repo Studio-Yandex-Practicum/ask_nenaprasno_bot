@@ -10,6 +10,7 @@ from core.config import URL_SERVICE_RULES
 from core.send_message import reply_message
 from core.utils import build_consultation_url, build_trello_url, get_word_case
 from decorators.logger import async_error_logger
+from get_timezone import get_user_timezone
 from service.api_client import APIService
 
 OVERDUE_TEMPLATE = (
@@ -34,27 +35,27 @@ async def menu(update: Update, context: ContextTypes.DEFAULT_TYPE) -> str:
     """
     Displays the menu.
     """
+    user_tz = await get_user_timezone(int(update.effective_user.id), context)
     menu_buttons = [
         [
-            InlineKeyboardButton(
-                text="Статистика за месяц", callback_data=callback_data.CALLBACK_STATISTIC_MONTH_COMMAND
-            ),
+            InlineKeyboardButton("Статистика за месяц", callback_data=callback_data.CALLBACK_STATISTIC_MONTH_COMMAND),
         ],
-        [InlineKeyboardButton(text="В работе", callback_data=callback_data.CALLBACK_ACTUAL_REQUESTS_COMMAND)],
-        [InlineKeyboardButton(text="🔥 Cроки горят", callback_data=callback_data.CALLBACK_OVERDUE_REQUESTS_COMMAND)],
+        [InlineKeyboardButton("В работе", callback_data=callback_data.CALLBACK_ACTUAL_REQUESTS_COMMAND)],
+        [InlineKeyboardButton("🔥 Cроки горят", callback_data=callback_data.CALLBACK_OVERDUE_REQUESTS_COMMAND)],
         [
             InlineKeyboardButton(
-                text="Правила сервиса",
+                "Правила сервиса",
                 url=URL_SERVICE_RULES,
             )
         ],
         [
             InlineKeyboardButton(
-                text="Настроить часовой пояс", callback_data=callback_data.CALLBACK_CONFIGURATE_TIMEZONE_COMMAND
+                f"Настроить часовой пояс (сейчас {user_tz})",
+                callback_data=callback_data.CALLBACK_CONFIGURATE_TIMEZONE_COMMAND,
             )
         ],
     ]
-    await reply_message(update=update, text="Меню", reply_markup=InlineKeyboardMarkup(menu_buttons))
+    await reply_message(update, "Меню", reply_markup=InlineKeyboardMarkup(menu_buttons))
     return states.MENU_STATE
 
 
