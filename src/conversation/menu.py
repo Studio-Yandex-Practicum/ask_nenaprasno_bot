@@ -38,26 +38,24 @@ async def menu(update: Update, context: ContextTypes.DEFAULT_TYPE) -> str:
     user_tz = await get_user_timezone(int(update.effective_user.id), context)
     menu_buttons = [
         [
-            InlineKeyboardButton(
-                text="Статистика за месяц", callback_data=callback_data.CALLBACK_STATISTIC_MONTH_COMMAND
-            ),
+            InlineKeyboardButton("Статистика за месяц", callback_data=callback_data.CALLBACK_STATISTIC_MONTH_COMMAND),
         ],
-        [InlineKeyboardButton(text="В работе", callback_data=callback_data.CALLBACK_ACTUAL_REQUESTS_COMMAND)],
-        [InlineKeyboardButton(text="🔥 Cроки горят", callback_data=callback_data.CALLBACK_OVERDUE_REQUESTS_COMMAND)],
+        [InlineKeyboardButton("В работе", callback_data=callback_data.CALLBACK_ACTUAL_REQUESTS_COMMAND)],
+        [InlineKeyboardButton("🔥 Cроки горят", callback_data=callback_data.CALLBACK_OVERDUE_REQUESTS_COMMAND)],
         [
             InlineKeyboardButton(
-                text="Правила сервиса",
+                "Правила сервиса",
                 url=URL_SERVICE_RULES,
             )
         ],
         [
             InlineKeyboardButton(
-                text=f"Настроить часовой пояс (сейчас {user_tz})",
+                f"Настроить часовой пояс (сейчас {user_tz})",
                 callback_data=callback_data.CALLBACK_CONFIGURATE_TIMEZONE_COMMAND,
             )
         ],
     ]
-    await reply_message(update=update, text="Меню", reply_markup=InlineKeyboardMarkup(menu_buttons))
+    await reply_message(update, "Меню", reply_markup=InlineKeyboardMarkup(menu_buttons))
     return states.MENU_STATE
 
 
