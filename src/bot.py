@@ -32,7 +32,7 @@ from service.repeat_message import repeat_message_after_1_hour_callback
 
 async def skip_bill_callback_handler(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     """Delete button under message."""
-    await edit_message(update=update, new_text=update.callback_query.message.text_markdown_v2_urled)
+    await edit_message(update, update.callback_query.message.text_markdown_v2_urled)
     await update.callback_query.answer()  # close progress bar in chat
 
 
@@ -40,11 +40,11 @@ async def done_bill_callback_handler(update: Update, context: ContextTypes.DEFAU
     """Delete job from JobQueue."""
     query = update.callback_query
     user_id = query.from_user.id
-    job_name = USER_BILL_REMINDER_TEMPLATE.format(user_id)
+    job_name = USER_BILL_REMINDER_TEMPLATE.format(telegram_id=user_id)
     current_jobs = context.job_queue.get_jobs_by_name(job_name)
     for job in current_jobs:
         job.schedule_removal()
-    await edit_message(update=update, new_text="Не будем напоминать до следующего месяца")
+    await edit_message(update, "Не будем напоминать до следующего месяца")
     await query.answer()  # close progress bar in chat
 
 
@@ -110,6 +110,11 @@ def create_bot():
         time=config.DAILY_COLLECT_CONSULTATIONS_TIME,
         name=DAILY_CONSULTATIONS_REMINDER_JOB,
     )
+
+    # Initial data collection for daily consultation on bot start up
+    bot_app.job_queue.run_once(daily_consulations_reminder_job, when=timedelta(seconds=1))
+    bot_app.job_queue.run_once(daily_consulations_duedate_is_today_reminder_job, when=timedelta(seconds=1))
+
     return bot_app
 
 

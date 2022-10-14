@@ -73,9 +73,11 @@ MONTHLY_RECEIPT_REMINDER_DAY = get_int("MONTHLY_RECEIPT_REMINDER_DAY", "20")
 DAILY_COLLECT_CONSULTATIONS_TIME = time(hour=0, minute=0, tzinfo=timezone.utc)
 DAILY_CONSULTATIONS_REMINDER_TIME = get_time("DAILY_CONSULTATIONS_REMINDER_TIME", "17:00")
 
-# Параметры запуска сбора недельной и месячной статистики - по умолчанию, полночь GMT+12
+# Параметры запуска сбора недельной и месячной статистики - по умолчанию, полночь GTM+12
+__collect_time = get_time("STAT_COLLECTION_TIME", "00:00")
 STAT_COLLECTION_TIMEZONE = "Asia/Kamchatka"
-STAT_COLLECTION_TIME = time(hour=0, minute=0, second=0, tzinfo=ZoneInfo(STAT_COLLECTION_TIMEZONE))
+# STAT_COLLECTION_TIME = time(hour=0, minute=0, second=0, tzinfo=ZoneInfo(STAT_COLLECTION_TIMEZONE))
+STAT_COLLECTION_TIME = __collect_time.replace(tzinfo=ZoneInfo(STAT_COLLECTION_TIMEZONE))
 
 # Файл с сохраненными данными бота
 BOT_PERSISTENCE_FILE = BASE_DIR / "persistence_data" / "bot_persistence_file"
@@ -94,3 +96,6 @@ SITE_API_BOT_TOKEN = get_string("SITE_API_BOT_TOKEN")
 FORM_URL_FUTURE_EXPERT = "https://forms.gle/DGMUm35bxZytE3QLA"
 URL_SERVICE_RULES = "https://docs.google.com/document/d/1hW2HUv9aWQMnUBuIE_YQEtmIDDbk8KhpychckbyaIEQ/edit"
 URL_ASK_NENAPRASNO = get_string("URL_ASK_NENAPRASNO")
+
+# Включить debug-режим
+DEBUG = get_bool("DEBUG")
