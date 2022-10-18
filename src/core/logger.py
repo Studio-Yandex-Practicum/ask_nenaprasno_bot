@@ -25,3 +25,9 @@ logger = logging.getLogger(__name__)
 logger.setLevel(LOG_LEVEL)
 logger.addHandler(get_file_handler())
 logger.addHandler(get_stream_handler())
+
+
+async def log_response(response):
+    request = response.request
+    await response.aread()
+    logger.info("%s %s %s\n%s", request.method, request.url, response.status_code, response.text)

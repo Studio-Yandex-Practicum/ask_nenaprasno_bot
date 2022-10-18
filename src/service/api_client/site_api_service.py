@@ -6,7 +6,7 @@ from urllib.parse import urljoin
 import httpx
 
 from core import config
-from core.logger import logger
+from core.logger import log_response, logger
 from service.api_client.base import AbstractAPIService
 from service.api_client.models import (
     BillStat,
@@ -86,7 +86,7 @@ class SiteAPIService(AbstractAPIService):
         url = urljoin(self.site_url, "/tgbot/user")
         headers = {"Authorization": self.bot_token}
         data = {"telegram_id": telegram_id, "timezone": user_time_zone}
-        async with httpx.AsyncClient() as client:
+        async with httpx.AsyncClient(event_hooks={"response": [log_response]}) as client:
             response = await client.put(url=url, headers=headers, json=data)
             return response.status_code
 
@@ -106,13 +106,13 @@ class SiteAPIService(AbstractAPIService):
 
     async def __get_json_data(self, url: str) -> Optional[dict]:
         headers = {"Authorization": self.bot_token}
-        async with httpx.AsyncClient() as client:
+        async with httpx.AsyncClient(event_hooks={"response": [log_response]}) as client:
             try:
                 response = await client.get(url=url, headers=headers)
                 response.raise_for_status()
                 return response.json()
             except httpx.HTTPError as error:
-                logger.error("Failed get data from server: %s", error)
+                logger.error("Failed get data from %s: %s", url, error)
             except json.JSONDecodeError as error:
                 logger.error(
                     "Got a JSONDecodeError in responce decode - %s, url - %s, error - %s", response.text, url, error

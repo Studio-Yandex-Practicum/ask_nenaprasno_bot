@@ -80,16 +80,19 @@ async def telegram_webhook_api(request: Request) -> Response:
 
 
 async def deserialize(request: Request, deserializer):
+    body = await request.body()
+    log_template = "%s %s %s\nRequest body: %s"
+
     try:
         request_data: deserializer = deserializer.from_dict(await request.json())
-        logger.info("Got new api request: %s", request_data)
+        logger.info(log_template, request.method, request.url, httpx.codes.OK, body)
         return request_data
     except KeyError as error:
-        logger.error("Got a KeyError: %s", error)
-        raise BadRequestError("There is an error in the request") from error
+        logger.error(log_template, request.method, request.url, httpx.codes.BAD_REQUEST, body)
+        raise BadRequestError(f"KeyError: {error} key not found") from error
     except JSONDecodeError as error:
-        logger.error("Got a JSONDecodeError: %s", error)
-        raise BadRequestError("There is an error in the request") from error
+        logger.error(log_template, request.method, request.url, httpx.codes.BAD_REQUEST, body)
+        raise BadRequestError(f"JSONDecodeError: {error}") from error
 
 
 @requires("authenticated", status_code=401)
@@ -97,7 +100,7 @@ async def consultation_assign(request: Request) -> Response:
     try:
         consultation = await deserialize(request, AssignedConsultationModel)
     except BadRequestError as error:
-        logger.error("Got a BadRequestError: %s", error)
+        logger.error("%s", error)
         return Response(status_code=httpx.codes.BAD_REQUEST)
 
     telegram_id = consultation.telegram_id
