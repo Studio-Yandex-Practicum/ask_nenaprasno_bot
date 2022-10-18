@@ -260,18 +260,21 @@ async def get_overdue_reminder_text(consultations: List, active_cons_count: int,
 
 def get_reminder_text(
     data: [PastConsultationData | DueConsultationData | DueHourConsultationData | ForwardConsultationData],
-    active_cons_count: int,
-    expired_cons_count: int,
+    cons_count: Dict,
 ) -> str:
     """Returns reminder text."""
     message_template = data.message_template
     consultation = data.consultation
+    active_cons_count = cons_count["active"]
+    expiring_cons_count = cons_count["expiring"]
+    expired_cons_count = cons_count["expired"]
 
     return message_template.format(
         consultation_id=consultation.id,
         consultation_number=consultation.number,
         created=data.created_date,
         active_consultations=active_cons_count,
+        expiring_consultations=expiring_cons_count,
         expired_consultations=expired_cons_count,
         site_url=build_consultation_url(consultation.id),
         trello_overdue_url=build_trello_url(consultation.username_trello, True),
@@ -294,7 +297,7 @@ async def send_reminder_now(context: CallbackContext) -> None:
     consultation = job_data.consultation
     telegram_id = consultation.telegram_id
     consultation_count = await service.get_consultations_count(telegram_id)
-    text = get_reminder_text(job_data, *consultation_count)
+    text = get_reminder_text(job_data, consultation_count)
 
     await send_message(
         bot=context.bot,
@@ -306,16 +309,14 @@ async def send_reminder_now(context: CallbackContext) -> None:
 async def send_reminder_overdue(context: CallbackContext) -> None:
     """Send overdue-consultation reminder"""
     telegram_id, consultations = context.job.data
-    active_cons_count, expired_cons_count = await service.get_consultations_count(telegram_id)
+    consultations_count = await service.get_consultations_count(telegram_id)
 
     if len(consultations) == 1:
-        message = get_reminder_text(
-            consultations[0],
-            active_cons_count,
-            expired_cons_count,
-        )
+        message = get_reminder_text(consultations[0], consultations_count)
     else:
-        message = await get_overdue_reminder_text(consultations, active_cons_count, expired_cons_count)
+        message = await get_overdue_reminder_text(
+            consultations, consultations_count["active"], consultations_count["expired"]
+        )
 
     await send_message(bot=context.bot, chat_id=telegram_id, text=message)
 

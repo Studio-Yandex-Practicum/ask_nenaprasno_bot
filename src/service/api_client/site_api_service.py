@@ -1,6 +1,6 @@
 # pylint: disable=no-member
 import json
-from typing import Optional, Tuple
+from typing import Dict, Optional
 from urllib.parse import urljoin
 
 import httpx
@@ -61,12 +61,16 @@ class SiteAPIService(AbstractAPIService):
             return None
         return UserExpiredConsultations.from_dict(exp_consultations)
 
-    async def get_consultations_count(self, telegram_id: int) -> Tuple:
-        """Gets count of active and expired consultations and returns it in tuple."""
-        active_cons_count = (await self.get_user_active_consultations(telegram_id=telegram_id)).active_consultations
-        expired_cons_count = (await self.get_user_expired_consultations(telegram_id=telegram_id)).expired_consultations
-
-        return active_cons_count, expired_cons_count
+    async def get_consultations_count(self, telegram_id: int) -> Dict:
+        """Gets count of active, expiring and expired consultations and returns it in dict.
+        keys ['active', 'expiring', 'expired']"""
+        active_cons = await self.get_user_active_consultations(telegram_id=telegram_id)
+        result = {
+            "active": active_cons.active_consultations,
+            "expiring": len(active_cons.expiring_consultations_data),
+            "expired": (await self.get_user_expired_consultations(telegram_id=telegram_id)).expired_consultations,
+        }
+        return result
 
     async def get_user_month_stat(self, telegram_id: int) -> Optional[UserMonthStat]:
         url = urljoin(self.site_url, f"/tgbot/stat/monthly/user/{telegram_id}")

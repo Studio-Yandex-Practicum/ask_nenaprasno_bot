@@ -103,9 +103,13 @@ async def consultation_assign(request: Request) -> Response:
     telegram_id = consultation.telegram_id
 
     service = APIService()
-    active_cons_count, expired_cons_count = await service.get_consultations_count(telegram_id)
+    consultations_count = await service.get_consultations_count(telegram_id)
+    active_cons_count = consultations_count["active"]
+    expiring_cons_count = consultations_count["expiring"]
+    expired_cons_count = consultations_count["expired"]
     declination_consultation = get_word_case(active_cons_count, "заявка", "заявки", "заявок")
-    genitive_declination_consultation = get_word_genitive(expired_cons_count, "заявки", "заявок")
+    genitive_declination_consultation_expiring = get_word_genitive(expiring_cons_count, "заявки", "заявок")
+    genitive_declination_consultation_expired = get_word_genitive(expired_cons_count, "заявки", "заявок")
 
     site_url = build_consultation_url(consultation.consultation_id)
     trello_url = build_trello_url(consultation.username_trello)
@@ -115,7 +119,8 @@ async def consultation_assign(request: Request) -> Response:
         f"[Посмотреть заявку на сайте]({site_url})\n"
         "---\n"
         f"В работе ***{active_cons_count}*** {declination_consultation}\n"
-        f"Истекает срок у ***{expired_cons_count}*** {genitive_declination_consultation}\n"
+        f"Истекает срок у ***{expiring_cons_count}*** {genitive_declination_consultation_expiring}\n"
+        f"Истек срок у ***{expired_cons_count}*** {genitive_declination_consultation_expired}\n"
         f"\n"
         f"[Открыть Trello]({trello_url})\n\n"
     )
