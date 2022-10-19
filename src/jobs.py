@@ -325,9 +325,10 @@ async def daily_overdue_consulations_reminder_job(context: CallbackContext, over
     for telegram_id, consultations in overdue.items():
         if consultations:
             # Send reminder job for every doctor
+            user_timezone = await get_user_timezone(int(telegram_id), context)
             context.job_queue.run_once(
                 send_reminder_overdue,
-                when=timedelta(seconds=1),
+                when=config.DAILY_CONSULTATIONS_REMINDER_TIME.replace(tzinfo=user_timezone),
                 data=(telegram_id, consultations),
             )
 
@@ -382,7 +383,7 @@ async def daily_consulations_reminder_job(context: CallbackContext) -> None:
                 # Due date is tomorrow, send one reminder per consultationsnow
                 context.job_queue.run_once(
                     send_reminder_now,
-                    when=timedelta(seconds=1),
+                    when=config.DAILY_CONSULTATIONS_REMINDER_TIME.replace(tzinfo=user_timezone),
                     data=ForwardConsultationData(consultation),
                 )
 
