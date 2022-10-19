@@ -61,14 +61,16 @@ class SiteAPIService(AbstractAPIService):
             return None
         return UserExpiredConsultations.from_dict(exp_consultations)
 
-    async def get_consultations_count(self, telegram_id: int) -> Dict:
+    async def get_consultations_count(self, telegram_id: int) -> Dict[str, int]:
         """Gets count of active, expiring and expired consultations and returns it in dict.
-        keys ['active', 'expiring', 'expired']"""
+        keys ['active_consultations_count', 'expiring_consultations_count', 'expired_consultations_count']"""
         active_cons = await self.get_user_active_consultations(telegram_id=telegram_id)
         return {
-            "active": active_cons.active_consultations,
-            "expiring": len(active_cons.expiring_consultations_data),
-            "expired": (await self.get_user_expired_consultations(telegram_id=telegram_id)).expired_consultations,
+            "active_consultations_count": active_cons.active_consultations,
+            "expiring_consultations_count": active_cons.expiring_consultations,
+            "expired_consultations_count": (
+                await self.get_user_expired_consultations(telegram_id=telegram_id)
+            ).expired_consultations,
         }
 
     async def get_user_month_stat(self, telegram_id: int) -> Optional[UserMonthStat]:
