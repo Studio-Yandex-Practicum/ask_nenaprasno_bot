@@ -244,7 +244,7 @@ async def daily_bill_remind_job(context: CallbackContext) -> None:
 
 
 async def get_overdue_reminder_text(
-    consultations: List, active_consultations_count: int, expired_consultations_count: int, kwargs: Dict
+    consultations: List, active_consultations_count: int, expired_consultations_count: int, **kwargs: Dict
 ) -> str:
     """Returns overdue reminder text if user have more than one overdue consultations."""
     link_nenaprasno = make_consultations_list(
