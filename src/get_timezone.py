@@ -61,11 +61,11 @@ async def get_timezone_from_text_message(update: Update, context: CallbackContex
     Return None if error, any else (string with timezone will be best).
     """
     timezone = get_timezone_from_str(update.message.text)
-    if timezone is not None:
-        text_utc = str(timezone)
-        await set_timezone(update.effective_chat.id, text_utc, context)
-        return text_utc
-    return None
+    if timezone is None:
+        return None
+    text_utc = str(timezone)
+    await set_timezone(update.effective_chat.id, text_utc, context)
+    return text_utc
 
 
 async def get_user_timezone(telegram_id: int, context: CallbackContext) -> datetime.timezone:
