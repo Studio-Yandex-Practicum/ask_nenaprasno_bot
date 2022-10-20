@@ -13,15 +13,21 @@ from service.api_client import APIService
 api = APIService()
 
 
-def get_timezone_from_str(tz_string: Optional[str]) -> datetime.timezone:
+def get_timezone_from_str(tz_string: Optional[str]) -> Optional[datetime.timezone]:
     """Returns datetime.timezone based on string in format UTC+00:00."""
     if tz_string is None:
         return datetime.timezone(datetime.timedelta(hours=MOSCOW_TIME_OFFSET))
 
-    tz_pattern = r"UTC(?P<sign>[\+|\-])(?P<hours>\d{2}):(?P<minutes>\d{2})"
-    sign, hours, minutes = re.search(tz_pattern, tz_string).groups()
-    tz_delta = datetime.timedelta(hours=int(hours), minutes=int(minutes))
-    return datetime.timezone(tz_delta) if sign == "+" else datetime.timezone(-tz_delta)
+    tz_pattern = r"(?i)(UTC)?(?P<sign>[-+]?)(?P<hours>(0?[1-9])|(1[0-2]))(:0{1,2})?$"
+    tz_result = re.search(tz_pattern, tz_string)
+    if tz_result is not None:
+        tz_delta = datetime.timedelta(
+            hours=int(tz_result.group("hours")),
+        )
+        if tz_result.group("sign") in ("+", ""):
+            return datetime.timezone(tz_delta)
+        return datetime.timezone(-tz_delta)
+    return None
 
 
 async def set_timezone(telegram_id: int, text_utc: str, context: CallbackContext) -> None:
@@ -54,15 +60,11 @@ async def get_timezone_from_text_message(update: Update, context: CallbackContex
     Sets timezone based on a text message from the user.
     Return None if error, any else (string with timezone will be best).
     """
-    timezone = re.search(r"(UTC)?([-+]?)(\d{1,2})(:\d{1,2}|)$", update.message.text, flags=re.IGNORECASE)
-    if timezone is None:
-        return None
-    if int(timezone[3]) > 12:
-        return None
-    timezone_sign = "+" if timezone[2] == "" else timezone[2]
-    text_utc = f"UTC{timezone_sign}{format(timezone[3], '0>2')}:00"
-    await set_timezone(update.effective_chat.id, text_utc, context)
-    return text_utc
+    timezone = get_timezone_from_str(update.message.text)
+    if timezone is not None:
+        text_utc = str(timezone)
+        await set_timezone(update.effective_chat.id, text_utc, context)
+        return text_utc
 
 
 async def get_user_timezone(telegram_id: int, context: CallbackContext) -> datetime.timezone:
