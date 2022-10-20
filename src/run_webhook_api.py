@@ -81,11 +81,11 @@ async def telegram_webhook_api(request: Request) -> Response:
 
 async def deserialize(request: Request, deserializer):
     body = await request.body()
-    log_template = "%s %s %s\nRequest body: %s"
+    log_template = "%s %s %s\nRequest: %s"
 
     try:
         request_data: deserializer = deserializer.from_dict(await request.json())
-        logger.info(log_template, request.method, request.url, httpx.codes.OK, body)
+        logger.debug(log_template, request.method, request.url, body)
         return request_data
     except KeyError as error:
         logger.error(log_template, request.method, request.url, httpx.codes.BAD_REQUEST, body)

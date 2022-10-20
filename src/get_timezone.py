@@ -55,7 +55,7 @@ async def get_timezone_from_text_message(update: Update, context: CallbackContex
     Sets timezone based on a text message from the user.
     Return None if error, any else (string with timezone will be best).
     """
-    logger.info("User %s input %s timezone", update.effective_user.id, update.message.text)
+    logger.debug("User %s input %s timezone", update.effective_user.id, update.message.text)
     timezone = re.search(r"(UTC)?([-+]?)(\d{1,2})(:\d{1,2}|)$", update.message.text, flags=re.IGNORECASE)
     if timezone is None:
         return None

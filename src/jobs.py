@@ -11,8 +11,10 @@ from constants.callback_data import CALLBACK_DONE_BILL_COMMAND, CALLBACK_SKIP_BI
 from constants.jobs import USER_BILL_REMINDER_TEMPLATE
 from conversation.menu import OVERDUE_TEMPLATE, format_average_user_answer_time, format_rating, make_consultations_list
 from core import config
+from core.logger import logger
 from core.send_message import send_message
 from core.utils import build_consultation_url, build_trello_url, get_word_case, get_word_genitive
+from decorators.logger import async_job_logger
 from get_timezone import get_timezone_from_str, get_user_timezone
 from service.api_client import APIService
 from service.api_client.models import Consultation
@@ -139,6 +141,7 @@ class ForwardConsultationData(BaseConsultationData):
         return self.due_date() - datetime.utcnow().date() == timedelta(days=1)
 
 
+@async_job_logger
 async def weekly_stat_job(context: CallbackContext) -> None:
     """Collects users timezones and adds statistic-sending jobs to queue."""
     week_statistics = await service.get_week_stat()
@@ -151,8 +154,10 @@ async def weekly_stat_job(context: CallbackContext) -> None:
         timezone_ = get_timezone_from_str(tz_string)
         start_time = config.WEEKLY_STAT_TIME.replace(tzinfo=timezone_)
         context.job_queue.run_once(send_weekly_statistic_job, when=start_time, data=tz_string)
+        logger.debug("Add %s to job queue. Start at %s", send_weekly_statistic_job.__name__, start_time)
 
 
+@async_job_logger
 async def monthly_stat_job(context: CallbackContext) -> None:
     """Collects users timezones and adds statistic-sending jobs to queue."""
     month_statistics = await service.get_month_stat()
@@ -163,8 +168,15 @@ async def monthly_stat_job(context: CallbackContext) -> None:
         timezone_ = get_timezone_from_str(statistic.timezone)
         start_time = config.MONTHLY_STAT_TIME.replace(tzinfo=timezone_)
         context.job_queue.run_once(send_monthly_statistic_job, when=start_time, data=statistic)
+        logger.debug(
+            "Add %s to job queue. Start at %s for user %s",
+            send_monthly_statistic_job.__name__,
+            start_time,
+            statistic.telegram_id,
+        )
 
 
+@async_job_logger
 async def send_weekly_statistic_job(context: CallbackContext) -> None:
     """Sends weekly statistics to users with specific timezone."""
     current_tz = context.job.data
@@ -186,6 +198,7 @@ async def send_weekly_statistic_job(context: CallbackContext) -> None:
         )
 
 
+@async_job_logger
 async def send_monthly_statistic_job(context: CallbackContext) -> None:
     """Send monthly statistic to user."""
     statistic = context.job.data
@@ -202,6 +215,7 @@ async def send_monthly_statistic_job(context: CallbackContext) -> None:
     )
 
 
+@async_job_logger
 async def monthly_bill_reminder_job(context: CallbackContext) -> None:
     """
     Send monthly reminder about the receipt formation during payment.
@@ -215,6 +229,7 @@ async def monthly_bill_reminder_job(context: CallbackContext) -> None:
     user_ids = bill_stat.telegram_ids
     for telegram_id in user_ids:
         user_tz = await get_user_timezone(int(telegram_id), context)
+        start_time = config.MONTHLY_RECEIPT_REMINDER_TIME.replace(tzinfo=user_tz)
         job_name = USER_BILL_REMINDER_TEMPLATE.format(telegram_id=telegram_id)
 
         current_jobs = context.job_queue.get_jobs_by_name(job_name)
@@ -223,12 +238,16 @@ async def monthly_bill_reminder_job(context: CallbackContext) -> None:
 
         context.job_queue.run_daily(
             daily_bill_remind_job,
-            time=config.MONTHLY_RECEIPT_REMINDER_TIME.replace(tzinfo=user_tz),
+            time=start_time,
             name=job_name,
             chat_id=telegram_id,
         )
+        logger.debug(
+            "Add %s to job queue. Start at %s for user %s", daily_bill_remind_job.__name__, start_time, telegram_id
+        )
 
 
+@async_job_logger
 async def daily_bill_remind_job(context: CallbackContext) -> None:
     """Send message every day until delete job from JobQueue."""
     job = context.job
@@ -280,6 +299,7 @@ def get_reminder_text(
     )
 
 
+@async_job_logger
 async def check_consultation_status_and_send_reminder(context: CallbackContext) -> None:
     """Sends reminder after check."""
     consultation = context.job.data
@@ -287,6 +307,7 @@ async def check_consultation_status_and_send_reminder(context: CallbackContext) 
         await send_reminder_now(context)
 
 
+@async_job_logger
 async def send_reminder_now(context: CallbackContext) -> None:
     """Sends reminder without check."""
     job_data = context.job.data
@@ -296,13 +317,10 @@ async def send_reminder_now(context: CallbackContext) -> None:
     consultation_count = await service.get_consultations_count(telegram_id)
     text = get_reminder_text(job_data, *consultation_count)
 
-    await send_message(
-        bot=context.bot,
-        chat_id=telegram_id,
-        text=text,
-    )
+    await send_message(context.bot, telegram_id, text)
 
 
+@async_job_logger
 async def send_reminder_overdue(context: CallbackContext) -> None:
     """Send overdue-consultation reminder"""
     telegram_id, consultations = context.job.data
@@ -317,9 +335,10 @@ async def send_reminder_overdue(context: CallbackContext) -> None:
     else:
         message = await get_overdue_reminder_text(consultations, active_cons_count, expired_cons_count)
 
-    await send_message(bot=context.bot, chat_id=telegram_id, text=message)
+    await send_message(context.bot, telegram_id, message)
 
 
+@async_job_logger
 async def daily_overdue_consulations_reminder_job(context: CallbackContext, overdue: Dict) -> None:
     """Creates tasks to send reminders for consultations expired at least one day ago."""
     for telegram_id, consultations in overdue.items():
@@ -330,8 +349,12 @@ async def daily_overdue_consulations_reminder_job(context: CallbackContext, over
                 when=timedelta(seconds=1),
                 data=(telegram_id, consultations),
             )
+            logger.debug(
+                "Add %s to job queue. Start in 1 second for user %s", send_reminder_overdue.__name__, telegram_id
+            )
 
 
+@async_job_logger
 async def daily_consulations_duedate_is_today_reminder_job(context: CallbackContext) -> None:
     """Adds a reminder job to the bot's job queue according to the scenario:
     - the due date is today
@@ -347,14 +370,27 @@ async def daily_consulations_duedate_is_today_reminder_job(context: CallbackCont
             context.job_queue.run_once(
                 check_consultation_status_and_send_reminder, when=due_time, data=DueConsultationData(consultation)
             )
+            logger.debug(
+                "Add %s to job queue. Start at %s for user %s",
+                check_consultation_status_and_send_reminder.__name__,
+                due_time,
+                consultation.telegram_id,
+            )
             # Bot will check consultation status and remind one hour after due time if consultation is still active
             context.job_queue.run_once(
                 check_consultation_status_and_send_reminder,
                 when=due_time + timedelta(hours=1),
                 data=DueHourConsultationData(consultation),
             )
+            logger.debug(
+                "Add %s to job queue. Start at %s for user %s",
+                check_consultation_status_and_send_reminder.__name__,
+                due_time + timedelta(hours=1),
+                consultation.telegram_id,
+            )
 
 
+@async_job_logger
 async def daily_consulations_reminder_job(context: CallbackContext) -> None:
     """Adds a reminder job to the bot's job queue according
     to one of the following scenarios:
@@ -384,6 +420,11 @@ async def daily_consulations_reminder_job(context: CallbackContext) -> None:
                     send_reminder_now,
                     when=timedelta(seconds=1),
                     data=ForwardConsultationData(consultation),
+                )
+                logger.debug(
+                    "Add %s to job queue. Start in 1 second for user %s",
+                    send_reminder_now.__name__,
+                    consultation.telegram_id,
                 )
 
     if overdue:
