@@ -96,10 +96,11 @@ def create_bot():
 
     # Once per day (but for every time zone) bot collects overdue consultations and send reminder
     # Doctor receives reminder at DAILY_OVERDUE_CONSULTATIONS_REMINDER_JOB his time zone
+    _, minute = config.DAILY_CONSULTATIONS_REMINDER_TIME.split(":")
     bot_app.job_queue.run_repeating(
         daily_consulations_reminder_job,
         interval=timedelta(hours=1),
-        first=time(hour=0, minute=0, second=0),
+        first=time(minute=int(minute)),
         name=DAILY_OVERDUE_CONSULTATIONS_REMINDER_JOB,
     )
 
@@ -112,7 +113,7 @@ def create_bot():
     )
 
     # Initial data collection for daily consultation on bot start up
-    bot_app.job_queue.run_once(daily_consulations_reminder_job, when=timedelta(seconds=1))
+    # bot_app.job_queue.run_once(daily_consulations_reminder_job, when=timedelta(seconds=1))
     bot_app.job_queue.run_once(daily_consulations_duedate_is_today_reminder_job, when=timedelta(seconds=1))
 
     return bot_app
