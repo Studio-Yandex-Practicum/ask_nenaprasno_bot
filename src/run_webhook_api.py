@@ -85,7 +85,7 @@ async def deserialize(request: Request, deserializer):
         return request_data
     except (KeyError, JSONDecodeError) as error:
         logger.error("Got exception %s while processing API request: %s", type(error).__name__, error)
-        return
+        return None
 
 
 @requires("authenticated", status_code=401)
