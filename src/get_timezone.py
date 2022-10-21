@@ -14,7 +14,7 @@ api = APIService()
 
 
 def get_timezone_utc_format(txt_pattern: Optional[str]) -> Optional[datetime.timezone]:
-    """Returns datetime.timezone based on string in format UTC+00:00 or NONE."""
+    """Returns datetime.timezone based on string in format UTC+00:00 or NONE"""
     if txt_pattern is None:
         return None
     tz_pattern = r"^(UTC)?(?P<sign>[-+]?)(?P<hours>(0?[1-9])|(1[0-4]))(?P<minutes>:0{1,2}|:30|:45)?$"
