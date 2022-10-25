@@ -17,53 +17,18 @@ from get_timezone import get_timezone_from_str, get_user_timezone
 from service.api_client import APIService
 from service.api_client.models import Consultation
 from service.repeat_message import repeat_after_one_hour_button
-
-REMINDER_BASE_TEMPLATE = (
-    "[Открыть заявку на сайте]({site_url})\n"
-    "----\n"
-    "В работе **{active_consultations}** {declination_consultation}\n"
-    "Истекает срок у **{expired_consultations}** {genitive_declination_consultation}\n\n"
-    "[Открыть Trello]({trello_overdue_url})"
-)
-
-DUE_REMINDER_TEMPLATE = (
-    "Нееееет! Срок ответа на заявку {consultation_number} истек :(\n" "Мы все очень ждем вашего ответа.\n\n"
-) + REMINDER_BASE_TEMPLATE
-
-DUE_HOUR_REMINDER_TEMPLATE = (
-    "Час прошел, а наша надежда - нет :)\n" "Ответьте, пожалуйста, на заявку {consultation_number}\n\n"
-) + REMINDER_BASE_TEMPLATE
-
-PAST_REMINDER_TEMPLATE = (
-    "Время и стекло 😎\n" "Заявка от {created} - **{consultation_number}**\n" "Верим и ждем.\n\n"
-) + REMINDER_BASE_TEMPLATE
-
-FORWARD_REMINDER_TEMPLATE = (
-    "Пупупууу! Истекает срок ответа по заявке {consultation_number} 🔥\n"
-    "У нас еще есть время, чтобы ответить человеку вовремя!\n\n"
-) + REMINDER_BASE_TEMPLATE
-
-WEEKLY_STATISTIC_TEMPLATE = (
-    "Вы делали добрые дела 7 дней!\n"
-    'Посмотрите, как прошла ваша неделя в *"Просто спросить"*\n'
-    "Закрыто заявок - *{closed_consultations}*\n"
-    "В работе *{active_consultations}* {declination_consultation} за неделю\n\n"
-    "Истекает срок у *{expiring_consultations}* {genitive_declination_consultation}\n"
-    "У *{expired_consultations}* {genitive_declination_expired} срок истек\n\n"
-    "[Открыть Trello]({trello_url})\n\n"
-    "Мы рады работать в одной команде :)\n"
-    "Так держать!\n"
-)
-
-MONTHLY_STATISTIC_TEMPLATE = (
-    "Это был отличный месяц!\n"
-    'Посмотрите, как он прошел в *"Просто спросить"* 🔥\n\n'
-    "Количество закрытых заявок - *{closed_consultations}*\n"
-    "{rating}"
-    "{average_user_answer_time}\n"
-    "[Открыть Trello]({trello_url})\n\n"
-    "Мы рады работать в одной команде :)\n"
-    "Так держать!\n"
+from texts import (
+    BILL_REMINDER_TEXT,
+    BTN_BILL_SENT,
+    BTN_BILL_SOON,
+    DUE_HOUR_REMINDER_TEMPLATE,
+    DUE_REMINDER_TEMPLATE,
+    FORWARD_REMINDER_TEMPLATE,
+    MONTHLY_STATISTIC_TEMPLATE,
+    PAST_REMINDER_TEMPLATE,
+    PLURAL_CONSULTATION,
+    PLURAL_CONSULTATION_NOT_SINGLE,
+    WEEKLY_STATISTIC_TEMPLATE,
 )
 
 DATE_FORMAT = "%Y-%m-%dT%H:%M:%S.%fZ"
@@ -174,9 +139,13 @@ async def send_weekly_statistic_job(context: CallbackContext) -> None:
         message = WEEKLY_STATISTIC_TEMPLATE.format(
             trello_url=build_trello_url(statistic.username_trello),
             **statistic.to_dict(),
-            declination_consultation=get_word_case(statistic.active_consultations, "заявка", "заявки", "заявок"),
-            genitive_declination_consultation=get_word_genitive(statistic.expiring_consultations, "заявки", "заявок"),
-            genitive_declination_expired=get_word_genitive(statistic.expired_consultations, "заявки", "заявок"),
+            declination_consultation=get_word_case(statistic.active_consultations, *PLURAL_CONSULTATION),
+            genitive_declination_consultation=get_word_genitive(
+                statistic.expiring_consultations, *PLURAL_CONSULTATION_NOT_SINGLE
+            ),
+            genitive_declination_expired=get_word_genitive(
+                statistic.expired_consultations, *PLURAL_CONSULTATION_NOT_SINGLE
+            ),
         )
         await send_message(
             bot=context.bot,
@@ -232,15 +201,14 @@ async def monthly_bill_reminder_job(context: CallbackContext) -> None:
 async def daily_bill_remind_job(context: CallbackContext) -> None:
     """Send message every day until delete job from JobQueue."""
     job = context.job
-    message = "Вы активно работали весь месяц! Не забудьте отправить чек нашему кейс-менеджеру"
     menu = InlineKeyboardMarkup(
         [
-            [InlineKeyboardButton("✅ Уже отправил(а)", callback_data=CALLBACK_DONE_BILL_COMMAND)],
+            [InlineKeyboardButton(BTN_BILL_SENT, callback_data=CALLBACK_DONE_BILL_COMMAND)],
             [repeat_after_one_hour_button],
-            [InlineKeyboardButton("🕑 Скоро отправлю", callback_data=CALLBACK_SKIP_BILL_COMMAND)],
+            [InlineKeyboardButton(BTN_BILL_SOON, callback_data=CALLBACK_SKIP_BILL_COMMAND)],
         ]
     )
-    await send_message(context.bot, job.chat_id, message, menu)
+    await send_message(context.bot, job.chat_id, BILL_REMINDER_TEXT, menu)
 
 
 async def get_overdue_reminder_text(consultations: List, active_cons_count: int, expired_cons_count: int) -> str:
@@ -275,8 +243,8 @@ def get_reminder_text(
         expired_consultations=expired_cons_count,
         site_url=build_consultation_url(consultation.id),
         trello_overdue_url=build_trello_url(consultation.username_trello, True),
-        declination_consultation=get_word_case(active_cons_count, "заявка", "заявки", "заявок"),
-        genitive_declination_consultation=get_word_genitive(expired_cons_count, "заявки", "заявок"),
+        declination_consultation=get_word_case(active_cons_count, *PLURAL_CONSULTATION),
+        genitive_declination_consultation=get_word_genitive(expired_cons_count, *PLURAL_CONSULTATION_NOT_SINGLE),
     )
 
 
