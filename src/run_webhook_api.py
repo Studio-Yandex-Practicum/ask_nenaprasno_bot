@@ -16,7 +16,6 @@ from telegram.error import TelegramError
 
 from bot import init_webhook
 from core import config
-from core.exceptions import BadRequestError
 from core.logger import logger
 from core.send_message import send_message
 from core.utils import build_consultation_url, build_trello_url, get_word_case, get_word_genitive
@@ -84,23 +83,18 @@ async def deserialize(request: Request, deserializer):
         request_data: deserializer = deserializer.from_dict(await request.json())
         logger.info("Got new api request: %s", request_data)
         return request_data
-    except KeyError as error:
-        logger.error("Got a KeyError: %s", error)
-        raise BadRequestError("There is an error in the request") from error
-    except JSONDecodeError as error:
-        logger.error("Got a JSONDecodeError: %s", error)
-        raise BadRequestError("There is an error in the request") from error
+    except (KeyError, JSONDecodeError) as error:
+        logger.error("Got exception %s while processing API request: %s", type(error).__name__, error)
+        return None
 
 
 @requires("authenticated", status_code=401)
 async def consultation_assign(request: Request) -> Response:
-    try:
-        consultation = await deserialize(request, AssignedConsultationModel)
-    except BadRequestError as error:
-        logger.error("Got a BadRequestError: %s", error)
+    consultation = await deserialize(request, AssignedConsultationModel)
+    if not consultation:
         return Response(status_code=httpx.codes.BAD_REQUEST)
 
-    telegram_id = consultation.telegram_id
+    telegram_id = int(consultation.telegram_id)
 
     service = APIService()
     active_cons_count, expired_cons_count = await service.get_consultations_count(telegram_id)
@@ -125,11 +119,10 @@ async def consultation_assign(request: Request) -> Response:
 
 @requires("authenticated", status_code=401)
 async def consultation_close(request: Request) -> Response:
-    try:
-        request_data = await deserialize(request, ClosedConsultationModel)
-    except BadRequestError as error:
-        logger.error("Got a BadRequestError: %s", error)
+    request_data = await deserialize(request, ClosedConsultationModel)
+    if not request_data:
         return Response(status_code=httpx.codes.BAD_REQUEST)
+
     consultation_id = request_data.consultation_id
     bot_app = api.state.bot_app
     reminder_jobs = bot_app.job_queue.jobs()
@@ -141,10 +134,8 @@ async def consultation_close(request: Request) -> Response:
 
 @requires("authenticated", status_code=401)
 async def consultation_message(request: Request) -> Response:
-    try:
-        consultation = await deserialize(request, ConsultationModel)
-    except BadRequestError as error:
-        logger.error("Got a BadRequestError: %s", error)
+    consultation = await deserialize(request, ConsultationModel)
+    if not consultation:
         return Response(status_code=httpx.codes.BAD_REQUEST)
 
     site_url = build_consultation_url(consultation.consultation_id)
@@ -162,10 +153,8 @@ async def consultation_message(request: Request) -> Response:
 
 @requires("authenticated", status_code=401)
 async def consultation_feedback(request: Request) -> Response:
-    try:
-        request_data = await deserialize(request, FeedbackConsultationModel)
-    except BadRequestError as error:
-        logger.error("Got a BadRequestError: %s", error)
+    request_data = await deserialize(request, FeedbackConsultationModel)
+    if not request_data:
         return Response(status_code=httpx.codes.BAD_REQUEST)
 
     bot = api.state.bot_app.bot
