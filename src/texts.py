@@ -39,3 +39,48 @@ BOT_OFFER_SEND_TELEGRAM_ID = (
 )
 BTN_CONSULTATION = "Получить онлайн-консультацию"
 BTN_SUPPORT = "Поддержать проект"
+
+# conversation/menu.py
+BTN_MONTH_STAT = "Статистика за месяц"
+BTN_IN_PROGRESS = "В работе"
+BTN_OVERDUE = "🔥 Cроки горят"
+BTN_RULES = "Правила сервиса"
+BTN_TIMEZONE = "Настроить часовой пояс (сейчас {user_tz})"
+BTN_MENU = "Меню"
+
+OVERDUE_TEMPLATE = (
+    "Время и стекло 😎\n"
+    "Ваше количество просроченных заявок - {expired_consultations}\n"
+    "Верим и ждем.\n\n"
+    "{link_nenaprasno}\n"
+    "----\n"
+    "В работе количество заявок - {active_consultations}\n"
+    "[Открыть Trello]({trello_url})\n\n"
+)
+
+ACTUAL_TEMPLATE = (
+    "У вас в работе {active_consultations} {declination_consultation}.\n"
+    "{link_nenaprasno}\n"
+    "[Открыть Trello]({trello_url})\n\n"
+)
+
+PLURAL_DAY = "день", "дня", "дней"
+PLURAL_HOUR = "час", "часа", "часов"
+PLURAL_CONSULTATION = "заявка", "заявки", "заявок"
+
+AVERAGE_ANSWER_TIME = "***Среднее время ответа*** - {days} {output_days} {hours} {output_hours}"
+RATING = "***Рейтинг*** - {rating:.1f}"
+DATA_NOT_AVAILABLE = "Данные недоступны!"
+
+MONTH_STAT_GOOD = (
+    f"С начала месяца вы сделали очень много для {__JUST_ASK} 🔥\n"
+    "***Количество закрытых заявок*** - {closed_consultations}\n"
+    "{rating}\n"
+    "{average_answer_time}\n\n"
+    "Мы рады работать в одной команде :)\n"
+    "Так держать!"
+)
+MONTH_STAT_BAD = "К сожалению у вас не было отвеченных заявок :(\nМы верим, что в следующем месяце все изменится! :)"
+
+CONSULTATION_LIST_HEAD = "Посмотреть заявки на сайте:"
+CONSULTATION_LIST_ITEM = "{number}. [Заявка {consultation_number}]({consultations_url})"

@@ -12,21 +12,25 @@ from core.utils import build_consultation_url, build_trello_url, get_word_case
 from decorators.logger import async_error_logger
 from get_timezone import get_user_timezone
 from service.api_client import APIService
-
-OVERDUE_TEMPLATE = (
-    "Время и стекло 😎\n"
-    "Ваше количество просроченных заявок - {expired_consultations}\n"
-    "Верим и ждем.\n\n"
-    "{link_nenaprasno}\n"
-    "----\n"
-    "В работе количество заявок - {active_consultations}\n"
-    "[Открыть Trello]({trello_url})\n\n"
-)
-
-ACTUAL_TEMPLATE = (
-    "У вас в работе {active_consultations} {declination_consultation}.\n"
-    "{link_nenaprasno}\n"
-    "[Открыть Trello]({trello_url})\n\n"
+from texts import (
+    ACTUAL_TEMPLATE,
+    AVERAGE_ANSWER_TIME,
+    BTN_IN_PROGRESS,
+    BTN_MENU,
+    BTN_MONTH_STAT,
+    BTN_OVERDUE,
+    BTN_RULES,
+    BTN_TIMEZONE,
+    CONSULTATION_LIST_HEAD,
+    CONSULTATION_LIST_ITEM,
+    DATA_NOT_AVAILABLE,
+    MONTH_STAT_BAD,
+    MONTH_STAT_GOOD,
+    OVERDUE_TEMPLATE,
+    PLURAL_CONSULTATION,
+    PLURAL_DAY,
+    PLURAL_HOUR,
+    RATING,
 )
 
 
@@ -38,24 +42,24 @@ async def menu(update: Update, context: ContextTypes.DEFAULT_TYPE) -> str:
     user_tz = await get_user_timezone(int(update.effective_user.id), context)
     menu_buttons = [
         [
-            InlineKeyboardButton("Статистика за месяц", callback_data=callback_data.CALLBACK_STATISTIC_MONTH_COMMAND),
+            InlineKeyboardButton(BTN_MONTH_STAT, callback_data=callback_data.CALLBACK_STATISTIC_MONTH_COMMAND),
         ],
-        [InlineKeyboardButton("В работе", callback_data=callback_data.CALLBACK_ACTUAL_REQUESTS_COMMAND)],
-        [InlineKeyboardButton("🔥 Cроки горят", callback_data=callback_data.CALLBACK_OVERDUE_REQUESTS_COMMAND)],
+        [InlineKeyboardButton(BTN_IN_PROGRESS, callback_data=callback_data.CALLBACK_ACTUAL_REQUESTS_COMMAND)],
+        [InlineKeyboardButton(BTN_OVERDUE, callback_data=callback_data.CALLBACK_OVERDUE_REQUESTS_COMMAND)],
         [
             InlineKeyboardButton(
-                "Правила сервиса",
+                BTN_RULES,
                 url=URL_SERVICE_RULES,
             )
         ],
         [
             InlineKeyboardButton(
-                f"Настроить часовой пояс (сейчас {user_tz})",
+                BTN_TIMEZONE.format(user_tz=user_tz),
                 callback_data=callback_data.CALLBACK_CONFIGURATE_TIMEZONE_COMMAND,
             )
         ],
     ]
-    await reply_message(update, "Меню", reply_markup=InlineKeyboardMarkup(menu_buttons))
+    await reply_message(update, BTN_MENU, reply_markup=InlineKeyboardMarkup(menu_buttons))
     return states.MENU_STATE
 
 
@@ -75,17 +79,17 @@ def format_average_user_answer_time(time: float | None) -> str:
     average_answer_time = timedelta(days=0, hours=0, milliseconds=time)
     days = average_answer_time.days
     hours = average_answer_time.seconds // 3600
-    output_days = get_word_case(days, "день", "дня", "дней")
-    output_hours = get_word_case(hours, "час", "часа", "часов")
+    output_days = get_word_case(days, *PLURAL_DAY)
+    output_hours = get_word_case(hours, *PLURAL_HOUR)
 
-    return f"***Среднее время ответа*** - {days} {output_days} {hours} {output_hours}\n"
+    return AVERAGE_ANSWER_TIME.format(days=days, output_days=output_days, hours=hours, output_hours=output_hours)
 
 
 def format_rating(rating: float | None) -> str:
     if rating is None:
         return ""
 
-    return f"***Рейтинг*** - {rating:.1f}\n"
+    return RATING.format(rating=rating)
 
 
 @async_error_logger(name="conversation.requests.button_statistic_month_callback")
@@ -98,20 +102,17 @@ async def button_statistic_month_callback(update: Update, context: ContextTypes.
     user_statistics = await service.get_user_month_stat(telegram_id=telegram_id)
 
     if user_statistics is None:
-        await update.callback_query.message.reply_text(text="Данные недоступны!")
+        await update.callback_query.message.reply_text(text=DATA_NOT_AVAILABLE)
         return
 
     if user_statistics.closed_consultations > 0:
-        message = (
-            'С начала месяца вы сделали очень много для "Просто спросить" 🔥\n'
-            f"***Количество закрытых заявок*** - {user_statistics.closed_consultations}\n"
-            f"{format_rating(user_statistics.rating)}"
-            f"{format_average_user_answer_time(user_statistics.average_user_answer_time)}"
-            "\nМы рады работать в одной команде :)\n"
-            "Так держать!"
+        message = MONTH_STAT_GOOD.format(
+            closed_consultations=user_statistics.closed_consultations,
+            rating=format_rating(user_statistics.rating),
+            average_answer_time=format_average_user_answer_time(user_statistics.average_user_answer_time),
         )
     else:
-        message = "К сожалению у вас не было отвеченных заявок :(\nМы верим, что в следующем месяце все изменится! :)"
+        message = MONTH_STAT_BAD
 
     await reply_message(update=update, text=message)
 
@@ -119,10 +120,15 @@ async def button_statistic_month_callback(update: Update, context: ContextTypes.
 def make_consultations_list(consultations_list: List[Dict]) -> str:
     if any(consultations_list):
         return (
-            "Посмотреть заявки на сайте:\n"
+            CONSULTATION_LIST_HEAD
+            + "\n"
             + "\n".join(
                 [
-                    f"{number}. [Заявка {consultation['number']}]({build_consultation_url(consultation['id'])})"
+                    CONSULTATION_LIST_ITEM.format(
+                        number=number,
+                        consultation_number=consultation["number"],
+                        consultations_url=build_consultation_url(consultation["id"]),
+                    )
                     for number, consultation in enumerate(consultations_list, start=1)
                 ]
             )
@@ -141,12 +147,12 @@ async def button_actual_requests_callback(update: Update, context: ContextTypes.
     active_consultations = await service.get_user_active_consultations(telegram_id=telegram_id)
 
     if active_consultations is None:
-        await update.callback_query.message.reply_text(text="Данные недоступны!")
+        await update.callback_query.message.reply_text(text=DATA_NOT_AVAILABLE)
         return
 
     active_consultations_list = active_consultations.active_consultations_data
     link_nenaprasno = make_consultations_list(active_consultations_list)
-    declination_consultation = get_word_case(active_consultations.active_consultations, "заявка", "заявки", "заявок")
+    declination_consultation = get_word_case(active_consultations.active_consultations, *PLURAL_CONSULTATION)
 
     trello_url = build_trello_url(active_consultations.username_trello, overdue=True)
 
@@ -170,7 +176,7 @@ async def button_overdue_requests_callback(update: Update, context: ContextTypes
     active_consultations = await service.get_user_active_consultations(telegram_id=telegram_id)
 
     if expired_consultations is None or active_consultations is None:
-        await update.callback_query.message.reply_text(text="Данные недоступны")
+        await update.callback_query.message.reply_text(text=DATA_NOT_AVAILABLE)
         return
 
     expired_consultations_list = expired_consultations.expired_consultations_data
