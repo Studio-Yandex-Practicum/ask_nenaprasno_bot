@@ -12,39 +12,17 @@ from decorators.logger import async_error_logger
 from menu_button import COMMANDS_UNAUTHORIZED, menu_button
 from service.api_client import APIService
 from service.api_client.models import UserData
-
-BOT_GREETINGS_MESSAGE = (
-    "Вы успешно начали работу с ботом. Меня зовут Женя Краб, "
-    "я telegram-bot для экспертов справочной службы "
-    '"Просто спросить". \nЯ буду сообщать вам о новых заявках, '
-    "присылать уведомления о новых сообщениях в чате от пациентов "
-    "и их близких и напоминать о просроченных заявках. \n"
-    "Нам нравится, что вы с нами. Не терпится увидеть вас в деле! "
-)
-BOT_QUESTON_YOU_ARE_EXPERT = (
-    'Привет! Этот бот предназначен только для экспертов справочной службы "Просто спросить".\n'
-    "Вы являетесь экспертом?"
-)
-BOT_QUESTON_WANT_BE_EXPERT = (
-    'Этот бот предназначен только для экспертов справочной службы "Просто спросить".\n'
-    "Хотите стать нашим экспертом и отвечать на заявки от пациентов и их близких?"
-)
-BOT_OFFER_ONLINE_CONSULTATION = (
-    'Этот бот предназначен только для экспертов справочной службы "Просто спросить".\n'
-    "Если у вас возникли вопросы об онкологическом заболевании, "
-    'заполните заявку на странице справочной службы "Просто спросить".'
-)
-BOT_OFFER_FILL_FORM_FOR_FUTURE_EXPERT = (
-    "Мы всегда рады подключать к проекту новых специалистов!\nЗдорово, что вы хотите работать с нами.\n"
-    f"Заполните, пожалуйста, эту [анкету]({config.FORM_URL_FUTURE_EXPERT}) (нужно 15 минут). "
-    "Команда сервиса подробно изучит вашу заявку и свяжется с вами в течение недели, чтобы договориться о "
-    "видеоинтервью.\nПеред интервью мы можем попросить вас ответить на тестовый кейс,"
-    " чтобы обсудить его на встрече."
-)
-BOT_OFFER_SEND_TELEGRAM_ID = (
-    "Ваш Telegram-идентификатор - ```{telegram_id}```\n\n"
-    "Для дальнейшей работы, пожалуйста, перешлите это сообщение кейс-менеджеру, "
-    "чтобы начать получать уведомления."
+from texts import (
+    BOT_GREETINGS_MESSAGE,
+    BOT_OFFER_FILL_FORM_FOR_FUTURE_EXPERT,
+    BOT_OFFER_ONLINE_CONSULTATION,
+    BOT_OFFER_SEND_TELEGRAM_ID,
+    BOT_QUESTON_WANT_BE_EXPERT,
+    BOT_QUESTON_YOU_ARE_EXPERT,
+    BTN_CONSULTATION,
+    BTN_NO,
+    BTN_SUPPORT,
+    BTN_YES,
 )
 
 
@@ -62,8 +40,8 @@ async def start(update: Update, context: CallbackContext) -> str:
     await menu_button(context, COMMANDS_UNAUTHORIZED)
     keyboard = [
         [
-            InlineKeyboardButton("Да", callback_data=callback_data.CALLBACK_IS_EXPERT_COMMAND),
-            InlineKeyboardButton("Нет", callback_data=callback_data.CALLBACK_NOT_EXPERT_COMMAND),
+            InlineKeyboardButton(BTN_YES, callback_data=callback_data.CALLBACK_IS_EXPERT_COMMAND),
+            InlineKeyboardButton(BTN_NO, callback_data=callback_data.CALLBACK_NOT_EXPERT_COMMAND),
         ]
     ]
     reply_markup = InlineKeyboardMarkup(keyboard)
@@ -78,8 +56,8 @@ async def not_expert_callback(update: Update, context: CallbackContext) -> str:
     """
     keyboard = [
         [
-            InlineKeyboardButton("Да", callback_data=callback_data.CALLBACK_REGISTER_AS_EXPERT_COMMAND),
-            InlineKeyboardButton("Нет", callback_data=callback_data.CALLBACK_SUPPORT_OR_CONSULT_COMMAND),
+            InlineKeyboardButton(BTN_YES, callback_data=callback_data.CALLBACK_REGISTER_AS_EXPERT_COMMAND),
+            InlineKeyboardButton(BTN_NO, callback_data=callback_data.CALLBACK_SUPPORT_OR_CONSULT_COMMAND),
         ]
     ]
     reply_markup = InlineKeyboardMarkup(keyboard)
@@ -94,8 +72,8 @@ async def support_or_consult_callback(update: Update, context: CallbackContext) 
     """
     keyboard = [
         [
-            InlineKeyboardButton("Получить онлайн-консультацию", url=config.URL_ASK_NENAPRASNO),
-            InlineKeyboardButton("Поддержать проект", url=urljoin(config.URL_ASK_NENAPRASNO, "/#donation")),
+            InlineKeyboardButton(BTN_CONSULTATION, url=config.URL_ASK_NENAPRASNO),
+            InlineKeyboardButton(BTN_SUPPORT, url=urljoin(config.URL_ASK_NENAPRASNO, "/#donation")),
         ]
     ]
     reply_markup = InlineKeyboardMarkup(keyboard)
