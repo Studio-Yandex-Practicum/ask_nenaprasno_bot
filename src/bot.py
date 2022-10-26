@@ -133,6 +133,7 @@ async def init_webhook() -> Application:
     await bot_app.bot.set_webhook(
         url=urljoin(config.APPLICATION_URL, "telegramWebhookApi"), secret_token=config.SECRET_TELEGRAM_TOKEN
     )
+    logger.debug("Set webhook. App url: %s", config.APPLICATION_URL)
     return bot_app
 
 
@@ -143,3 +144,4 @@ def init_polling() -> None:
     """
     bot_app = create_bot()
     bot_app.run_polling()
+    logger.debug("Start polling")
