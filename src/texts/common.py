@@ -1,5 +1,5 @@
-__JUST_ASK = '"Просто спросить"'
-__OPEN_TRELLO = "[Открыть Trello]({trello_url})"
+__JUST_ASK_NAME = '"Просто спросить"'
+__OPEN_TRELLO_URL = "[Открыть Trello]({trello_url})"
 
 PLURAL_DAY = "день", "дня", "дней"
 PLURAL_HOUR = "час", "часа", "часов"

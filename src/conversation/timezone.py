@@ -34,10 +34,10 @@ async def get_timezone(update: Update, context: CallbackContext) -> str:
     Requests a timezone from the user.
     """
     keyboard = [
-        [KeyboardButton(texts_buttons.BTN_GEOLOCATION, request_location=True)],
+        [KeyboardButton(texts_buttons.SEND_GEOLOCATION, request_location=True)],
     ]
     markup = ReplyKeyboardMarkup(keyboard, resize_keyboard=True, one_time_keyboard=True)
-    await reply_message(update=update, text=texts_conversations.TIMEZONE_MESSAGE, reply_markup=markup)
+    await reply_message(update=update, text=texts_conversations.MESSAGE_TIMEZONE, reply_markup=markup)
     return states.TIMEZONE_STATE
 
 
@@ -50,14 +50,14 @@ async def check_timezone(update: Update, context: ContextTypes.DEFAULT_TYPE, tim
     if timezone is None:
         await reply_message(
             update=update,
-            text=texts_conversations.TIMEZONE_FAIL_MESSAGE,
+            text=texts_conversations.MESSAGE_TIMEZONE_FAIL,
         )
         return states.TIMEZONE_STATE
 
     if not context.user_data.get(ASK_FLAG):
         await reply_message(
             update=update,
-            text=texts_conversations.TIMEZONE_SUCCESS_MESSAGE.format(timezone=timezone),
+            text=texts_conversations.TEMPLATE_TIMEZONE_SUCCESS.format(timezone=timezone),
             reply_markup=ReplyKeyboardRemove(),
         )
         return states.MENU_STATE
@@ -65,22 +65,23 @@ async def check_timezone(update: Update, context: ContextTypes.DEFAULT_TYPE, tim
     buttons_after_timezone = [
         [
             InlineKeyboardButton(
-                text=texts_buttons.BTN_MONTH_STAT, callback_data=callback_data.CALLBACK_STATISTIC_MONTH_COMMAND
+                text=texts_buttons.MONTH_STATISTICS, callback_data=callback_data.CALLBACK_STATISTIC_MONTH_COMMAND
             ),
         ],
         [
             InlineKeyboardButton(
-                text=texts_buttons.BTN_IN_PROGRESS, callback_data=callback_data.CALLBACK_ACTUAL_REQUESTS_COMMAND
+                text=texts_buttons.CONSULTATIONS_IN_PROGRESS,
+                callback_data=callback_data.CALLBACK_ACTUAL_REQUESTS_COMMAND,
             )
         ],
         [
             InlineKeyboardButton(
-                text=texts_buttons.BTN_OVERDUE, callback_data=callback_data.CALLBACK_OVERDUE_REQUESTS_COMMAND
+                text=texts_buttons.VERDUE_CONSULTATIONS, callback_data=callback_data.CALLBACK_OVERDUE_REQUESTS_COMMAND
             )
         ],
         [
             InlineKeyboardButton(
-                text=texts_buttons.BTN_RULES,
+                text=texts_buttons.RULES,
                 url=URL_SERVICE_RULES,
             )
         ],
@@ -88,7 +89,7 @@ async def check_timezone(update: Update, context: ContextTypes.DEFAULT_TYPE, tim
     reply_markup = InlineKeyboardMarkup(buttons_after_timezone)
     await reply_message(
         update=update,
-        text=texts_conversations.TIMEZONE_SUCCESS_MESSAGE.format(timezone=timezone),
+        text=texts_conversations.TEMPLATE_TIMEZONE_SUCCESS.format(timezone=timezone),
         reply_markup=ReplyKeyboardRemove(),
     )
     await reply_message(
@@ -135,18 +136,20 @@ async def set_timezone_from_keyboard(update: Update, context: CallbackContext) -
     keyboard = [
         [
             InlineKeyboardButton(
-                texts_buttons.BTN_TIMEZONE_DEFAULT,
+                texts_buttons.DEFAULT_TIMEZONE,
                 callback_data=callback_data.CALLBACK_SET_DEFAULT_TIMEZONE,
             ),
         ],
         [
             InlineKeyboardButton(
-                texts_buttons.BTN_TIMEZONE_BY_LOCATION_OR_MANUAL, callback_data=callback_data.CALLBACK_SET_TIMEZONE
+                texts_buttons.TIMEZONE_BY_LOCATION_OR_MANUAL, callback_data=callback_data.CALLBACK_SET_TIMEZONE
             ),
         ],
     ]
     await menu_button(context, COMMANDS)
-    await reply_message(update, text=texts_conversations.TIMEZONE_START, reply_markup=InlineKeyboardMarkup(keyboard))
+    await reply_message(
+        update, text=texts_conversations.MESSAGE_TIMEZONE_START, reply_markup=InlineKeyboardMarkup(keyboard)
+    )
     return states.MENU_STATE
 
 

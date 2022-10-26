@@ -23,19 +23,19 @@ async def start(update: Update, context: CallbackContext) -> str:
     """
     user_data = await autorize(update.effective_user.id, context)
     if user_data is not None:
-        await reply_message(update=update, text=texts_conversations.BOT_GREETINGS_MESSAGE)
+        await reply_message(update=update, text=texts_conversations.MESSAGE_GREETINGS)
         context.user_data[ASK_FLAG] = True
         await set_timezone_from_keyboard(update, context)
         return states.MENU_STATE
     await menu_button(context, COMMANDS_UNAUTHORIZED)
     keyboard = [
         [
-            InlineKeyboardButton(texts_buttons.BTN_YES, callback_data=callback_data.CALLBACK_IS_EXPERT_COMMAND),
-            InlineKeyboardButton(texts_buttons.BTN_NO, callback_data=callback_data.CALLBACK_NOT_EXPERT_COMMAND),
+            InlineKeyboardButton(texts_buttons.YES, callback_data=callback_data.CALLBACK_IS_EXPERT_COMMAND),
+            InlineKeyboardButton(texts_buttons.NO, callback_data=callback_data.CALLBACK_NOT_EXPERT_COMMAND),
         ]
     ]
     reply_markup = InlineKeyboardMarkup(keyboard)
-    await reply_message(update=update, text=texts_conversations.BOT_QUESTON_YOU_ARE_EXPERT, reply_markup=reply_markup)
+    await reply_message(update=update, text=texts_conversations.MESSAGE_ARE_YOU_AN_EXPERT, reply_markup=reply_markup)
     return states.UNAUTHORIZED_STATE
 
 
@@ -46,15 +46,13 @@ async def not_expert_callback(update: Update, context: CallbackContext) -> str:
     """
     keyboard = [
         [
-            InlineKeyboardButton(
-                texts_buttons.BTN_YES, callback_data=callback_data.CALLBACK_REGISTER_AS_EXPERT_COMMAND
-            ),
-            InlineKeyboardButton(texts_buttons.BTN_NO, callback_data=callback_data.CALLBACK_SUPPORT_OR_CONSULT_COMMAND),
+            InlineKeyboardButton(texts_buttons.YES, callback_data=callback_data.CALLBACK_REGISTER_AS_EXPERT_COMMAND),
+            InlineKeyboardButton(texts_buttons.NO, callback_data=callback_data.CALLBACK_SUPPORT_OR_CONSULT_COMMAND),
         ]
     ]
     reply_markup = InlineKeyboardMarkup(keyboard)
     await edit_message(
-        update=update, new_text=texts_conversations.BOT_QUESTON_WANT_BE_EXPERT, reply_markup=reply_markup
+        update=update, new_text=texts_conversations.MESSAGE_WANNA_BE_AN_EXPERT, reply_markup=reply_markup
     )
     return states.REGISTRATION_STATE
 
@@ -66,13 +64,13 @@ async def support_or_consult_callback(update: Update, context: CallbackContext) 
     """
     keyboard = [
         [
-            InlineKeyboardButton(texts_buttons.BTN_CONSULTATION, url=config.URL_ASK_NENAPRASNO),
-            InlineKeyboardButton(texts_buttons.BTN_SUPPORT, url=urljoin(config.URL_ASK_NENAPRASNO, "/#donation")),
+            InlineKeyboardButton(texts_buttons.GET_CONSULTATION, url=config.URL_ASK_NENAPRASNO),
+            InlineKeyboardButton(texts_buttons.SUPPORT_PROJECT, url=urljoin(config.URL_ASK_NENAPRASNO, "/#donation")),
         ]
     ]
     reply_markup = InlineKeyboardMarkup(keyboard)
     await edit_message(
-        update=update, new_text=texts_conversations.BOT_OFFER_ONLINE_CONSULTATION, reply_markup=reply_markup
+        update=update, new_text=texts_conversations.MESSAGE_OFFER_ONLINE_CONSULTATION, reply_markup=reply_markup
     )
     return ConversationHandler.END
 
@@ -82,7 +80,7 @@ async def register_as_expert_callback(update: Update, context: CallbackContext) 
     """
     Sends a registration form to the user.
     """
-    await reply_message(update=update, text=texts_conversations.BOT_OFFER_FILL_FORM_FOR_FUTURE_EXPERT)
+    await reply_message(update=update, text=texts_conversations.MESSAGE_OFFER_FILL_FORM_FOR_EXPERT)
     return ConversationHandler.END
 
 
@@ -108,10 +106,10 @@ async def is_expert_callback(update: Update, context: CallbackContext) -> str:
     user_data = await autorize(update.effective_user.id, context)
     await update.callback_query.answer()
     if user_data is None:
-        message = texts_conversations.BOT_OFFER_SEND_TELEGRAM_ID.format(telegram_id=telegram_id)
+        message = texts_conversations.TEMPLATE_OFFER_SEND_TELEGRAM_ID.format(telegram_id=telegram_id)
         await edit_message(update=update, new_text=message)
         return states.UNAUTHORIZED_STATE
-    await edit_message(update=update, new_text=texts_conversations.BOT_GREETINGS_MESSAGE)
+    await edit_message(update=update, new_text=texts_conversations.MESSAGE_GREETINGS)
     context.user_data[ASK_FLAG] = True
     await set_timezone_from_keyboard(update, context)
     return states.MENU_STATE

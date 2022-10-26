@@ -53,7 +53,7 @@ class DueConsultationData(BaseConsultationData):
     right upon expiration of the due time.
     """
 
-    message_template: str = texts_bot.DUE_REMINDER_TEMPLATE
+    message_template: str = texts_bot.TEMPLATE_DUE_REMINDER
 
     def in_valid_time_range(self) -> bool:
         return self.due_date() == datetime.utcnow().date()
@@ -65,7 +65,7 @@ class DueHourConsultationData(BaseConsultationData):
     one hour after expiration of the due time.
     """
 
-    message_template: str = texts_bot.DUE_HOUR_REMINDER_TEMPLATE
+    message_template: str = texts_bot.TEMPLATE_DUE_HOUR_REMINDER
 
     def in_valid_time_range(self) -> bool:
         return self.due_date() == datetime.utcnow().date()
@@ -77,7 +77,7 @@ class PastConsultationData(BaseConsultationData):
     for consultations expired at least one day ago.
     """
 
-    message_template: str = texts_bot.PAST_REMINDER_TEMPLATE
+    message_template: str = texts_bot.TEMPLATE_PAST_REMINDER
 
     def in_valid_time_range(self) -> bool:
         return self.due_date() < datetime.utcnow().date()
@@ -89,7 +89,7 @@ class ForwardConsultationData(BaseConsultationData):
     for consultations expiring tomorrow.
     """
 
-    message_template: str = texts_bot.FORWARD_REMINDER_TEMPLATE
+    message_template: str = texts_bot.TEMPLATE_FORWARD_REMINDER
 
     def in_valid_time_range(self) -> bool:
         return self.due_date() - datetime.utcnow().date() == timedelta(days=1)
@@ -127,7 +127,7 @@ async def send_weekly_statistic_job(context: CallbackContext) -> None:
     week_statistics = await service.get_week_stat()
 
     for statistic in filter(lambda stat: stat.telegram_id is not None and stat.timezone == current_tz, week_statistics):
-        message = texts_bot.WEEKLY_STATISTIC_TEMPLATE.format(
+        message = texts_bot.TEMPLATE_WEEKLY_STATISTIC.format(
             trello_url=build_trello_url(statistic.username_trello),
             **statistic.to_dict(),
             declination_consultation=get_word_case(statistic.active_consultations, *texts_common.PLURAL_CONSULTATION),
@@ -149,7 +149,7 @@ async def send_weekly_statistic_job(context: CallbackContext) -> None:
 async def send_monthly_statistic_job(context: CallbackContext) -> None:
     """Send monthly statistic to user."""
     statistic = context.job.data
-    message = texts_bot.MONTHLY_STATISTIC_TEMPLATE.format(
+    message = texts_bot.TEMPLATE_MONTHLY_STATISTIC.format(
         closed_consultations=statistic.closed_consultations,
         rating=format_rating(statistic.rating),
         average_user_answer_time=format_average_user_answer_time(statistic.average_user_answer_time),
@@ -194,9 +194,9 @@ async def daily_bill_remind_job(context: CallbackContext) -> None:
     job = context.job
     menu = InlineKeyboardMarkup(
         [
-            [InlineKeyboardButton(texts_buttons.BTN_BILL_SENT, callback_data=CALLBACK_DONE_BILL_COMMAND)],
+            [InlineKeyboardButton(texts_buttons.BILL_SENT, callback_data=CALLBACK_DONE_BILL_COMMAND)],
             [repeat_after_one_hour_button],
-            [InlineKeyboardButton(texts_buttons.BTN_BILL_SOON, callback_data=CALLBACK_SKIP_BILL_COMMAND)],
+            [InlineKeyboardButton(texts_buttons.BILL_WILL_SEND_SOON, callback_data=CALLBACK_SKIP_BILL_COMMAND)],
         ]
     )
     await send_message(context.bot, job.chat_id, texts_bot.BILL_REMINDER_TEXT, menu)
@@ -209,7 +209,7 @@ async def get_overdue_reminder_text(consultations: List, active_cons_count: int,
     )
     trello_url = build_trello_url(consultations[0].consultation.username_trello, overdue=True)
 
-    return texts_conversations.OVERDUE_TEMPLATE.format(
+    return texts_conversations.TEMPLATE_OVERDUE.format(
         active_consultations=active_cons_count,
         expired_consultations=expired_cons_count,
         link_nenaprasno=link_nenaprasno,

@@ -30,6 +30,4 @@ async def repeat_message_job(context: CallbackContext) -> None:
     await send_message(context.bot, context.job.chat_id, data.text_markdown_urled, data.reply_markup)
 
 
-repeat_after_one_hour_button = InlineKeyboardButton(
-    texts_buttons.BTN_REMIND_IN_HOUR, callback_data=CALLBACK_REPEAT_COMMAND
-)
+repeat_after_one_hour_button = InlineKeyboardButton(texts_buttons.REMIND_IN_HOUR, callback_data=CALLBACK_REPEAT_COMMAND)

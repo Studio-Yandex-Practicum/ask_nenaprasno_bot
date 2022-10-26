@@ -26,33 +26,33 @@ async def menu(update: Update, context: ContextTypes.DEFAULT_TYPE) -> str:
     menu_buttons = [
         [
             InlineKeyboardButton(
-                texts_buttons.BTN_MONTH_STAT, callback_data=callback_data.CALLBACK_STATISTIC_MONTH_COMMAND
+                texts_buttons.MONTH_STATISTICS, callback_data=callback_data.CALLBACK_STATISTIC_MONTH_COMMAND
             ),
         ],
         [
             InlineKeyboardButton(
-                texts_buttons.BTN_IN_PROGRESS, callback_data=callback_data.CALLBACK_ACTUAL_REQUESTS_COMMAND
+                texts_buttons.CONSULTATIONS_IN_PROGRESS, callback_data=callback_data.CALLBACK_ACTUAL_REQUESTS_COMMAND
             )
         ],
         [
             InlineKeyboardButton(
-                texts_buttons.BTN_OVERDUE, callback_data=callback_data.CALLBACK_OVERDUE_REQUESTS_COMMAND
+                texts_buttons.VERDUE_CONSULTATIONS, callback_data=callback_data.CALLBACK_OVERDUE_REQUESTS_COMMAND
             )
         ],
         [
             InlineKeyboardButton(
-                texts_buttons.BTN_RULES,
+                texts_buttons.RULES,
                 url=URL_SERVICE_RULES,
             )
         ],
         [
             InlineKeyboardButton(
-                texts_buttons.BTN_TIMEZONE.format(user_tz=user_tz),
+                texts_buttons.SET_TIMEZONE.format(user_tz=user_tz),
                 callback_data=callback_data.CALLBACK_CONFIGURATE_TIMEZONE_COMMAND,
             )
         ],
     ]
-    await reply_message(update, texts_buttons.BTN_MENU, reply_markup=InlineKeyboardMarkup(menu_buttons))
+    await reply_message(update, texts_buttons.MENU, reply_markup=InlineKeyboardMarkup(menu_buttons))
     return states.MENU_STATE
 
 
@@ -75,7 +75,7 @@ def format_average_user_answer_time(time: float | None) -> str:
     output_days = get_word_case(days, *texts_common.PLURAL_DAY)
     output_hours = get_word_case(hours, *texts_common.PLURAL_HOUR)
 
-    return texts_conversations.AVERAGE_ANSWER_TIME.format(
+    return texts_conversations.USER_AVERAGE_ANSWER_TIME.format(
         days=days, output_days=output_days, hours=hours, output_hours=output_hours
     )
 
@@ -84,7 +84,7 @@ def format_rating(rating: float | None) -> str:
     if rating is None:
         return ""
 
-    return texts_conversations.RATING.format(rating=rating)
+    return texts_conversations.USER_RATING.format(rating=rating)
 
 
 @async_error_logger(name="conversation.requests.button_statistic_month_callback")
@@ -101,13 +101,13 @@ async def button_statistic_month_callback(update: Update, context: ContextTypes.
         return
 
     if user_statistics.closed_consultations > 0:
-        message = texts_conversations.MONTH_STAT_GOOD.format(
+        message = texts_conversations.TEMPLATE_MONTH_POSITIVE_STAT.format(
             closed_consultations=user_statistics.closed_consultations,
             rating=format_rating(user_statistics.rating),
             average_answer_time=format_average_user_answer_time(user_statistics.average_user_answer_time),
         )
     else:
-        message = texts_conversations.MONTH_STAT_BAD
+        message = texts_conversations.TEMPLATE_MONTH_NEGATIVE_STAT
 
     await reply_message(update=update, text=message)
 
@@ -119,7 +119,7 @@ def make_consultations_list(consultations_list: List[Dict]) -> str:
             + "\n"
             + "\n".join(
                 [
-                    texts_conversations.CONSULTATION_LIST_ITEM.format(
+                    texts_conversations.TEMPLATE_CONSULTATION_LIST_ITEM.format(
                         number=number,
                         consultation_number=consultation["number"],
                         consultations_url=build_consultation_url(consultation["id"]),
@@ -153,7 +153,7 @@ async def button_actual_requests_callback(update: Update, context: ContextTypes.
 
     trello_url = build_trello_url(active_consultations.username_trello, overdue=True)
 
-    message = texts_conversations.ACTUAL_TEMPLATE.format(
+    message = texts_conversations.TEMPLATE_ACTUAL.format(
         active_consultations=active_consultations.active_consultations,
         declination_consultation=declination_consultation,
         link_nenaprasno=link_nenaprasno,
@@ -180,7 +180,7 @@ async def button_overdue_requests_callback(update: Update, context: ContextTypes
     link_nenaprasno = make_consultations_list(expired_consultations_list)
     trello_url = build_trello_url(expired_consultations.username_trello, overdue=True)
 
-    message = texts_conversations.OVERDUE_TEMPLATE.format(
+    message = texts_conversations.TEMPLATE_OVERDUE.format(
         expired_consultations=expired_consultations.expired_consultations,
         link_nenaprasno=link_nenaprasno,
         active_consultations=active_consultations.active_consultations,

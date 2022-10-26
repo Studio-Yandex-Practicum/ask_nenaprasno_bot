@@ -108,7 +108,7 @@ async def consultation_assign(request: Request) -> Response:
     site_url = build_consultation_url(consultation.consultation_id)
     trello_url = build_trello_url(consultation.username_trello)
 
-    text = texts_bot.API_NEW_CONSULTATION.format(
+    text = texts_bot.TEMPLATE_NEW_CONSULTATION.format(
         consultation_number=consultation.consultation_number,
         site_url=site_url,
         active_cons_count=active_cons_count,
@@ -145,7 +145,7 @@ async def consultation_message(request: Request) -> Response:
     site_url = build_consultation_url(consultation.consultation_id)
     trello_url = build_trello_url(consultation.username_trello)
 
-    text = texts_bot.API_CONSULTATION_MESSAGE.format(
+    text = texts_bot.TEMPLATE_CONSULTATION_MESSAGE.format(
         consultation_number=consultation.consultation_number, site_url=site_url, trello_url=trello_url
     )
     await send_message(api.state.bot_app.bot, consultation.telegram_id, text)
@@ -159,7 +159,7 @@ async def consultation_feedback(request: Request) -> Response:
         return Response(status_code=httpx.codes.BAD_REQUEST)
 
     bot = api.state.bot_app.bot
-    text = texts_bot.API_NEW_FEEDBACK.format(
+    text = texts_bot.TEMPLATE_NEW_FEEDBACK.format(
         consultation_number=request_data.consultation_number, feedback=request_data.feedback
     )
     await send_message(bot=bot, chat_id=request_data.telegram_id, text=text)
