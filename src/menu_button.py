@@ -2,11 +2,11 @@ from telegram import BotCommand
 from telegram.ext import CallbackContext
 
 from constants import commands
-from texts.buttons import BTN_MENU2, BTN_START
+from texts import buttons as texts_buttons
 
-COMMANDS_UNAUTHORIZED = (BotCommand(commands.START, BTN_START),)
+COMMANDS_UNAUTHORIZED = (BotCommand(commands.START, texts_buttons.BTN_START),)
 COMMANDS = (
-    BotCommand(commands.MENU, BTN_MENU2),
+    BotCommand(commands.MENU, texts_buttons.BTN_MENU2),
     *COMMANDS_UNAUTHORIZED,
 )
 

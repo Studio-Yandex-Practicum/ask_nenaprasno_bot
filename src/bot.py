@@ -28,7 +28,7 @@ from jobs import (
     weekly_stat_job,
 )
 from service.repeat_message import repeat_message_after_1_hour_callback
-from texts.bot import REMIND_IN_NEXT_MONTH
+from texts import bot as texts_bot
 
 
 async def skip_bill_callback_handler(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
@@ -45,7 +45,7 @@ async def done_bill_callback_handler(update: Update, context: ContextTypes.DEFAU
     current_jobs = context.job_queue.get_jobs_by_name(job_name)
     for job in current_jobs:
         job.schedule_removal()
-    await edit_message(update, REMIND_IN_NEXT_MONTH)
+    await edit_message(update, texts_bot.REMIND_IN_NEXT_MONTH)
     await query.answer()  # close progress bar in chat
 
 

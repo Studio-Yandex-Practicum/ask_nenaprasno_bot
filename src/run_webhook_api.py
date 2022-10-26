@@ -28,8 +28,8 @@ from service.models import (
     FeedbackConsultationModel,
     HealthCheckResponseModel,
 )
-from texts.bot import API_CONSULTATION_MESSAGE, API_NEW_CONSULTATION, API_NEW_FEEDBACK
-from texts.common import PLURAL_CONSULTATION, PLURAL_CONSULTATION_NOT_SINGLE
+from texts import bot as texts_bot
+from texts import common as texts_common
 
 
 async def start_bot() -> None:
@@ -100,13 +100,15 @@ async def consultation_assign(request: Request) -> Response:
 
     service = APIService()
     active_cons_count, expired_cons_count = await service.get_consultations_count(telegram_id)
-    declination_consultation = get_word_case(active_cons_count, *PLURAL_CONSULTATION)
-    genitive_declination_consultation = get_word_genitive(expired_cons_count, *PLURAL_CONSULTATION_NOT_SINGLE)
+    declination_consultation = get_word_case(active_cons_count, *texts_common.PLURAL_CONSULTATION)
+    genitive_declination_consultation = get_word_genitive(
+        expired_cons_count, *texts_common.PLURAL_CONSULTATION_NOT_SINGLE
+    )
 
     site_url = build_consultation_url(consultation.consultation_id)
     trello_url = build_trello_url(consultation.username_trello)
 
-    text = API_NEW_CONSULTATION.format(
+    text = texts_bot.API_NEW_CONSULTATION.format(
         consultation_number=consultation.consultation_number,
         site_url=site_url,
         active_cons_count=active_cons_count,
@@ -143,7 +145,7 @@ async def consultation_message(request: Request) -> Response:
     site_url = build_consultation_url(consultation.consultation_id)
     trello_url = build_trello_url(consultation.username_trello)
 
-    text = API_CONSULTATION_MESSAGE.format(
+    text = texts_bot.API_CONSULTATION_MESSAGE.format(
         consultation_number=consultation.consultation_number, site_url=site_url, trello_url=trello_url
     )
     await send_message(api.state.bot_app.bot, consultation.telegram_id, text)
@@ -157,7 +159,9 @@ async def consultation_feedback(request: Request) -> Response:
         return Response(status_code=httpx.codes.BAD_REQUEST)
 
     bot = api.state.bot_app.bot
-    text = API_NEW_FEEDBACK.format(consultation_number=request_data.consultation_number, feedback=request_data.feedback)
+    text = texts_bot.API_NEW_FEEDBACK.format(
+        consultation_number=request_data.consultation_number, feedback=request_data.feedback
+    )
     await send_message(bot=bot, chat_id=request_data.telegram_id, text=text)
     return Response(status_code=httpx.codes.OK)
 

@@ -9,7 +9,7 @@ from telegram.ext import CallbackContext
 
 from constants.callback_data import CALLBACK_DONE_BILL_COMMAND, CALLBACK_SKIP_BILL_COMMAND
 from constants.jobs import USER_BILL_REMINDER_TEMPLATE
-from conversation.menu import OVERDUE_TEMPLATE, format_average_user_answer_time, format_rating, make_consultations_list
+from conversation.menu import format_average_user_answer_time, format_rating, make_consultations_list
 from core import config
 from core.send_message import send_message
 from core.utils import build_consultation_url, build_trello_url, get_word_case, get_word_genitive
@@ -17,17 +17,10 @@ from get_timezone import get_timezone_from_str, get_user_timezone
 from service.api_client import APIService
 from service.api_client.models import Consultation
 from service.repeat_message import repeat_after_one_hour_button
-from texts.bot import (
-    BILL_REMINDER_TEXT,
-    DUE_HOUR_REMINDER_TEMPLATE,
-    DUE_REMINDER_TEMPLATE,
-    FORWARD_REMINDER_TEMPLATE,
-    MONTHLY_STATISTIC_TEMPLATE,
-    PAST_REMINDER_TEMPLATE,
-    WEEKLY_STATISTIC_TEMPLATE,
-)
-from texts.buttons import BTN_BILL_SENT, BTN_BILL_SOON
-from texts.common import PLURAL_CONSULTATION, PLURAL_CONSULTATION_NOT_SINGLE
+from texts import bot as texts_bot
+from texts import buttons as texts_buttons
+from texts import common as texts_common
+from texts import conversations as texts_conversations
 
 DATE_FORMAT = "%Y-%m-%dT%H:%M:%S.%fZ"
 NATIONAL_DATE_FORMAT = "%d.%m.%Y"
@@ -60,7 +53,7 @@ class DueConsultationData(BaseConsultationData):
     right upon expiration of the due time.
     """
 
-    message_template: str = DUE_REMINDER_TEMPLATE
+    message_template: str = texts_bot.DUE_REMINDER_TEMPLATE
 
     def in_valid_time_range(self) -> bool:
         return self.due_date() == datetime.utcnow().date()
@@ -72,7 +65,7 @@ class DueHourConsultationData(BaseConsultationData):
     one hour after expiration of the due time.
     """
 
-    message_template: str = DUE_HOUR_REMINDER_TEMPLATE
+    message_template: str = texts_bot.DUE_HOUR_REMINDER_TEMPLATE
 
     def in_valid_time_range(self) -> bool:
         return self.due_date() == datetime.utcnow().date()
@@ -84,7 +77,7 @@ class PastConsultationData(BaseConsultationData):
     for consultations expired at least one day ago.
     """
 
-    message_template: str = PAST_REMINDER_TEMPLATE
+    message_template: str = texts_bot.PAST_REMINDER_TEMPLATE
 
     def in_valid_time_range(self) -> bool:
         return self.due_date() < datetime.utcnow().date()
@@ -96,7 +89,7 @@ class ForwardConsultationData(BaseConsultationData):
     for consultations expiring tomorrow.
     """
 
-    message_template: str = FORWARD_REMINDER_TEMPLATE
+    message_template: str = texts_bot.FORWARD_REMINDER_TEMPLATE
 
     def in_valid_time_range(self) -> bool:
         return self.due_date() - datetime.utcnow().date() == timedelta(days=1)
@@ -134,15 +127,15 @@ async def send_weekly_statistic_job(context: CallbackContext) -> None:
     week_statistics = await service.get_week_stat()
 
     for statistic in filter(lambda stat: stat.telegram_id is not None and stat.timezone == current_tz, week_statistics):
-        message = WEEKLY_STATISTIC_TEMPLATE.format(
+        message = texts_bot.WEEKLY_STATISTIC_TEMPLATE.format(
             trello_url=build_trello_url(statistic.username_trello),
             **statistic.to_dict(),
-            declination_consultation=get_word_case(statistic.active_consultations, *PLURAL_CONSULTATION),
+            declination_consultation=get_word_case(statistic.active_consultations, *texts_common.PLURAL_CONSULTATION),
             genitive_declination_consultation=get_word_genitive(
-                statistic.expiring_consultations, *PLURAL_CONSULTATION_NOT_SINGLE
+                statistic.expiring_consultations, *texts_common.PLURAL_CONSULTATION_NOT_SINGLE
             ),
             genitive_declination_expired=get_word_genitive(
-                statistic.expired_consultations, *PLURAL_CONSULTATION_NOT_SINGLE
+                statistic.expired_consultations, *texts_common.PLURAL_CONSULTATION_NOT_SINGLE
             ),
         )
         await send_message(
@@ -156,7 +149,7 @@ async def send_weekly_statistic_job(context: CallbackContext) -> None:
 async def send_monthly_statistic_job(context: CallbackContext) -> None:
     """Send monthly statistic to user."""
     statistic = context.job.data
-    message = MONTHLY_STATISTIC_TEMPLATE.format(
+    message = texts_bot.MONTHLY_STATISTIC_TEMPLATE.format(
         closed_consultations=statistic.closed_consultations,
         rating=format_rating(statistic.rating),
         average_user_answer_time=format_average_user_answer_time(statistic.average_user_answer_time),
@@ -201,12 +194,12 @@ async def daily_bill_remind_job(context: CallbackContext) -> None:
     job = context.job
     menu = InlineKeyboardMarkup(
         [
-            [InlineKeyboardButton(BTN_BILL_SENT, callback_data=CALLBACK_DONE_BILL_COMMAND)],
+            [InlineKeyboardButton(texts_buttons.BTN_BILL_SENT, callback_data=CALLBACK_DONE_BILL_COMMAND)],
             [repeat_after_one_hour_button],
-            [InlineKeyboardButton(BTN_BILL_SOON, callback_data=CALLBACK_SKIP_BILL_COMMAND)],
+            [InlineKeyboardButton(texts_buttons.BTN_BILL_SOON, callback_data=CALLBACK_SKIP_BILL_COMMAND)],
         ]
     )
-    await send_message(context.bot, job.chat_id, BILL_REMINDER_TEXT, menu)
+    await send_message(context.bot, job.chat_id, texts_bot.BILL_REMINDER_TEXT, menu)
 
 
 async def get_overdue_reminder_text(consultations: List, active_cons_count: int, expired_cons_count: int) -> str:
@@ -216,7 +209,7 @@ async def get_overdue_reminder_text(consultations: List, active_cons_count: int,
     )
     trello_url = build_trello_url(consultations[0].consultation.username_trello, overdue=True)
 
-    return OVERDUE_TEMPLATE.format(
+    return texts_conversations.OVERDUE_TEMPLATE.format(
         active_consultations=active_cons_count,
         expired_consultations=expired_cons_count,
         link_nenaprasno=link_nenaprasno,
@@ -241,8 +234,10 @@ def get_reminder_text(
         expired_consultations=expired_cons_count,
         site_url=build_consultation_url(consultation.id),
         trello_url=build_trello_url(consultation.username_trello, True),
-        declination_consultation=get_word_case(active_cons_count, *PLURAL_CONSULTATION),
-        genitive_declination_consultation=get_word_genitive(expired_cons_count, *PLURAL_CONSULTATION_NOT_SINGLE),
+        declination_consultation=get_word_case(active_cons_count, *texts_common.PLURAL_CONSULTATION),
+        genitive_declination_consultation=get_word_genitive(
+            expired_cons_count, *texts_common.PLURAL_CONSULTATION_NOT_SINGLE
+        ),
     )
 
 

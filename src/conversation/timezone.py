@@ -22,22 +22,8 @@ from core.send_message import reply_message
 from decorators.logger import async_error_logger
 from get_timezone import get_timezone_from_location, get_timezone_from_text_message, set_timezone
 from menu_button import COMMANDS, menu_button
-from texts.buttons import (
-    BTN_GEOLOCATION,
-    BTN_IN_PROGRESS,
-    BTN_MONTH_STAT,
-    BTN_OVERDUE,
-    BTN_RULES,
-    BTN_TIMEZONE_BY_LOCATION_OR_MANUAL,
-    BTN_TIMEZONE_DEFAULT,
-)
-from texts.conversation import (
-    MENU_HELP__,
-    TIMEZONE_FAIL_MESSAGE,
-    TIMEZONE_MESSAGE,
-    TIMEZONE_START,
-    TIMEZONE_SUCCESS_MESSAGE,
-)
+from texts import buttons as texts_buttons
+from texts import conversations as texts_conversations
 
 ASK_FLAG = "ask_flag"
 
@@ -48,10 +34,10 @@ async def get_timezone(update: Update, context: CallbackContext) -> str:
     Requests a timezone from the user.
     """
     keyboard = [
-        [KeyboardButton(BTN_GEOLOCATION, request_location=True)],
+        [KeyboardButton(texts_buttons.BTN_GEOLOCATION, request_location=True)],
     ]
     markup = ReplyKeyboardMarkup(keyboard, resize_keyboard=True, one_time_keyboard=True)
-    await reply_message(update=update, text=TIMEZONE_MESSAGE, reply_markup=markup)
+    await reply_message(update=update, text=texts_conversations.TIMEZONE_MESSAGE, reply_markup=markup)
     return states.TIMEZONE_STATE
 
 
@@ -64,27 +50,37 @@ async def check_timezone(update: Update, context: ContextTypes.DEFAULT_TYPE, tim
     if timezone is None:
         await reply_message(
             update=update,
-            text=TIMEZONE_FAIL_MESSAGE,
+            text=texts_conversations.TIMEZONE_FAIL_MESSAGE,
         )
         return states.TIMEZONE_STATE
 
     if not context.user_data.get(ASK_FLAG):
         await reply_message(
             update=update,
-            text=TIMEZONE_SUCCESS_MESSAGE.format(timezone=timezone),
+            text=texts_conversations.TIMEZONE_SUCCESS_MESSAGE.format(timezone=timezone),
             reply_markup=ReplyKeyboardRemove(),
         )
         return states.MENU_STATE
 
     buttons_after_timezone = [
         [
-            InlineKeyboardButton(text=BTN_MONTH_STAT, callback_data=callback_data.CALLBACK_STATISTIC_MONTH_COMMAND),
+            InlineKeyboardButton(
+                text=texts_buttons.BTN_MONTH_STAT, callback_data=callback_data.CALLBACK_STATISTIC_MONTH_COMMAND
+            ),
         ],
-        [InlineKeyboardButton(text=BTN_IN_PROGRESS, callback_data=callback_data.CALLBACK_ACTUAL_REQUESTS_COMMAND)],
-        [InlineKeyboardButton(text=BTN_OVERDUE, callback_data=callback_data.CALLBACK_OVERDUE_REQUESTS_COMMAND)],
         [
             InlineKeyboardButton(
-                text=BTN_RULES,
+                text=texts_buttons.BTN_IN_PROGRESS, callback_data=callback_data.CALLBACK_ACTUAL_REQUESTS_COMMAND
+            )
+        ],
+        [
+            InlineKeyboardButton(
+                text=texts_buttons.BTN_OVERDUE, callback_data=callback_data.CALLBACK_OVERDUE_REQUESTS_COMMAND
+            )
+        ],
+        [
+            InlineKeyboardButton(
+                text=texts_buttons.BTN_RULES,
                 url=URL_SERVICE_RULES,
             )
         ],
@@ -92,12 +88,12 @@ async def check_timezone(update: Update, context: ContextTypes.DEFAULT_TYPE, tim
     reply_markup = InlineKeyboardMarkup(buttons_after_timezone)
     await reply_message(
         update=update,
-        text=TIMEZONE_SUCCESS_MESSAGE.format(timezone=timezone),
+        text=texts_conversations.TIMEZONE_SUCCESS_MESSAGE.format(timezone=timezone),
         reply_markup=ReplyKeyboardRemove(),
     )
     await reply_message(
         update=update,
-        text=MENU_HELP__,
+        text=texts_conversations.MENU_HELP__,
         reply_markup=reply_markup,
     )
     del context.user_data[ASK_FLAG]
@@ -139,16 +135,18 @@ async def set_timezone_from_keyboard(update: Update, context: CallbackContext) -
     keyboard = [
         [
             InlineKeyboardButton(
-                BTN_TIMEZONE_DEFAULT,
+                texts_buttons.BTN_TIMEZONE_DEFAULT,
                 callback_data=callback_data.CALLBACK_SET_DEFAULT_TIMEZONE,
             ),
         ],
         [
-            InlineKeyboardButton(BTN_TIMEZONE_BY_LOCATION_OR_MANUAL, callback_data=callback_data.CALLBACK_SET_TIMEZONE),
+            InlineKeyboardButton(
+                texts_buttons.BTN_TIMEZONE_BY_LOCATION_OR_MANUAL, callback_data=callback_data.CALLBACK_SET_TIMEZONE
+            ),
         ],
     ]
     await menu_button(context, COMMANDS)
-    await reply_message(update, text=TIMEZONE_START, reply_markup=InlineKeyboardMarkup(keyboard))
+    await reply_message(update, text=texts_conversations.TIMEZONE_START, reply_markup=InlineKeyboardMarkup(keyboard))
     return states.MENU_STATE
 
 
