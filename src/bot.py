@@ -28,7 +28,7 @@ from jobs import (
     weekly_stat_job,
 )
 from service.repeat_message import repeat_message_after_1_hour_callback
-from texts import REMIND_IN_NEXT_MONTH
+from texts.bot import REMIND_IN_NEXT_MONTH
 
 
 async def skip_bill_callback_handler(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:

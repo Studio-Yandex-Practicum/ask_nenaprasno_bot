@@ -22,7 +22,7 @@ from core.send_message import reply_message
 from decorators.logger import async_error_logger
 from get_timezone import get_timezone_from_location, get_timezone_from_text_message, set_timezone
 from menu_button import COMMANDS, menu_button
-from texts import (
+from texts.buttons import (
     BTN_GEOLOCATION,
     BTN_IN_PROGRESS,
     BTN_MONTH_STAT,
@@ -30,6 +30,8 @@ from texts import (
     BTN_RULES,
     BTN_TIMEZONE_BY_LOCATION_OR_MANUAL,
     BTN_TIMEZONE_DEFAULT,
+)
+from texts.conversation import (
     MENU_HELP__,
     TIMEZONE_FAIL_MESSAGE,
     TIMEZONE_MESSAGE,

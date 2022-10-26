@@ -12,17 +12,14 @@ from decorators.logger import async_error_logger
 from menu_button import COMMANDS_UNAUTHORIZED, menu_button
 from service.api_client import APIService
 from service.api_client.models import UserData
-from texts import (
+from texts.buttons import BTN_CONSULTATION, BTN_NO, BTN_SUPPORT, BTN_YES
+from texts.conversation import (
     BOT_GREETINGS_MESSAGE,
     BOT_OFFER_FILL_FORM_FOR_FUTURE_EXPERT,
     BOT_OFFER_ONLINE_CONSULTATION,
     BOT_OFFER_SEND_TELEGRAM_ID,
     BOT_QUESTON_WANT_BE_EXPERT,
     BOT_QUESTON_YOU_ARE_EXPERT,
-    BTN_CONSULTATION,
-    BTN_NO,
-    BTN_SUPPORT,
-    BTN_YES,
 )
 
 

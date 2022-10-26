@@ -12,7 +12,7 @@ from telegram.ext import CallbackContext, ContextTypes
 
 from constants.callback_data import CALLBACK_REPEAT_COMMAND
 from core.send_message import edit_message, send_message
-from texts import BTN_REMIND_IN_HOUR
+from texts.buttons import BTN_REMIND_IN_HOUR
 
 
 async def repeat_message_after_1_hour_callback(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:

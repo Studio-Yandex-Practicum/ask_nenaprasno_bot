@@ -17,19 +17,17 @@ from get_timezone import get_timezone_from_str, get_user_timezone
 from service.api_client import APIService
 from service.api_client.models import Consultation
 from service.repeat_message import repeat_after_one_hour_button
-from texts import (
+from texts.bot import (
     BILL_REMINDER_TEXT,
-    BTN_BILL_SENT,
-    BTN_BILL_SOON,
     DUE_HOUR_REMINDER_TEMPLATE,
     DUE_REMINDER_TEMPLATE,
     FORWARD_REMINDER_TEMPLATE,
     MONTHLY_STATISTIC_TEMPLATE,
     PAST_REMINDER_TEMPLATE,
-    PLURAL_CONSULTATION,
-    PLURAL_CONSULTATION_NOT_SINGLE,
     WEEKLY_STATISTIC_TEMPLATE,
 )
+from texts.buttons import BTN_BILL_SENT, BTN_BILL_SOON
+from texts.common import PLURAL_CONSULTATION, PLURAL_CONSULTATION_NOT_SINGLE
 
 DATE_FORMAT = "%Y-%m-%dT%H:%M:%S.%fZ"
 NATIONAL_DATE_FORMAT = "%d.%m.%Y"
@@ -242,7 +240,7 @@ def get_reminder_text(
         active_consultations=active_cons_count,
         expired_consultations=expired_cons_count,
         site_url=build_consultation_url(consultation.id),
-        trello_overdue_url=build_trello_url(consultation.username_trello, True),
+        trello_url=build_trello_url(consultation.username_trello, True),
         declination_consultation=get_word_case(active_cons_count, *PLURAL_CONSULTATION),
         genitive_declination_consultation=get_word_genitive(expired_cons_count, *PLURAL_CONSULTATION_NOT_SINGLE),
     )

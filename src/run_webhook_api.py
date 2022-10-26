@@ -28,13 +28,8 @@ from service.models import (
     FeedbackConsultationModel,
     HealthCheckResponseModel,
 )
-from texts import (
-    API_CONSULTATION_MESSAGE,
-    API_NEW_CONSULTATION,
-    API_NEW_FEEDBACK,
-    PLURAL_CONSULTATION,
-    PLURAL_CONSULTATION_NOT_SINGLE,
-)
+from texts.bot import API_CONSULTATION_MESSAGE, API_NEW_CONSULTATION, API_NEW_FEEDBACK
+from texts.common import PLURAL_CONSULTATION, PLURAL_CONSULTATION_NOT_SINGLE
 
 
 async def start_bot() -> None:

@@ -12,24 +12,16 @@ from core.utils import build_consultation_url, build_trello_url, get_word_case
 from decorators.logger import async_error_logger
 from get_timezone import get_user_timezone
 from service.api_client import APIService
-from texts import (
+from texts.buttons import BTN_IN_PROGRESS, BTN_MENU, BTN_MONTH_STAT, BTN_OVERDUE, BTN_RULES, BTN_TIMEZONE
+from texts.common import DATA_NOT_AVAILABLE, PLURAL_CONSULTATION, PLURAL_DAY, PLURAL_HOUR
+from texts.conversation import (
     ACTUAL_TEMPLATE,
     AVERAGE_ANSWER_TIME,
-    BTN_IN_PROGRESS,
-    BTN_MENU,
-    BTN_MONTH_STAT,
-    BTN_OVERDUE,
-    BTN_RULES,
-    BTN_TIMEZONE,
     CONSULTATION_LIST_HEAD,
     CONSULTATION_LIST_ITEM,
-    DATA_NOT_AVAILABLE,
     MONTH_STAT_BAD,
     MONTH_STAT_GOOD,
     OVERDUE_TEMPLATE,
-    PLURAL_CONSULTATION,
-    PLURAL_DAY,
-    PLURAL_HOUR,
     RATING,
 )
 
