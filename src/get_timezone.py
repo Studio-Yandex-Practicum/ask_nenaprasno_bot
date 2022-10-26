@@ -23,7 +23,7 @@ def get_timezone_utc_format(txt_pattern: Optional[str]) -> Optional[datetime.tim
         return None
 
     minutes = tz_result.group("minutes")
-    minutes = 0 if minutes is None else int(minutes)
+    minutes = 0 if minutes is None else int(minutes[1:])
 
     tz_delta = datetime.timedelta(hours=int(tz_result.group("hours")), minutes=minutes)
     if tz_result.group("sign") in ("+", ""):
