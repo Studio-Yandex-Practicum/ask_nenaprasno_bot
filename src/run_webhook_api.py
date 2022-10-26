@@ -28,6 +28,13 @@ from service.models import (
     FeedbackConsultationModel,
     HealthCheckResponseModel,
 )
+from texts import (
+    API_CONSULTATION_MESSAGE,
+    API_NEW_CONSULTATION,
+    API_NEW_FEEDBACK,
+    PLURAL_CONSULTATION,
+    PLURAL_CONSULTATION_NOT_SINGLE,
+)
 
 
 async def start_bot() -> None:
@@ -98,20 +105,20 @@ async def consultation_assign(request: Request) -> Response:
 
     service = APIService()
     active_cons_count, expired_cons_count = await service.get_consultations_count(telegram_id)
-    declination_consultation = get_word_case(active_cons_count, "заявка", "заявки", "заявок")
-    genitive_declination_consultation = get_word_genitive(expired_cons_count, "заявки", "заявок")
+    declination_consultation = get_word_case(active_cons_count, *PLURAL_CONSULTATION)
+    genitive_declination_consultation = get_word_genitive(expired_cons_count, *PLURAL_CONSULTATION_NOT_SINGLE)
 
     site_url = build_consultation_url(consultation.consultation_id)
     trello_url = build_trello_url(consultation.username_trello)
 
-    text = (
-        f"Ура! Вам назначена новая заявка ***{consultation.consultation_number}***\n"
-        f"[Посмотреть заявку на сайте]({site_url})\n"
-        "---\n"
-        f"В работе ***{active_cons_count}*** {declination_consultation}\n"
-        f"Истекает срок у ***{expired_cons_count}*** {genitive_declination_consultation}\n"
-        f"\n"
-        f"[Открыть Trello]({trello_url})\n\n"
+    text = API_NEW_CONSULTATION.format(
+        consultation_number=consultation.consultation_number,
+        site_url=site_url,
+        active_cons_count=active_cons_count,
+        declination_consultation=declination_consultation,
+        expired_cons_count=expired_cons_count,
+        genitive_declination_consultation=genitive_declination_consultation,
+        trello_url=trello_url,
     )
     await send_message(api.state.bot_app.bot, telegram_id, text)
     return Response(status_code=httpx.codes.OK)
@@ -141,11 +148,8 @@ async def consultation_message(request: Request) -> Response:
     site_url = build_consultation_url(consultation.consultation_id)
     trello_url = build_trello_url(consultation.username_trello)
 
-    text = (
-        f"Вау! Получено новое сообщение в чате заявки ***{consultation.consultation_number}***\n"
-        f"[Прочитать сообщение]({site_url})\n"
-        f"\n"
-        f"[Открыть Trello]({trello_url})"
+    text = API_CONSULTATION_MESSAGE.format(
+        consultation_number=consultation.consultation_number, site_url=site_url, trello_url=trello_url
     )
     await send_message(api.state.bot_app.bot, consultation.telegram_id, text)
     return Response(status_code=httpx.codes.OK)
@@ -158,12 +162,7 @@ async def consultation_feedback(request: Request) -> Response:
         return Response(status_code=httpx.codes.BAD_REQUEST)
 
     bot = api.state.bot_app.bot
-    text = (
-        f"Воу-воу-воу, у вас отзыв!\n"
-        f"Ваша ***заявка {request_data.consultation_number}*** успешно закрыта пользователем!\n\n"
-        f"***{request_data.feedback}***\n\n"
-        f"Надеемся, он был вам полезен:)"
-    )
+    text = API_NEW_FEEDBACK.format(consultation_number=request_data.consultation_number, feedback=request_data.feedback)
     await send_message(bot=bot, chat_id=request_data.telegram_id, text=text)
     return Response(status_code=httpx.codes.OK)
 

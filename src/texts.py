@@ -179,3 +179,24 @@ BILL_REMINDER_TEXT = "Вы активно работали весь месяц! 
 # menu_button.py
 BTN_START = "Начать работу с ботом."
 BTN_MENU2 = "Показать список возможных запросов."
+
+
+# run_webhook_api.py
+API_NEW_CONSULTATION = (
+    "Ура! Вам назначена новая заявка ***{consultation_number}***\n"
+    "[Посмотреть заявку на сайте]({site_url})\n---\n"
+    "В работе ***{active_cons_count}*** {declination_consultation}\n"
+    "Истекает срок у ***{expired_cons_count}*** {genitive_declination_consultation}\n\n"
+    "[Открыть Trello]({trello_url})\n\n"
+)
+API_CONSULTATION_MESSAGE = (
+    "Вау! Получено новое сообщение в чате заявки ***{consultation_number}***\n"
+    "[Прочитать сообщение]({site_url})\n\n"
+    "[Открыть Trello]({trello_url})"
+)
+API_NEW_FEEDBACK = (
+    "Воу-воу-воу, у вас отзыв!\n"
+    "Ваша ***заявка {consultation_number}*** успешно закрыта пользователем!\n\n"
+    "***{feedback}***\n\n"
+    "Надеемся, он был вам полезен:)"
+)
