@@ -235,6 +235,7 @@ async def monthly_bill_reminder_job(context: CallbackContext) -> None:
         current_jobs = context.job_queue.get_jobs_by_name(job_name)
         for job in current_jobs:
             job.schedule_removal()
+            logger.debug("Remove %s from queue", job.name)
 
         context.job_queue.run_daily(
             daily_bill_remind_job,

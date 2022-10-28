@@ -17,7 +17,7 @@ from telegram.error import TelegramError
 from bot import init_webhook
 from core import config
 from core.exceptions import BadRequestError
-from core.logger import logger
+from core.logger import LOGGING_CONFIG, logger
 from core.send_message import send_message
 from core.utils import build_consultation_url, build_trello_url, get_word_case, get_word_genitive
 from middleware import TokenAuthBackend
@@ -197,4 +197,4 @@ api = Starlette(routes=routes, on_startup=[start_bot], on_shutdown=[stop_bot], m
 
 
 if __name__ == "__main__":
-    uvicorn.run(app=api, debug=True, host=config.HOST, port=config.PORT)
+    uvicorn.run(app=api, debug=True, host=config.HOST, port=config.PORT, log_config=LOGGING_CONFIG)

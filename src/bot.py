@@ -48,7 +48,7 @@ async def done_bill_callback_handler(update: Update, context: ContextTypes.DEFAU
     current_jobs = context.job_queue.get_jobs_by_name(job_name)
     for job in current_jobs:
         job.schedule_removal()
-        logger.debug("Remove %s from queue", job.__name__)
+        logger.debug("Remove %s from queue", job.name)
     await edit_message(update, "Не будем напоминать до следующего месяца")
     await query.answer()  # close progress bar in chat
 

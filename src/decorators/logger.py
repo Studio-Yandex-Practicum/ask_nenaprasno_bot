@@ -5,10 +5,10 @@ from typing import Callable
 from core.logger import logger
 
 
-def async_error_logger(name):
+def async_error_logger(name: str) -> Callable:
     """Logs errors in wrapped async functions."""
 
-    def log(func):
+    def log(func: Callable) -> Callable:
         @functools.wraps(func)
         async def wrapper(*args, **kwargs):
             update = args[0]
