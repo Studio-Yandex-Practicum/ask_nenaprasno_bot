@@ -51,6 +51,7 @@ class WeekStat:
 class UserActiveConsultations:
     username_trello: str
     active_consultations: int
+    expiring_consultations: int
     active_consultations_data: List[Dict]
     expiring_consultations_data: List[Dict]
 
