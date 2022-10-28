@@ -103,7 +103,7 @@ async def consultation_assign(request: Request) -> Response:
         logger.error("%s", error)
         return Response(status_code=httpx.codes.BAD_REQUEST)
 
-    telegram_id = consultation.telegram_id
+    telegram_id = int(consultation.telegram_id)
 
     service = APIService()
     active_cons_count, expired_cons_count = await service.get_consultations_count(telegram_id)
@@ -128,11 +128,10 @@ async def consultation_assign(request: Request) -> Response:
 
 @requires("authenticated", status_code=401)
 async def consultation_close(request: Request) -> Response:
-    try:
-        request_data = await deserialize(request, ClosedConsultationModel)
-    except BadRequestError as error:
-        logger.error("Got a BadRequestError: %s", error)
+    request_data = await deserialize(request, ClosedConsultationModel)
+    if not request_data:
         return Response(status_code=httpx.codes.BAD_REQUEST)
+
     consultation_id = request_data.consultation_id
     bot_app = api.state.bot_app
     reminder_jobs = bot_app.job_queue.jobs()
@@ -144,10 +143,8 @@ async def consultation_close(request: Request) -> Response:
 
 @requires("authenticated", status_code=401)
 async def consultation_message(request: Request) -> Response:
-    try:
-        consultation = await deserialize(request, ConsultationModel)
-    except BadRequestError as error:
-        logger.error("Got a BadRequestError: %s", error)
+    consultation = await deserialize(request, ConsultationModel)
+    if not consultation:
         return Response(status_code=httpx.codes.BAD_REQUEST)
 
     site_url = build_consultation_url(consultation.consultation_id)
@@ -165,10 +162,8 @@ async def consultation_message(request: Request) -> Response:
 
 @requires("authenticated", status_code=401)
 async def consultation_feedback(request: Request) -> Response:
-    try:
-        request_data = await deserialize(request, FeedbackConsultationModel)
-    except BadRequestError as error:
-        logger.error("Got a BadRequestError: %s", error)
+    request_data = await deserialize(request, FeedbackConsultationModel)
+    if not request_data:
         return Response(status_code=httpx.codes.BAD_REQUEST)
 
     bot = api.state.bot_app.bot
