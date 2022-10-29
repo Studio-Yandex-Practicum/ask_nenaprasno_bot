@@ -99,10 +99,16 @@ async def consultation_assign(request: Request) -> Response:
     telegram_id = int(consultation.telegram_id)
 
     service = APIService()
-    active_cons_count, expired_cons_count = await service.get_consultations_count(telegram_id)
-    declination_consultation = get_word_case(active_cons_count, *texts_common.PLURAL_CONSULTATION)
-    genitive_declination_consultation = get_word_genitive(
-        expired_cons_count, *texts_common.PLURAL_CONSULTATION_NOT_SINGLE
+    consultations_count = await service.get_consultations_count(telegram_id)
+    active_consultations_count = consultations_count["active_consultations_count"]
+    expired_consultations_count = consultations_count["expired_consultations_count"]
+    expiring_consultations_count = consultations_count["expiring_consultations_count"]
+    declination_consultation = get_word_case(active_consultations_count, *texts_common.PLURAL_CONSULTATION)
+    genitive_declination_consultation_expiring = get_word_genitive(
+        expiring_consultations_count, *texts_common.PLURAL_CONSULTATION_NOT_SINGLE
+    )
+    genitive_declination_consultation_expired = get_word_genitive(
+        expired_consultations_count, *texts_common.PLURAL_CONSULTATION_NOT_SINGLE
     )
 
     site_url = build_consultation_url(consultation.consultation_id)
@@ -111,10 +117,12 @@ async def consultation_assign(request: Request) -> Response:
     text = texts_bot.TEMPLATE_NEW_CONSULTATION.format(
         consultation_number=consultation.consultation_number,
         site_url=site_url,
-        active_cons_count=active_cons_count,
+        active_consultations_count=active_consultations_count,
         declination_consultation=declination_consultation,
-        expired_cons_count=expired_cons_count,
-        genitive_declination_consultation=genitive_declination_consultation,
+        expired_consultations_count=expired_consultations_count,
+        expiring_consultations_count=expiring_consultations_count,
+        genitive_declination_consultation_expiring=genitive_declination_consultation_expiring,
+        genitive_declination_consultation_expired=genitive_declination_consultation_expired,
         trello_url=trello_url,
     )
     await send_message(api.state.bot_app.bot, telegram_id, text)

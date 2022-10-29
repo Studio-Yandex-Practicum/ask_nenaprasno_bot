@@ -100,7 +100,7 @@ def create_bot():
     bot_app.job_queue.run_repeating(
         daily_consulations_reminder_job,
         interval=timedelta(hours=1),
-        first=time(hour=0, minute=0, second=0),
+        first=time(minute=int(config.DAILY_CONSULTATIONS_REMINDER_TIME.minute)),
         name=DAILY_OVERDUE_CONSULTATIONS_REMINDER_JOB,
     )
 
@@ -113,7 +113,6 @@ def create_bot():
     )
 
     # Initial data collection for daily consultation on bot start up
-    bot_app.job_queue.run_once(daily_consulations_reminder_job, when=timedelta(seconds=1))
     bot_app.job_queue.run_once(daily_consulations_duedate_is_today_reminder_job, when=timedelta(seconds=1))
 
     return bot_app

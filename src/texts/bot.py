@@ -56,8 +56,9 @@ BILL_REMINDER_TEXT = "Вы активно работали весь месяц! 
 TEMPLATE_NEW_CONSULTATION = (
     "Ура! Вам назначена новая заявка ***{consultation_number}***\n"
     "[Посмотреть заявку на сайте]({site_url})\n---\n"
-    "В работе ***{active_cons_count}*** {declination_consultation}\n"
-    "Истекает срок у ***{expired_cons_count}*** {genitive_declination_consultation}\n\n"
+    "В работе ***{active_consultations_count}*** {declination_consultation}\n"
+    "Истекает срок у ***{expiring_consultations_count}*** {genitive_declination_consultation_expiring}\n"
+    "Истек срок у ***{expired_consultations_count}*** {genitive_declination_consultation_expired}\n"
     f"{__OPEN_TRELLO_URL}\n\n"
 )
 TEMPLATE_CONSULTATION_MESSAGE = (
