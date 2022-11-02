@@ -45,11 +45,9 @@ def get_bool(setting: str, default: str = "False") -> bool:
 
 
 # Параметры общей папки с данными
-DATA_PATH = BASE_DIR / "../data"
-if not Path(DATA_PATH).exists():
-    Path(DATA_PATH).mkdir()
-    Path(DATA_PATH / "logs").mkdir()
-    Path(DATA_PATH / "persistence_data").mkdir()
+DATA_PATH = BASE_DIR.parent / ".data"
+Path(DATA_PATH).mkdir(exist_ok=True)
+Path(DATA_PATH / "logs").mkdir(exist_ok=True)
 
 # Параметры логгера
 LOG_PATH = DATA_PATH / "logs" / "bot.log"
@@ -86,7 +84,7 @@ STAT_COLLECTION_TIMEZONE = "Asia/Kamchatka"
 STAT_COLLECTION_TIME = __collect_time.replace(tzinfo=ZoneInfo(STAT_COLLECTION_TIMEZONE))
 
 # Файл с сохраненными данными бота
-BOT_PERSISTENCE_FILE = DATA_PATH / "persistence_data" / "bot_persistence_file"
+BOT_PERSISTENCE_FILE = DATA_PATH / "bot_persistence_file"
 
 # Настройка отладки
 IS_FAKE_API = get_bool("IS_FAKE_API", "False")
