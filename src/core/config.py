@@ -46,9 +46,9 @@ def get_bool(setting: str, default: str = "False") -> bool:
 
 # Параметры общей папки с данными
 DATA_PATH = BASE_DIR.parent / ".data"
-Path(DATA_PATH / "logs").mkdir(parents=True, exist_ok=True)
 
 # Параметры логгера
+Path(DATA_PATH / "logs").mkdir(parents=True, exist_ok=True)
 LOG_PATH = DATA_PATH / "logs" / "bot.log"
 
 # Параметры локального сервера принимающего обновления от телеграм
