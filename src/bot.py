@@ -123,7 +123,6 @@ async def init_webhook() -> Application:
     :return: Initiated application
     """
     bot_app = create_bot()
-    bot_app = None
     bot_app.updater = None
     await bot_app.bot.set_webhook(
         url=urljoin(config.APPLICATION_URL, "telegramWebhookApi"), secret_token=config.SECRET_TELEGRAM_TOKEN

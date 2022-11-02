@@ -7,9 +7,7 @@ on:
     branches:
       - develop
   pull_request:
-    types:
-      - opened
-      - synchronize
+    types: [opened, synchronize]
     branches:
       - develop
 
