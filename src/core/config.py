@@ -46,8 +46,7 @@ def get_bool(setting: str, default: str = "False") -> bool:
 
 # Параметры общей папки с данными
 DATA_PATH = BASE_DIR.parent / ".data"
-Path(DATA_PATH).mkdir(exist_ok=True)
-Path(DATA_PATH / "logs").mkdir(exist_ok=True)
+Path(DATA_PATH / "logs").mkdir(parents=True, exist_ok=True)
 
 # Параметры логгера
 LOG_PATH = DATA_PATH / "logs" / "bot.log"
