@@ -40,7 +40,7 @@ async def start_bot() -> None:
     # https://www.starlette.io/applications/#storing-state-on-the-app-instance
     api.state.bot_app = bot_app
 
-    api.state.bot_service = BotNotifierService(api.state.bot_app.bot)
+    api.state.bot_service = BotNotifierService(bot_app.bot)
 
 
 async def stop_bot() -> None:

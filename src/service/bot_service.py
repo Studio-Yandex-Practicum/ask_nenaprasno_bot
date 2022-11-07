@@ -8,7 +8,7 @@ from service.models import ConsultationModel, FeedbackConsultationModel
 
 class BotNotifierService:
     def __init__(self, bot: Bot):
-        self.bot = bot
+        self.__bot = bot
 
     async def consultation_feedback(self, request_data: FeedbackConsultationModel) -> Response:
         text = (
@@ -17,7 +17,7 @@ class BotNotifierService:
             f"***{request_data.feedback}***\n\n"
             f"Надеемся, он был вам полезен:)"
         )
-        await send_message(self.bot, request_data.telegram_id, text)
+        await send_message(self.__bot, request_data.telegram_id, text)
         return Response(status_code=httpx.codes.OK)
 
     async def consultation_message(self, request_data: ConsultationModel) -> Response:
