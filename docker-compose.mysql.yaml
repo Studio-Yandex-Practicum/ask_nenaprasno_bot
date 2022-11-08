@@ -10,10 +10,10 @@ services:
       MYSQL_ROOT_PASSWORD: example
       MYSQL_DATABASE: test
     ports:
-      - '3306:3306'
+      - '33061:3306'
 
   adminer:
     image: adminer
     restart: always
     ports:
-      - 8080:8080
+      - 8081:8080
