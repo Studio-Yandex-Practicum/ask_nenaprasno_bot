@@ -43,6 +43,7 @@ def get_datetime_tuple(setting: str, default: str = None) -> tuple:
 def get_bool(setting: str, default: str = "False") -> bool:
     return get_string(setting, default) == "True"
 
+
 # Параметры общей папки с данными
 DATA_PATH = BASE_DIR.parent / ".data"
 
