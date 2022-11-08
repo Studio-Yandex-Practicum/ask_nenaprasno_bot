@@ -38,9 +38,11 @@ async def start_bot() -> None:
 
     # provide bot started bot application to server via global state variable
     # https://www.starlette.io/applications/#storing-state-on-the-app-instance
+
+    # Удалить пермененную после переноса всех методов в класс BotNotifierService
     api.state.bot_app = bot_app
 
-    api.state.bot_service = BotNotifierService(bot_app.bot)
+    api.state.bot_service = BotNotifierService(bot_app)
 
 
 async def stop_bot() -> None:
