@@ -1,9 +1,10 @@
 import logging
+from logging import config as logging_config
 
-from core.config import LOG_LEVEL_STR, LOG_PATH
+from core import config as bot_config
 
 FORMATTER = "%(asctime)s %(levelname)s %(name)s:\t%(message)s"
-LOG_LEVEL = logging.getLevelName(LOG_LEVEL_STR)
+LOG_LEVEL = logging.getLevelName(bot_config.LOG_LEVEL_STR)
 LOGGING_CONFIG = {
     "version": 1,
     "disable_existing_loggers": False,
@@ -26,7 +27,7 @@ LOGGING_CONFIG = {
         "file": {
             "formatter": "default",
             "class": "logging.handlers.TimedRotatingFileHandler",
-            "filename": LOG_PATH,
+            "filename": bot_config.LOG_PATH,
             "when": "midnight",
             "interval": 1,
             "encoding": "utf-8",
@@ -46,7 +47,7 @@ LOGGING_CONFIG = {
 }
 
 
-logging.config.dictConfig(LOGGING_CONFIG)
+logging_config.dictConfig(LOGGING_CONFIG)
 logger = logging.getLogger(__name__)
 
 
