@@ -8,6 +8,7 @@ from telegram.ext import CallbackContext
 from timezonefinder import TimezoneFinder
 
 from constants.timezone import DEFAULT_TIMEZONE, MOSCOW_TIME_OFFSET, TIME_ZONE
+from core.logger import logger
 from service.api_client import APIService
 
 api = APIService()
@@ -65,6 +66,7 @@ async def get_timezone_from_text_message(update: Update, context: CallbackContex
     Sets timezone based on a text message from the user.
     Return None if error, any else (string with timezone will be best).
     """
+    logger.debug("User %s input %s timezone", update.effective_user.id, update.message.text)
     timezone = get_timezone_utc_format(update.message.text)
     if timezone is None:
         return None

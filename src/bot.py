@@ -19,7 +19,9 @@ from constants.jobs import (
 )
 from conversation.authorization import authorization_conversation
 from core import config
+from core.logger import logger
 from core.send_message import edit_message
+from decorators.logger import async_error_logger
 from jobs import (
     daily_consulations_duedate_is_today_reminder_job,
     daily_consulations_reminder_job,
@@ -30,12 +32,14 @@ from jobs import (
 from service.repeat_message import repeat_message_after_1_hour_callback
 
 
+@async_error_logger(name="skip_bill_callback_handler")
 async def skip_bill_callback_handler(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     """Delete button under message."""
     await edit_message(update, update.callback_query.message.text_markdown_urled)
     await update.callback_query.answer()  # close progress bar in chat
 
 
+@async_error_logger(name="done_bill_callback_handler")
 async def done_bill_callback_handler(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     """Delete job from JobQueue."""
     query = update.callback_query
@@ -44,6 +48,7 @@ async def done_bill_callback_handler(update: Update, context: ContextTypes.DEFAU
     current_jobs = context.job_queue.get_jobs_by_name(job_name)
     for job in current_jobs:
         job.schedule_removal()
+        logger.debug("Remove %s from queue", job.name)
     await edit_message(update, "Не будем напоминать до следующего месяца")
     await query.answer()  # close progress bar in chat
 
@@ -127,6 +132,7 @@ async def init_webhook() -> Application:
     await bot_app.bot.set_webhook(
         url=urljoin(config.APPLICATION_URL, "telegramWebhookApi"), secret_token=config.SECRET_TELEGRAM_TOKEN
     )
+    logger.debug("Set webhook. App url: %s", config.APPLICATION_URL)
     return bot_app
 
 
@@ -137,3 +143,4 @@ def init_polling() -> None:
     """
     bot_app = create_bot()
     bot_app.run_polling()
+    logger.debug("Start polling")

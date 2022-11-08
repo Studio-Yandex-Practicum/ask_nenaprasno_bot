@@ -51,6 +51,8 @@ DATA_PATH = BASE_DIR.parent / ".data"
 Path(DATA_PATH / "logs").mkdir(parents=True, exist_ok=True)
 LOG_PATH = DATA_PATH / "logs" / "bot.log"
 
+LOG_LEVEL_STR = get_string("LOG_LEVEL", "INFO")
+
 # Параметры локального сервера принимающего обновления от телеграм
 HOST = get_string("HOST", "0.0.0.0")
 APPLICATION_URL = get_string("APPLICATION_URL")
@@ -69,7 +71,7 @@ MONTHLY_STAT_TIME = get_time("MONTHLY_STAT_TIME", "11:00")
 MONTHLY_STAT_DAY = get_int("MONTHLY_STAT_DAY", "28")
 
 # Параметры рассылки чеков
-MONTHLY_RECEIPT_REMINDER_TIME = get_datetime("MONTHLY_RECEIPT_REMINDER_TIME", "12:00")
+MONTHLY_RECEIPT_REMINDER_TIME = get_time("MONTHLY_RECEIPT_REMINDER_TIME", "12:00")
 MONTHLY_RECEIPT_REMINDER_DAY = get_int("MONTHLY_RECEIPT_REMINDER_DAY", "20")
 
 # Параметры рассылки напоминаний
@@ -99,6 +101,3 @@ SITE_API_BOT_TOKEN = get_string("SITE_API_BOT_TOKEN")
 FORM_URL_FUTURE_EXPERT = "https://forms.gle/DGMUm35bxZytE3QLA"
 URL_SERVICE_RULES = "https://docs.google.com/document/d/1hW2HUv9aWQMnUBuIE_YQEtmIDDbk8KhpychckbyaIEQ/edit"
 URL_ASK_NENAPRASNO = get_string("URL_ASK_NENAPRASNO")
-
-# Включить debug-режим
-DEBUG = get_bool("DEBUG")

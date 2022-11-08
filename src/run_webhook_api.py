@@ -16,7 +16,8 @@ from telegram.error import TelegramError
 
 from bot import init_webhook
 from core import config
-from core.logger import logger
+from core.exceptions import BadRequestError
+from core.logger import LOGGING_CONFIG, logger
 from core.send_message import send_message
 from core.utils import build_consultation_url, build_trello_url, get_word_case, get_word_genitive
 from middleware import TokenAuthBackend
@@ -79,19 +80,27 @@ async def telegram_webhook_api(request: Request) -> Response:
 
 
 async def deserialize(request: Request, deserializer):
+    body = await request.body()
+    log_template = "%s %s %s\nRequest: %s"
+
     try:
         request_data: deserializer = deserializer.from_dict(await request.json())
-        logger.info("Got new api request: %s", request_data)
+        logger.debug(log_template, request.method, request.url, body)
         return request_data
-    except (KeyError, JSONDecodeError) as error:
-        logger.error("Got exception %s while processing API request: %s", type(error).__name__, error)
-        return None
+    except KeyError as error:
+        logger.error(log_template, request.method, request.url, httpx.codes.BAD_REQUEST, body)
+        raise BadRequestError(f"KeyError: {error} key not found") from error
+    except JSONDecodeError as error:
+        logger.error(log_template, request.method, request.url, httpx.codes.BAD_REQUEST, body)
+        raise BadRequestError(f"JSONDecodeError: {error}") from error
 
 
 @requires("authenticated", status_code=401)
 async def consultation_assign(request: Request) -> Response:
-    consultation = await deserialize(request, AssignedConsultationModel)
-    if not consultation:
+    try:
+        consultation = await deserialize(request, AssignedConsultationModel)
+    except BadRequestError as error:
+        logger.error("%s", error)
         return Response(status_code=httpx.codes.BAD_REQUEST)
 
     telegram_id = int(consultation.telegram_id)
@@ -188,4 +197,4 @@ api = Starlette(routes=routes, on_startup=[start_bot], on_shutdown=[stop_bot], m
 
 
 if __name__ == "__main__":
-    uvicorn.run(app=api, debug=True, host=config.HOST, port=config.PORT)
+    uvicorn.run(app=api, debug=True, host=config.HOST, port=config.PORT, log_config=LOGGING_CONFIG)
