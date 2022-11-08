@@ -24,7 +24,9 @@ jobs:
     if: github.event.pull_request.merged == true
     name: Check if the pull request was not merged to the branch
     runs-on: ubuntu-latest
-    run: echo "Merged"
+    steps:
+      - name: Confirm that is it merged
+        run: echo "Merged"
 
   build_and_push:
     name: Push Docker image to GitHub Packages
