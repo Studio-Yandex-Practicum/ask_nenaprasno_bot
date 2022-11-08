@@ -43,9 +43,13 @@ def get_datetime_tuple(setting: str, default: str = None) -> tuple:
 def get_bool(setting: str, default: str = "False") -> bool:
     return get_string(setting, default) == "True"
 
+# Параметры общей папки с данными
+DATA_PATH = BASE_DIR.parent / ".data"
 
 # Параметры логгера
-LOG_PATH = BASE_DIR / ".." / "logs" / "bot.log"
+Path(DATA_PATH / "logs").mkdir(parents=True, exist_ok=True)
+LOG_PATH = DATA_PATH / "logs" / "bot.log"
+
 LOG_LEVEL_STR = get_string("LOG_LEVEL", "INFO")
 
 # Параметры локального сервера принимающего обновления от телеграм
@@ -80,7 +84,7 @@ STAT_COLLECTION_TIMEZONE = "Asia/Kamchatka"
 STAT_COLLECTION_TIME = __collect_time.replace(tzinfo=ZoneInfo(STAT_COLLECTION_TIMEZONE))
 
 # Файл с сохраненными данными бота
-BOT_PERSISTENCE_FILE = BASE_DIR / "persistence_data" / "bot_persistence_file"
+BOT_PERSISTENCE_FILE = DATA_PATH / "bot_persistence_file"
 
 # Настройка отладки
 IS_FAKE_API = get_bool("IS_FAKE_API", "False")
