@@ -7,10 +7,13 @@ from service.models import ConsultationModel, FeedbackConsultationModel
 
 
 class BotNotifierService:
+    """Класс работы с приложением бота"""
+
     def __init__(self, bot_app: Application):
         self.__bot_app = bot_app
 
     async def consultation_feedback(self, request_data: FeedbackConsultationModel) -> Response:
+        """Отправка отзыва на консультацию пользователю в чат бота"""
         text = (
             f"Воу-воу-воу, у вас отзыв!\n"
             f"Ваша ***заявка {request_data.consultation_number}*** успешно закрыта пользователем!\n\n"
