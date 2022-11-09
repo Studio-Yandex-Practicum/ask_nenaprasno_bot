@@ -10,9 +10,4 @@ services:
     ports:
       - "8000:8000"
     volumes:
-      - ./.data/logs:/code/logs
-      - ./.data/persistence_data:/code/src/persistence_data
-
-volumes:
-  logs:
-  persistence_data:
+      - ./.data:/code/.data
