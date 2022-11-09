@@ -2,7 +2,7 @@
 from collections import defaultdict
 from dataclasses import dataclass
 from datetime import date, datetime, timedelta
-from typing import Dict, List, Optional, Tuple
+from typing import Dict, List, Optional
 
 from telegram import InlineKeyboardButton, InlineKeyboardMarkup
 from telegram.ext import CallbackContext
@@ -12,8 +12,8 @@ from constants.jobs import USER_BILL_REMINDER_TEMPLATE
 from conversation.menu import OVERDUE_TEMPLATE, format_average_user_answer_time, format_rating, make_consultations_list
 from core import config
 from core.send_message import send_message
-from core.utils import build_consultation_url, build_trello_url, get_timezone_from_str, get_word_case, get_word_genitive
-from get_timezone import get_user_timezone
+from core.utils import build_consultation_url, build_trello_url, get_word_case, get_word_genitive
+from get_timezone import get_timezone_from_str, get_user_timezone
 from service.api_client import APIService
 from service.api_client.models import Consultation
 from service.repeat_message import repeat_after_one_hour_button
@@ -215,7 +215,7 @@ async def monthly_bill_reminder_job(context: CallbackContext) -> None:
     user_ids = bill_stat.telegram_ids
     for telegram_id in user_ids:
         user_tz = await get_user_timezone(int(telegram_id), context)
-        job_name = USER_BILL_REMINDER_TEMPLATE.format(telegram_id)
+        job_name = USER_BILL_REMINDER_TEMPLATE.format(telegram_id=telegram_id)
 
         current_jobs = context.job_queue.get_jobs_by_name(job_name)
         for job in current_jobs:
@@ -243,15 +243,9 @@ async def daily_bill_remind_job(context: CallbackContext) -> None:
     await send_message(context.bot, job.chat_id, message, menu)
 
 
-async def get_consultations_count(telegram_id: int) -> Tuple:
-    """Gets count of active and expired consultations and returns it in tuple."""
-    active_cons_count = (await service.get_user_active_consultations(telegram_id=telegram_id)).active_consultations
-    expired_cons_count = (await service.get_user_expired_consultations(telegram_id=telegram_id)).expired_consultations
-
-    return active_cons_count, expired_cons_count
-
-
-async def get_overdue_reminder_text(consultations: List, active_cons_count: int, expired_cons_count: int) -> str:
+async def get_overdue_reminder_text(
+    consultations: List, active_consultations_count: int, expired_consultations_count: int, **kwargs
+) -> str:
     """Returns overdue reminder text if user have more than one overdue consultations."""
     link_nenaprasno = make_consultations_list(
         [Consultation.to_dict(consultation.consultation) for consultation in consultations]
@@ -259,8 +253,8 @@ async def get_overdue_reminder_text(consultations: List, active_cons_count: int,
     trello_url = build_trello_url(consultations[0].consultation.username_trello, overdue=True)
 
     return OVERDUE_TEMPLATE.format(
-        active_consultations=active_cons_count,
-        expired_consultations=expired_cons_count,
+        active_consultations=active_consultations_count,
+        expired_consultations=expired_consultations_count,
         link_nenaprasno=link_nenaprasno,
         trello_url=trello_url,
     )
@@ -268,23 +262,23 @@ async def get_overdue_reminder_text(consultations: List, active_cons_count: int,
 
 def get_reminder_text(
     data: [PastConsultationData | DueConsultationData | DueHourConsultationData | ForwardConsultationData],
-    active_cons_count: int,
-    expired_cons_count: int,
+    active_consultations_count: int,
+    expired_consultations_count: int,
+    **kwargs,
 ) -> str:
     """Returns reminder text."""
     message_template = data.message_template
     consultation = data.consultation
-
     return message_template.format(
         consultation_id=consultation.id,
         consultation_number=consultation.number,
         created=data.created_date,
-        active_consultations=active_cons_count,
-        expired_consultations=expired_cons_count,
+        active_consultations=active_consultations_count,
+        expired_consultations=expired_consultations_count,
         site_url=build_consultation_url(consultation.id),
         trello_overdue_url=build_trello_url(consultation.username_trello, True),
-        declination_consultation=get_word_case(active_cons_count, "заявка", "заявки", "заявок"),
-        genitive_declination_consultation=get_word_genitive(expired_cons_count, "заявки", "заявок"),
+        declination_consultation=get_word_case(active_consultations_count, "заявка", "заявки", "заявок"),
+        genitive_declination_consultation=get_word_genitive(expired_consultations_count, "заявки", "заявок"),
     )
 
 
@@ -301,8 +295,8 @@ async def send_reminder_now(context: CallbackContext) -> None:
 
     consultation = job_data.consultation
     telegram_id = consultation.telegram_id
-    consultation_count = await get_consultations_count(telegram_id)
-    text = get_reminder_text(job_data, *consultation_count)
+    consultations_count = await service.get_consultations_count(telegram_id)
+    text = get_reminder_text(job_data, **consultations_count)
 
     await send_message(
         bot=context.bot,
@@ -314,16 +308,12 @@ async def send_reminder_now(context: CallbackContext) -> None:
 async def send_reminder_overdue(context: CallbackContext) -> None:
     """Send overdue-consultation reminder"""
     telegram_id, consultations = context.job.data
-    active_cons_count, expired_cons_count = await get_consultations_count(telegram_id)
+    consultations_count = await service.get_consultations_count(telegram_id)
 
     if len(consultations) == 1:
-        message = get_reminder_text(
-            consultations[0],
-            active_cons_count,
-            expired_cons_count,
-        )
+        message = get_reminder_text(consultations[0], **consultations_count)
     else:
-        message = await get_overdue_reminder_text(consultations, active_cons_count, expired_cons_count)
+        message = await get_overdue_reminder_text(consultations, **consultations_count)
 
     await send_message(bot=context.bot, chat_id=telegram_id, text=message)
 
@@ -383,7 +373,7 @@ async def daily_consulations_reminder_job(context: CallbackContext) -> None:
         # Important. This job starts every hour at 0 minutes 0 seconds, so we need to check only hour
         if user_time.hour == config.DAILY_CONSULTATIONS_REMINDER_TIME.hour:
             # Check consultation in right timezone
-            if due_time.date() < now.today():
+            if due_time.date() < now.date():
                 # Group overdue consultations by doctor
                 overdue[consultation.telegram_id].append(PastConsultationData(consultation))
             elif due_time.date() - now.date() == timedelta(days=1):

@@ -44,11 +44,12 @@ def get_bool(setting: str, default: str = "False") -> bool:
     return get_string(setting, default) == "True"
 
 
-# Параметры логгера
-LOG_NAME = get_string("LOG_NAME")
-LOG_NAME = LOG_NAME if LOG_NAME is not None else "bot.log"
+# Параметры общей папки с данными
+DATA_PATH = BASE_DIR.parent / ".data"
 
-LOG_PATH = BASE_DIR / "../logs" / LOG_NAME
+# Параметры логгера
+Path(DATA_PATH / "logs").mkdir(parents=True, exist_ok=True)
+LOG_PATH = DATA_PATH / "logs" / "bot.log"
 
 # Параметры локального сервера принимающего обновления от телеграм
 HOST = get_string("HOST", "0.0.0.0")
@@ -76,11 +77,13 @@ DAILY_COLLECT_CONSULTATIONS_TIME = time(hour=0, minute=0, tzinfo=timezone.utc)
 DAILY_CONSULTATIONS_REMINDER_TIME = get_time("DAILY_CONSULTATIONS_REMINDER_TIME", "17:00")
 
 # Параметры запуска сбора недельной и месячной статистики - по умолчанию, полночь GTM+12
+__collect_time = get_time("STAT_COLLECTION_TIME", "00:00")
 STAT_COLLECTION_TIMEZONE = "Asia/Kamchatka"
-STAT_COLLECTION_TIME = time(hour=0, minute=0, second=0, tzinfo=ZoneInfo(STAT_COLLECTION_TIMEZONE))
+# STAT_COLLECTION_TIME = time(hour=0, minute=0, second=0, tzinfo=ZoneInfo(STAT_COLLECTION_TIMEZONE))
+STAT_COLLECTION_TIME = __collect_time.replace(tzinfo=ZoneInfo(STAT_COLLECTION_TIMEZONE))
 
 # Файл с сохраненными данными бота
-BOT_PERSISTENCE_FILE = BASE_DIR / "persistence_data" / "bot_persistence_file"
+BOT_PERSISTENCE_FILE = DATA_PATH / "bot_persistence_file"
 
 # Настройка отладки
 IS_FAKE_API = get_bool("IS_FAKE_API", "False")

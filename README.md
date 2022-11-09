@@ -44,13 +44,13 @@ Poetry - это инструмент для управления зависим�
 
 ### Установка:
 
-Для UNIX систем вводим в консоль следующую команду
+Для UNIX-систем и Bash on Windows вводим в консоль следующую команду
 
-> *curl -sSL https://raw.githubusercontent.com/python-poetry/poetry/master/get-poetry.py | python -*
+> *curl -sSL https://install.python-poetry.org | python -*
 
-Для WINDOWS вводим в PowerShell
+Для WINDOWS PowerShell
 
-> *(Invoke-WebRequest -Uri https://raw.githubusercontent.com/python-poetry/poetry/master/get-poetry.py -UseBasicParsing).Content | python -*
+> *(Invoke-WebRequest -Uri https://install.python-poetry.org -UseBasicParsing).Content | python -*
 
 После установки перезапустите оболочку и введите команду
 
@@ -58,7 +58,7 @@ Poetry - это инструмент для управления зависим�
 
 Ответ должен быть в формате
 
-> Poetry version 1.1.13
+> Poetry (version 1.2.0)
 
 Для дальнейшей работы введите команду:
 
