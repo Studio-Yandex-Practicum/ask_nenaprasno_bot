@@ -1,4 +1,3 @@
-import httpx
 from starlette.responses import Response
 from telegram.ext import Application
 
@@ -21,7 +20,6 @@ class BotNotifierService:
             f"Надеемся, он был вам полезен:)"
         )
         await send_message(self.__bot_app.bot, request_data.telegram_id, text)
-        return Response(status_code=httpx.codes.OK)
 
     async def consultation_message(self, request_data: ConsultationModel) -> Response:
         pass

@@ -167,7 +167,8 @@ async def consultation_feedback(request: Request) -> Response:
     if not request_data:
         return Response(status_code=httpx.codes.BAD_REQUEST)
 
-    return await api.state.bot_service.consultation_feedback(request_data)
+    await api.state.bot_service.consultation_feedback(request_data)
+    return Response(status_code=httpx.codes.OK)
 
 
 routes = [
