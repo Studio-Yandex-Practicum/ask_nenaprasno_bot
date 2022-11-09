@@ -1,12 +1,9 @@
 name: ask_nenaprasno_bot_deploy_on_stage
 
 on:
-  push:
-    branches:
-      - feature/deploy_stage
   pull_request:
     branches:
-      - develop
+      - stage
     types: [closed]
 
 env:
