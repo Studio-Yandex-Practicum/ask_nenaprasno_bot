@@ -22,6 +22,7 @@ from core.send_message import send_message
 from core.utils import build_consultation_url, build_trello_url, get_word_case, get_word_genitive
 from middleware import TokenAuthBackend
 from service.api_client import APIService
+from service.bot_service import BotNotifierService
 from service.models import (
     AssignedConsultationModel,
     ClosedConsultationModel,
@@ -38,7 +39,11 @@ async def start_bot() -> None:
 
     # provide bot started bot application to server via global state variable
     # https://www.starlette.io/applications/#storing-state-on-the-app-instance
+
+    # Удалить пермененную после переноса всех методов в класс BotNotifierService
     api.state.bot_app = bot_app
+
+    api.state.bot_service = BotNotifierService(bot_app)
 
 
 async def stop_bot() -> None:
@@ -171,14 +176,7 @@ async def consultation_feedback(request: Request) -> Response:
     if not request_data:
         return Response(status_code=httpx.codes.BAD_REQUEST)
 
-    bot = api.state.bot_app.bot
-    text = (
-        f"Воу-воу-воу, у вас отзыв!\n"
-        f"Ваша ***заявка {request_data.consultation_number}*** успешно закрыта пользователем!\n\n"
-        f"***{request_data.feedback}***\n\n"
-        f"Надеемся, он был вам полезен:)"
-    )
-    await send_message(bot=bot, chat_id=request_data.telegram_id, text=text)
+    await api.state.bot_service.consultation_feedback(request_data)
     return Response(status_code=httpx.codes.OK)
 
 
