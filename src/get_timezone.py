@@ -18,15 +18,17 @@ def get_timezone_utc_format(txt_pattern: Optional[str]) -> Optional[datetime.tim
     """Returns datetime.timezone based on string in format UTC+00:00 or NONE"""
     if txt_pattern is None:
         return None
-    tz_pattern = r"^(UTC)?(?P<sign>[-+]?)(?P<hours>(0?[0-9])|(1[0-4]))(:(?P<minutes>0{1,2}|30|45))?$"
+    tz_pattern = r"^(UTC)?(?P<sign>[-+]?)(?P<hours>(0?[0-9])|(1[0-2]))?(:(?P<minutes>0{1,2}|30|45))?$"
     tz_result = re.search(tz_pattern, txt_pattern, flags=re.IGNORECASE)
     if tz_result is None:
         return None
 
+    hours = tz_result.group("hours")
+    hours = 0 if hours is None else int(hours)
     minutes = tz_result.group("minutes")
     minutes = 0 if minutes is None else int(minutes)
 
-    tz_delta = datetime.timedelta(hours=int(tz_result.group("hours")), minutes=minutes)
+    tz_delta = datetime.timedelta(hours=hours, minutes=minutes)
     if tz_result.group("sign") in ("+", ""):
         return datetime.timezone(tz_delta)
     return datetime.timezone(-tz_delta)
@@ -56,7 +58,7 @@ async def get_timezone_from_location(update: Update, context: CallbackContext):
     if user_timezone is None:
         return None
     time_zone = pytz.timezone(user_timezone).localize(datetime.datetime.now()).strftime("%z")
-    text_utc = TIME_ZONE + time_zone[:3] + time_zone[3:]
+    text_utc = TIME_ZONE + time_zone[:3] + ":" + time_zone[3:]
     await set_timezone(update.effective_chat.id, text_utc, context)
     return text_utc
 
