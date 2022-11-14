@@ -92,6 +92,7 @@ jobs:
             echo URL_ASK_NENAPRASNO_API=${{ secrets.URL_ASK_NENAPRASNO_API }} >> .env
             echo SITE_API_BOT_TOKEN=${{ secrets.SITE_API_BOT_TOKEN }} >> .env
             echo TRELLO_BORD_ID=${{ secrets.TRELLO_BORD_ID }} >> .env
+            echo LOG_LEVEL=${{ secrets.LOG_LEVEL }} >> .env
 
   start_application:
     # if: github.event.pull_request.merged == true
