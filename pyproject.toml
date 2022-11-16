@@ -1,0 +1,51 @@
+[tool.black]
+line-length = 120
+include = '\.pyi?$'
+exclude = '''
+(
+  /(
+    | venv
+    | _build
+    | buck-out
+    | build
+    | example
+  )/
+)
+'''
+
+[tool.poetry]
+name = "Prosto_sprosit_bot"
+version = "0.1.0"
+description = "Service bot for doctors in \"Prosto sprosit\" team."
+readme = "README.md"
+authors = [
+  "Yandex.Praktikum students of Python+ course, cohort №2",
+]
+license = "The MIT License"
+homepage = "https://github.com/Studio-Yandex-Practicum/ask_nenaprasno_bot"
+repository = "https://github.com/Studio-Yandex-Practicum/ask_nenaprasno_bot"
+documentation = "https://github.com/Studio-Yandex-Practicum/ask_nenaprasno_bot"
+
+[tool.poetry.dependencies]
+python = ">=3.10,<3.11"
+python-telegram-bot = "^20.0a4"
+starlette = "^0.20.4"
+uvicorn = "^0.18.2"
+python-dotenv = "^0.20.0"
+asgiref = "^3.5.2"
+timezonefinder = "6.0.2"
+dataclasses-json = "^0.5.7"
+aiolimiter = "^1.0.0"
+
+
+[tool.poetry.dev-dependencies]
+isort = "^5.10.1"
+virtualenv = "^20.15.1"
+pylint = "^2.14.4"
+pre-commit = "^2.19.0"
+flake8 = "^4.0.1"
+
+
+[build-system]
+requires = ["poetry-core>=1.0.0"]
+build-backend = "poetry.core.masonry.api"

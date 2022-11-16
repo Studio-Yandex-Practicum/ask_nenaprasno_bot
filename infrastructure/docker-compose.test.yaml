@@ -1,0 +1,17 @@
+version: '3.8'
+
+services:
+  bot:
+    container_name: ask_bot
+    env_file:
+      - .env
+    image: ghcr.io/studio-yandex-practicum/nenaprasno-ask-bot:test
+    restart: always
+    ports:
+      - "8000:8000"
+    volumes:
+      - ./.data:/code/.data
+
+volumes:
+  logs:
+  persistence_data:

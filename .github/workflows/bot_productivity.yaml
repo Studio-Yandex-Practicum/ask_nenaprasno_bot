@@ -1,0 +1,57 @@
+name: Check bot productivity
+
+on:
+  push:
+    types:
+      - opened
+    branches:
+      - develop
+  pull_request:
+    types:
+      - opened
+      - synchronize
+    branches:
+      - develop
+
+
+jobs:
+  build_and_run_bot:
+    name: Startup bot
+    environment:
+      name: Test
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v3
+
+      - name: Set up Python
+        uses: actions/setup-python@v3
+        with:
+          python-version: "3.10"
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+
+      - name: Start the bot
+        env:
+          TELEGRAM_TOKEN: ${{ secrets.TELEGRAM_TOKEN }}
+          APPLICATION_URL: ${{ secrets.APPLICATION_URL }}
+          HOST: 127.0.0.1
+          WEEKLY_STAT_TIME: 13:00
+          WEEKLY_STAT_WEEK_DAYS: 0
+          MONTHLY_STAT_TIME: 13:00
+          MONTHLY_STAT_DAY: 19
+          MONTHLY_RECEIPT_REMINDER_TIME: 13:00
+          MONTHLY_RECEIPT_REMINDER_DAY: 19
+          DAILY_CONSULTATIONS_REMINDER_TIME: 17:00
+          URL_ASK_NENAPRASNO: ${{ secrets.URL_ASK_NENAPRASNO }}
+          URL_ASK_NENAPRASNO_API: ${{ secrets.URL_ASK_NENAPRASNO_API }}
+          SITE_API_BOT_TOKEN: ${{ secrets.SITE_API_BOT_TOKEN }}
+          TRELLO_BORD_ID: 14nNNGRp
+          IS_FAKE_API: True
+
+        run: |
+          python3 src/run_bot.py & sleep 15 && pkill -9 python
+          python3 src/run_webhook_api.py & sleep 15 && pkill -9 python

@@ -1,0 +1,2 @@
+START = "start"
+MENU = "menu"

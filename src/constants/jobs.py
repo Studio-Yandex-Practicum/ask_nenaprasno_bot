@@ -1,0 +1,3 @@
+DAILY_CONSULTATIONS_REMINDER_JOB = "daily_consulations_reminder_job"
+DAILY_OVERDUE_CONSULTATIONS_REMINDER_JOB = "daily_overdue_consulations_reminder_job"
+USER_BILL_REMINDER_TEMPLATE = "send_{telegram_id}_bill_until_complete_job"
