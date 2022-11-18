@@ -4,6 +4,7 @@ from typing import Tuple
 
 import httpx
 import uvicorn
+from pydantic import ValidationError
 from starlette.applications import Starlette
 from starlette.authentication import requires
 from starlette.middleware import Middleware
@@ -14,6 +15,7 @@ from starlette.routing import Route
 from telegram import Bot, Update
 from telegram.error import TelegramError
 
+from api.context_models import ClosedConsultationContext
 from bot import init_webhook
 from core import config
 from core.exceptions import BadRequestError
@@ -25,7 +27,6 @@ from service.api_client import APIService
 from service.bot_service import BotNotifierService
 from service.models import (
     AssignedConsultationModel,
-    ClosedConsultationModel,
     ConsultationModel,
     FeedbackConsultationModel,
     HealthCheckResponseModel,
@@ -100,6 +101,22 @@ async def deserialize(request: Request, deserializer):
         raise BadRequestError(f"JSONDecodeError: {error}") from error
 
 
+async def request_to_context(request: Request, context):
+    body = await request.body()
+    log_template = "%s %s %s\nRequest: %s"
+
+    try:
+        request_data: context = context.parse_obj(request)(await request.json())
+        logger.debug(log_template, request.method, request.url, body)
+        return request_data
+    except ValidationError as error:
+        logger.error(log_template, request.method, request.url, httpx.codes.BAD_REQUEST, error)
+        raise BadRequestError(f"ValidationError: {error}") from error
+    except JSONDecodeError as error:
+        logger.error(log_template, request.method, request.url, httpx.codes.BAD_REQUEST, body)
+        raise BadRequestError(f"JSONDecodeError: {error}") from error
+
+
 @requires("authenticated", status_code=401)
 async def consultation_assign(request: Request) -> Response:
     try:
@@ -138,8 +155,9 @@ async def consultation_assign(request: Request) -> Response:
 
 @requires("authenticated", status_code=401)
 async def consultation_close(request: Request) -> Response:
-    request_data = await deserialize(request, ClosedConsultationModel)
-    if not request_data:
+    try:
+        request_data = await request_to_context(request, ClosedConsultationContext)
+    except BadRequestError:
         return Response(status_code=httpx.codes.BAD_REQUEST)
 
     consultation_id = request_data.consultation_id
