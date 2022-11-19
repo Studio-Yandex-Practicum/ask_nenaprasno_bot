@@ -14,6 +14,8 @@ services:
 
     ports:
       - '33061:3306'
+    volumes:
+      - /var/lib/mysql/
 
   adminer:
     image: adminer
