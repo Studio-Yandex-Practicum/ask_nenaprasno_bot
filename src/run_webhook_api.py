@@ -1,6 +1,5 @@
 # pylint: disable=W0612
 from json import JSONDecodeError
-from typing import Tuple
 
 import httpx
 import uvicorn
@@ -18,8 +17,6 @@ from bot import init_webhook
 from core import config
 from core.exceptions import BadRequestError
 from core.logger import LOGGING_CONFIG, logger
-from core.send_message import send_message
-from core.utils import build_consultation_url, build_trello_url, get_word_case, get_word_genitive
 from middleware import TokenAuthBackend
 from service.api_client import APIService
 from service.bot_service import BotNotifierService
@@ -90,7 +87,7 @@ async def deserialize(request: Request, deserializer):
 
     try:
         request_data: deserializer = deserializer.from_dict(await request.json())
-        logger.debug(log_template, request.method, request.url, body)
+        logger.debug(log_template, request.method, request.url, httpx.codes.OK, body)
         return request_data
     except KeyError as error:
         logger.error(log_template, request.method, request.url, httpx.codes.BAD_REQUEST, body)
@@ -103,36 +100,16 @@ async def deserialize(request: Request, deserializer):
 @requires("authenticated", status_code=401)
 async def consultation_assign(request: Request) -> Response:
     try:
-        consultation = await deserialize(request, AssignedConsultationModel)
+        request_data = await deserialize(request, AssignedConsultationModel)
     except BadRequestError as error:
         logger.error("%s", error)
         return Response(status_code=httpx.codes.BAD_REQUEST)
 
-    telegram_id = int(consultation.telegram_id)
+    telegram_id = int(request_data.telegram_id)
 
     service = APIService()
     consultations_count = await service.get_consultations_count(telegram_id)
-    active_consultations_count = consultations_count["active_consultations_count"]
-    expired_consultations_count = consultations_count["expired_consultations_count"]
-    expiring_consultations_count = consultations_count["expiring_consultations_count"]
-    declination_consultation = get_word_case(active_consultations_count, "заявка", "заявки", "заявок")
-    genitive_declination_consultation_expiring = get_word_genitive(expiring_consultations_count, "заявки", "заявок")
-    genitive_declination_consultation_expired = get_word_genitive(expired_consultations_count, "заявки", "заявок")
-
-    site_url = build_consultation_url(consultation.consultation_id)
-    trello_url = build_trello_url(consultation.username_trello)
-
-    text = (
-        f"Ура! Вам назначена новая заявка ***{consultation.consultation_number}***\n"
-        f"[Посмотреть заявку на сайте]({site_url})\n"
-        "---\n"
-        f"В работе ***{active_consultations_count}*** {declination_consultation}\n"
-        f"Истекает срок у ***{expiring_consultations_count}*** {genitive_declination_consultation_expiring}\n"
-        f"Истек срок у ***{expired_consultations_count}*** {genitive_declination_consultation_expired}\n"
-        f"\n"
-        f"[Открыть Trello]({trello_url})\n\n"
-    )
-    await send_message(api.state.bot_app.bot, telegram_id, text)
+    await api.state.bot_service.consultation_assignment(request_data, consultations_count)
     return Response(status_code=httpx.codes.OK)
 
 
@@ -142,31 +119,17 @@ async def consultation_close(request: Request) -> Response:
     if not request_data:
         return Response(status_code=httpx.codes.BAD_REQUEST)
 
-    consultation_id = request_data.consultation_id
-    bot_app = api.state.bot_app
-    reminder_jobs = bot_app.job_queue.jobs()
-    for job in reminder_jobs:
-        if isinstance(job.data, Tuple) and job.data[0] == consultation_id:
-            job.schedule_removal()
+    api.state.bot_service.consultation_close(request_data)
     return Response(status_code=httpx.codes.OK)
 
 
 @requires("authenticated", status_code=401)
 async def consultation_message(request: Request) -> Response:
-    consultation = await deserialize(request, ConsultationModel)
-    if not consultation:
+    request_data = await deserialize(request, ConsultationModel)
+    if not request_data:
         return Response(status_code=httpx.codes.BAD_REQUEST)
 
-    site_url = build_consultation_url(consultation.consultation_id)
-    trello_url = build_trello_url(consultation.username_trello)
-
-    text = (
-        f"Вау! Получено новое сообщение в чате заявки ***{consultation.consultation_number}***\n"
-        f"[Прочитать сообщение]({site_url})\n"
-        f"\n"
-        f"[Открыть Trello]({trello_url})"
-    )
-    await send_message(api.state.bot_app.bot, consultation.telegram_id, text)
+    await api.state.bot_service.consultation_message(request_data)
     return Response(status_code=httpx.codes.OK)
 
 
