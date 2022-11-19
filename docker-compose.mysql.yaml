@@ -1,9 +1,7 @@
-# Use root/example as user/password credentials
 version: '3.8'
 
 services:
-
-  db:
+  nenaprasno_db:
     image: mysql:8.0
     restart: always
     environment:
@@ -17,8 +15,8 @@ services:
     volumes:
       - /var/lib/mysql/
 
-  adminer:
+  mysql_adminer:
     image: adminer
     restart: always
     ports:
-      - 8081:8080
+      - '8081:8080'
