@@ -6,6 +6,7 @@ import uvicorn
 from pydantic import ValidationError
 from starlette.applications import Starlette
 from starlette.authentication import requires
+from starlette.exceptions import HTTPException
 from starlette.middleware import Middleware
 from starlette.middleware.authentication import AuthenticationMiddleware
 from starlette.requests import Request
@@ -103,15 +104,15 @@ async def request_to_context(request: Request, context):
     log_template = "%s %s %s\nRequest: %s"
 
     try:
-        request_data: context = context.parse_obj(request)(await request.json())
-        logger.debug(log_template, request.method, request.url, body)
+        request_data: context = context.parse_obj(await request.json())
+        logger.debug(log_template, request.method, request.url, httpx.codes.OK, body)
         return request_data
     except ValidationError as error:
         logger.error(log_template, request.method, request.url, httpx.codes.BAD_REQUEST, error)
-        raise BadRequestError(f"ValidationError: {error}") from error
+        raise HTTPException(httpx.codes.BAD_REQUEST, f"ValidationError: {error}") from error
     except JSONDecodeError as error:
         logger.error(log_template, request.method, request.url, httpx.codes.BAD_REQUEST, body)
-        raise BadRequestError(f"JSONDecodeError: {error}") from error
+        raise HTTPException(httpx.codes.BAD_REQUEST, f"JSONDecodeError: {error}") from error
 
 
 @requires("authenticated", status_code=401)
@@ -132,10 +133,7 @@ async def consultation_assign(request: Request) -> Response:
 
 @requires("authenticated", status_code=401)
 async def consultation_close(request: Request) -> Response:
-    try:
-        request_data = await request_to_context(request, ClosedConsultationContext)
-    except BadRequestError:
-        return Response(status_code=httpx.codes.BAD_REQUEST)
+    request_data = await request_to_context(request, ClosedConsultationContext)
 
     api.state.bot_service.consultation_close(request_data)
     return Response(status_code=httpx.codes.OK)
@@ -161,6 +159,13 @@ async def consultation_feedback(request: Request) -> Response:
     return Response(status_code=httpx.codes.OK)
 
 
+async def http_exception(request: Request, exc: HTTPException):
+    return JSONResponse({"detail": exc.detail}, status_code=exc.status_code, headers=exc.headers)
+
+
+exception_handlers = {HTTPException: http_exception}
+
+
 routes = [
     Route("/telegramWebhookApi", telegram_webhook_api, methods=["POST"]),
     Route("/healthcheck", healthcheck_api, methods=["GET"]),
@@ -172,7 +177,13 @@ routes = [
 
 middleware = [Middleware(AuthenticationMiddleware, backend=TokenAuthBackend())]
 
-api = Starlette(routes=routes, on_startup=[start_bot], on_shutdown=[stop_bot], middleware=middleware)
+api = Starlette(
+    routes=routes,
+    on_startup=[start_bot],
+    on_shutdown=[stop_bot],
+    middleware=middleware,
+    exception_handlers=exception_handlers,
+)
 
 
 if __name__ == "__main__":
