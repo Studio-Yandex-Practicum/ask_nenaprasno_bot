@@ -5,12 +5,7 @@ from telegram.ext import Application
 
 from core import utils
 from core.send_message import send_message
-from service.models import (
-    AssignedConsultationModel,
-    ClosedConsultationModel,
-    ConsultationModel,
-    FeedbackConsultationModel,
-)
+from service import models
 
 
 class BotNotifierService:
@@ -20,7 +15,7 @@ class BotNotifierService:
         self.__bot_app = bot_app
 
     async def consultation_assignment(
-        self, request_data: AssignedConsultationModel, consultations_count: Dict[str, int]
+        self, request_data: models.AssignedConsultationModel, consultations_count: Dict[str, int]
     ) -> Response:
         """Отправка информации при назначении новой заявки"""
         active_consultations_count = consultations_count["active_consultations_count"]
@@ -49,7 +44,7 @@ class BotNotifierService:
         )
         await send_message(self.__bot_app.bot, request_data.telegram_id, text)
 
-    async def consultation_feedback(self, request_data: FeedbackConsultationModel) -> Response:
+    async def consultation_feedback(self, request_data: models.FeedbackConsultationModel) -> Response:
         """Отправка отзыва на консультацию в чат бота"""
         text = (
             f"Воу-воу-воу, у вас отзыв!\n"
@@ -59,7 +54,7 @@ class BotNotifierService:
         )
         await send_message(self.__bot_app.bot, request_data.telegram_id, text)
 
-    async def consultation_message(self, request_data: ConsultationModel) -> Response:
+    async def consultation_message(self, request_data: models.ConsultationModel) -> Response:
         """Отправка информации о новом сообщения по консультации в чате"""
         site_url = utils.build_consultation_url(request_data.consultation_id)
         trello_url = utils.build_trello_url(request_data.username_trello)
@@ -72,7 +67,7 @@ class BotNotifierService:
         )
         await send_message(self.__bot_app.bot, request_data.telegram_id, text)
 
-    def consultation_close(self, request_data: ClosedConsultationModel) -> Response:
+    def consultation_close(self, request_data: models.ClosedConsultationModel) -> Response:
         """Удаление из очереди джобов, относящися к закрытой консультации"""
         consultation_id = request_data.consultation_id
         reminder_jobs = self.__bot_app.job_queue.jobs()
