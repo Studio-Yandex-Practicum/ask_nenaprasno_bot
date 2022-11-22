@@ -1,4 +1,3 @@
-# pylint: disable=W0612
 from json import JSONDecodeError
 
 import httpx
@@ -15,7 +14,7 @@ from starlette.routing import Route
 from telegram import Bot, Update
 from telegram.error import TelegramError
 
-from api.context_models import ClosedConsultationContext
+from api import context_models
 from bot import init_webhook
 from core import config
 from core.exceptions import BadRequestError
@@ -133,7 +132,7 @@ async def consultation_assign(request: Request) -> Response:
 
 @requires("authenticated", status_code=401)
 async def consultation_close(request: Request) -> Response:
-    request_data = await request_to_context(request, ClosedConsultationContext)
+    request_data = await request_to_context(request, context_models.ClosedConsultationContext)
 
     api.state.bot_service.consultation_close(request_data)
     return Response(status_code=httpx.codes.OK)
