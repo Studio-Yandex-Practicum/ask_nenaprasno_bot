@@ -22,12 +22,7 @@ from core.logger import LOGGING_CONFIG, logger
 from middleware import TokenAuthBackend
 from service.api_client import APIService
 from service.bot_service import BotNotifierService
-from service.models import (
-    AssignedConsultationModel,
-    ConsultationModel,
-    FeedbackConsultationModel,
-    HealthCheckResponseModel,
-)
+from service.models import AssignedConsultationModel, FeedbackConsultationModel, HealthCheckResponseModel
 
 
 async def start_bot() -> None:
@@ -140,7 +135,7 @@ async def consultation_close(request: Request) -> Response:
 
 @requires("authenticated", status_code=401)
 async def consultation_message(request: Request) -> Response:
-    request_data = await deserialize(request, ConsultationModel)
+    request_data = await request_to_context(request, context_models.ConsultationContext)
     if not request_data:
         return Response(status_code=httpx.codes.BAD_REQUEST)
 
