@@ -51,6 +51,7 @@ jobs:
           SITE_API_BOT_TOKEN: ${{ secrets.SITE_API_BOT_TOKEN }}
           TRELLO_BORD_ID: 14nNNGRp
           IS_FAKE_API: True
+          SECRET_TELEGRAM_TOKEN: Secret-Telegram-Token
 
         run: |
           python3 src/run_bot.py & sleep 15 && pkill -9 python
