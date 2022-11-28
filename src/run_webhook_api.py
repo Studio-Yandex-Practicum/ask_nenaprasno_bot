@@ -17,12 +17,10 @@ from telegram.error import TelegramError
 from api import context_models
 from bot import init_webhook
 from core import config
-from core.exceptions import BadRequestError
 from core.logger import LOGGING_CONFIG, logger
 from middleware import TokenAuthBackend
 from service.api_client import APIService
 from service.bot_service import BotNotifierService
-from service.models import AssignedConsultationModel, FeedbackConsultationModel, HealthCheckResponseModel
 
 
 async def start_bot() -> None:
@@ -45,7 +43,7 @@ async def stop_bot() -> None:
 
 
 async def healthcheck_api(request: Request) -> JSONResponse:
-    health = HealthCheckResponseModel()
+    health = context_models.HealthCheckResponseContext()
     bot: Bot = api.state.bot_app.bot
     try:
         await bot.get_me()
@@ -77,22 +75,6 @@ async def telegram_webhook_api(request: Request) -> Response:
     return Response(**response)
 
 
-async def deserialize(request: Request, deserializer):
-    body = await request.body()
-    log_template = "%s %s %s\nRequest: %s"
-
-    try:
-        request_data: deserializer = deserializer.from_dict(await request.json())
-        logger.debug(log_template, request.method, request.url, httpx.codes.OK, body)
-        return request_data
-    except KeyError as error:
-        logger.error(log_template, request.method, request.url, httpx.codes.BAD_REQUEST, body)
-        raise BadRequestError(f"KeyError: {error} key not found") from error
-    except JSONDecodeError as error:
-        logger.error(log_template, request.method, request.url, httpx.codes.BAD_REQUEST, body)
-        raise BadRequestError(f"JSONDecodeError: {error}") from error
-
-
 async def request_to_context(request: Request, context):
     body = await request.body()
     log_template = "%s %s %s\nRequest: %s"
@@ -111,10 +93,8 @@ async def request_to_context(request: Request, context):
 
 @requires("authenticated", status_code=401)
 async def consultation_assign(request: Request) -> Response:
-    try:
-        request_data = await deserialize(request, AssignedConsultationModel)
-    except BadRequestError as error:
-        logger.error("%s", error)
+    request_data = await request_to_context(request, context_models.AssignedConsultationContext)
+    if not request_data:
         return Response(status_code=httpx.codes.BAD_REQUEST)
 
     telegram_id = int(request_data.telegram_id)
@@ -145,7 +125,7 @@ async def consultation_message(request: Request) -> Response:
 
 @requires("authenticated", status_code=401)
 async def consultation_feedback(request: Request) -> Response:
-    request_data = await deserialize(request, FeedbackConsultationModel)
+    request_data = await request_to_context(request, context_models.FeedbackConsultationContext)
     if not request_data:
         return Response(status_code=httpx.codes.BAD_REQUEST)
 

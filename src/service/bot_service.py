@@ -6,7 +6,6 @@ from telegram.ext import Application
 from api import context_models
 from core import utils
 from core.send_message import send_message
-from service import models
 
 
 class BotNotifierService:
@@ -16,7 +15,7 @@ class BotNotifierService:
         self.__bot_app = bot_app
 
     async def consultation_assignment(
-        self, request_data: models.AssignedConsultationModel, consultations_count: Dict[str, int]
+        self, request_data: context_models.AssignedConsultationContext, consultations_count: Dict[str, int]
     ) -> Response:
         """Отправка информации при назначении новой заявки"""
         active_consultations_count = consultations_count["active_consultations_count"]
@@ -45,7 +44,7 @@ class BotNotifierService:
         )
         await send_message(self.__bot_app.bot, request_data.telegram_id, text)
 
-    async def consultation_feedback(self, request_data: models.FeedbackConsultationModel) -> Response:
+    async def consultation_feedback(self, request_data: context_models.FeedbackConsultationContext) -> Response:
         """Отправка отзыва на консультацию в чат бота"""
         text = (
             f"Воу-воу-воу, у вас отзыв!\n"
