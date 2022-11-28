@@ -58,15 +58,15 @@ class Settings(BaseSettings):
     trello_bord_id: str
 
     # статичные значения
-    port: int = Field(8000, const=True)
-    form_url_future_expert: str = Field("https://forms.gle/DGMUm35bxZytE3QLA", const=True)
+    port: int = Field(8000)
+    form_url_future_expert: str = Field("https://forms.gle/DGMUm35bxZytE3QLA")
     url_service_rules: str = Field(
-        "https://docs.google.com/document/d/1hW2HUv9aWQMnUBuIE_YQEtmIDDbk8KhpychckbyaIEQ/edit", const=True
+        "https://docs.google.com/document/d/1hW2HUv9aWQMnUBuIE_YQEtmIDDbk8KhpychckbyaIEQ/edit"
     )
-    bot_persistence_file: Path = Field(Path(DATA_PATH, "bot_persistence_file"), const=True)
-    stat_collection_time: time = Field(time(tzinfo=ZoneInfo("Asia/Kamchatka")), const=True)
-    log_path: Path = Field(Path(logs_folder, "bot.log"), const=True)
-    daily_collect_consultation_time: time = Field(time(tzinfo=timezone.utc), const=True)
+    bot_persistence_file: Path = Field(Path(DATA_PATH, "bot_persistence_file"))
+    stat_collection_time: time = Field(time(tzinfo=ZoneInfo("Asia/Kamchatka")))
+    log_path: Path = Field(Path(logs_folder, "bot.log"))
+    daily_collect_consultation_time: time = Field(time(tzinfo=timezone.utc))
 
     class Config:  # pylint: disable=R0903
         env_file = Path(BASE_DIR.parent, ".env")
