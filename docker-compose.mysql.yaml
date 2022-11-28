@@ -5,18 +5,21 @@ services:
     image: mysql:8.0
     restart: always
     environment:
-      MYSQL_ROOT_PASSWORD: example
+      MYSQL_ROOT_PASSWORD: root
       MYSQL_DATABASE: nenaprasno
-      MYSQL_USER: nenaprasno
-      MYSQL_PASSWORD: nenaprasno
+      MYSQL_USER: admin
+      MYSQL_PASSWORD: admin
 
     ports:
       - '33061:3306'
     volumes:
-      - /var/lib/mysql/
+      - mysql_data:/var/lib/mysql/
 
   mysql_adminer:
     image: adminer
     restart: always
     ports:
       - '8081:8080'
+
+volumes:
+  mysql_data:
