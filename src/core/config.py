@@ -7,10 +7,10 @@ from pydantic import BaseSettings, Field
 BASE_DIR = Path(__file__).resolve().parent.parent
 
 # Параметры общей папки с данными
-DATA_PATH = Path(BASE_DIR.parent, ".data")
+DATA_PATH = BASE_DIR.parent / ".data"
 
 # Параметры логгера
-logs_folder = Path(DATA_PATH, "logs")
+logs_folder = DATA_PATH / "logs"
 logs_folder.mkdir(parents=True, exist_ok=True)
 
 
@@ -63,13 +63,13 @@ class Settings(BaseSettings):
     url_service_rules: str = Field(
         "https://docs.google.com/document/d/1hW2HUv9aWQMnUBuIE_YQEtmIDDbk8KhpychckbyaIEQ/edit"
     )
-    bot_persistence_file: Path = Field(Path(DATA_PATH, "bot_persistence_file"))
+    bot_persistence_file: Path = Field(DATA_PATH / "bot_persistence_file")
     stat_collection_time: time = Field(time(tzinfo=ZoneInfo("Asia/Kamchatka")))
-    log_path: Path = Field(Path(logs_folder, "bot.log"))
+    log_path: Path = Field(logs_folder / "bot.log")
     daily_collect_consultation_time: time = Field(time(tzinfo=timezone.utc))
 
     class Config:  # pylint: disable=R0903
-        env_file = Path(BASE_DIR.parent, ".env")
+        env_file = BASE_DIR.parent / ".env"
 
 
 settings = Settings()
