@@ -1,11 +1,10 @@
 from typing import Dict, Tuple
 
-from starlette.responses import Response
 from telegram.ext import Application
 
+from api import context_models
 from core import utils
 from core.send_message import send_message
-from service import models
 
 
 class BotNotifierService:
@@ -15,8 +14,8 @@ class BotNotifierService:
         self.__bot_app = bot_app
 
     async def consultation_assignment(
-        self, request_data: models.AssignedConsultationModel, consultations_count: Dict[str, int]
-    ) -> Response:
+        self, request_data: context_models.AssignedConsultationContext, consultations_count: Dict[str, int]
+    ) -> None:
         """Отправка информации при назначении новой заявки"""
         active_consultations_count = consultations_count["active_consultations_count"]
         expired_consultations_count = consultations_count["expired_consultations_count"]
@@ -44,7 +43,7 @@ class BotNotifierService:
         )
         await send_message(self.__bot_app.bot, request_data.telegram_id, text)
 
-    async def consultation_feedback(self, request_data: models.FeedbackConsultationModel) -> Response:
+    async def consultation_feedback(self, request_data: context_models.FeedbackConsultationContext) -> None:
         """Отправка отзыва на консультацию в чат бота"""
         text = (
             f"Воу-воу-воу, у вас отзыв!\n"
@@ -54,7 +53,7 @@ class BotNotifierService:
         )
         await send_message(self.__bot_app.bot, request_data.telegram_id, text)
 
-    async def consultation_message(self, request_data: models.ConsultationModel) -> Response:
+    async def consultation_message(self, request_data: context_models.ConsultationContext) -> None:
         """Отправка информации о новом сообщения по консультации в чате"""
         site_url = utils.build_consultation_url(request_data.consultation_id)
         trello_url = utils.build_trello_url(request_data.username_trello)
@@ -67,7 +66,7 @@ class BotNotifierService:
         )
         await send_message(self.__bot_app.bot, request_data.telegram_id, text)
 
-    def consultation_close(self, request_data: models.ClosedConsultationModel) -> Response:
+    def consultation_close(self, request_data: context_models.ClosedConsultationContext) -> None:
         """Удаление из очереди джобов, относящися к закрытой консультации"""
         consultation_id = request_data.consultation_id
         reminder_jobs = self.__bot_app.job_queue.jobs()
