@@ -15,9 +15,9 @@ class ClosedConsultationContext(BaseModel):
 
 class ConsultationContext(BaseModel):
     consultation_id: str
-    consultation_number: str
+    consultation_number: int
     username_trello: str
-    telegram_id: str
+    telegram_id: int
     trello_card_id: str
 
     class Config:  # pylint: disable=R0903
