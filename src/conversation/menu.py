@@ -6,7 +6,7 @@ from telegram.ext import CallbackQueryHandler, CommandHandler, ContextTypes, Con
 
 from constants import callback_data, states
 from conversation.timezone import set_timezone_from_keyboard, timezone_conversation
-from core.config import URL_SERVICE_RULES
+from core.config import settings
 from core.send_message import reply_message
 from core.utils import build_consultation_url, build_trello_url, get_word_case
 from decorators.logger import async_error_logger
@@ -45,7 +45,7 @@ async def menu(update: Update, context: ContextTypes.DEFAULT_TYPE) -> str:
         [
             InlineKeyboardButton(
                 "Правила сервиса",
-                url=URL_SERVICE_RULES,
+                url=settings.url_service_rules,
             )
         ],
         [

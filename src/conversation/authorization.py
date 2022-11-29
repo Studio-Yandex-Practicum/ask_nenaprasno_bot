@@ -6,7 +6,7 @@ from telegram.ext import CallbackContext, CallbackQueryHandler, CommandHandler, 
 from constants import callback_data, states
 from conversation.menu import menu_conversation
 from conversation.timezone import ASK_FLAG, set_timezone_from_keyboard, timezone_conversation
-from core import config
+from core.config import settings
 from core.send_message import edit_message, reply_message
 from decorators.logger import async_error_logger
 from menu_button import COMMANDS_UNAUTHORIZED, menu_button
@@ -36,7 +36,7 @@ BOT_OFFER_ONLINE_CONSULTATION = (
 )
 BOT_OFFER_FILL_FORM_FOR_FUTURE_EXPERT = (
     "Мы всегда рады подключать к проекту новых специалистов!\nЗдорово, что вы хотите работать с нами.\n"
-    f"Заполните, пожалуйста, эту [анкету]({config.FORM_URL_FUTURE_EXPERT}) (нужно 15 минут). "
+    f"Заполните, пожалуйста, эту [анкету]({settings.form_url_future_expert}) (нужно 15 минут). "
     "Команда сервиса подробно изучит вашу заявку и свяжется с вами в течение недели, чтобы договориться о "
     "видеоинтервью.\nПеред интервью мы можем попросить вас ответить на тестовый кейс,"
     " чтобы обсудить его на встрече.\nЖелаем удачи :)"
@@ -94,8 +94,8 @@ async def support_or_consult_callback(update: Update, context: CallbackContext) 
     """
     keyboard = [
         [
-            InlineKeyboardButton("Получить онлайн-консультацию", url=config.URL_ASK_NENAPRASNO),
-            InlineKeyboardButton("Поддержать проект", url=urljoin(config.URL_ASK_NENAPRASNO, "/#donation")),
+            InlineKeyboardButton("Получить онлайн-консультацию", url=settings.url_ask_nenaprasno),
+            InlineKeyboardButton("Поддержать проект", url=urljoin(settings.url_ask_nenaprasno, "/#donation")),
         ]
     ]
     reply_markup = InlineKeyboardMarkup(keyboard)
