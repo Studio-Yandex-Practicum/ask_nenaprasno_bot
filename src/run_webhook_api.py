@@ -16,7 +16,7 @@ from telegram.error import TelegramError
 
 from api import context_models
 from bot import init_webhook
-from core import config
+from core.config import settings
 from core.exceptions import BadRequestError
 from core.logger import LOGGING_CONFIG, logger
 from middleware import TokenAuthBackend
@@ -186,4 +186,4 @@ api = Starlette(
 
 
 if __name__ == "__main__":
-    uvicorn.run(app=api, debug=True, host=config.HOST, port=config.PORT, log_config=LOGGING_CONFIG)
+    uvicorn.run(app=api, debug=True, host=settings.host, port=settings.port, log_config=LOGGING_CONFIG)

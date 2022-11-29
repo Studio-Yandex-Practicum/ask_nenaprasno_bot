@@ -1,6 +1,6 @@
 from urllib.parse import urljoin
 
-from core.config import TRELLO_BORD_ID, URL_ASK_NENAPRASNO
+from core.config import settings
 
 
 def get_word_case(number, single, few, many):
@@ -30,8 +30,8 @@ def build_trello_url(username_trello: str, overdue: bool = False) -> str:
     if overdue:
         trello_filter += ",overdue:true"
 
-    return urljoin("https://trello.com/b/", TRELLO_BORD_ID) + f"/?filter={trello_filter}"
+    return urljoin("https://trello.com/b/", settings.trello_bord_id) + f"/?filter={trello_filter}"
 
 
 def build_consultation_url(consultation_id: str) -> str:
-    return urljoin(URL_ASK_NENAPRASNO, f"/consultation/redirect/{consultation_id}")
+    return urljoin(settings.url_ask_nenaprasno, f"/consultation/redirect/{consultation_id}")

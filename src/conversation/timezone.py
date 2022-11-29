@@ -17,7 +17,7 @@ from telegram.ext import (
 
 from constants import callback_data, states
 from constants.timezone import DEFAULT_TIMEZONE
-from core.config import URL_SERVICE_RULES
+from core.config import settings
 from core.send_message import reply_message
 from decorators.logger import async_error_logger
 from get_timezone import get_timezone_from_location, get_timezone_from_text_message, set_timezone
@@ -94,7 +94,7 @@ async def check_timezone(update: Update, context: ContextTypes.DEFAULT_TYPE, tim
         [
             InlineKeyboardButton(
                 text="Правила сервиса",
-                url=URL_SERVICE_RULES,
+                url=settings.url_service_rules,
             )
         ],
     ]
