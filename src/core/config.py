@@ -1,103 +1,75 @@
-import os
-from datetime import datetime, time, timezone
+from datetime import time, timezone
 from pathlib import Path
 from zoneinfo import ZoneInfo
 
-from dotenv import dotenv_values
-
-from decorators.safe_conversion import safe_conversion
+from pydantic import BaseSettings, Field
 
 BASE_DIR = Path(__file__).resolve().parent.parent
-
-# --------------------------------------------------------------------------------- #
-# Getting variables from .env                                                       #
-# --------------------------------------------------------------------------------- #
-
-env = dotenv_values()
-
-
-def get_string(setting: str, default: str = None) -> str:
-    return env.get(setting) or os.getenv(setting, default)
-
-
-@safe_conversion
-def get_int(setting: str, default: str = None) -> int:
-    return int(get_string(setting, default))
-
-
-@safe_conversion
-def get_datetime(setting: str, default: str = None) -> datetime:
-    return datetime.strptime(get_string(setting, default), "%H:%M")
-
-
-@safe_conversion
-def get_time(setting: str, default: str = None) -> time:
-    return get_datetime(setting, default).time()
-
-
-@safe_conversion
-def get_datetime_tuple(setting: str, default: str = None) -> tuple:
-    return tuple(map(int, list(filter(None, get_string(setting, default).split(",")))))
-
-
-def get_bool(setting: str, default: str = "False") -> bool:
-    return get_string(setting, default) == "True"
-
 
 # Параметры общей папки с данными
 DATA_PATH = BASE_DIR.parent / ".data"
 
 # Параметры логгера
-Path(DATA_PATH / "logs").mkdir(parents=True, exist_ok=True)
-LOG_PATH = DATA_PATH / "logs" / "bot.log"
+logs_folder = DATA_PATH / "logs"
+logs_folder.mkdir(parents=True, exist_ok=True)
 
-LOG_LEVEL_STR = get_string("LOG_LEVEL", "INFO")
 
-# Параметры локального сервера принимающего обновления от телеграм
-HOST = get_string("HOST", "0.0.0.0")
-APPLICATION_URL = get_string("APPLICATION_URL")
+class Settings(BaseSettings):
+    # Токен телеграм бота
+    telegram_token: str
+    # адрес сервера, где будет запущен бот
+    application_url: str
+    # host для доступа к uvicorn серверу, по умолчанию localhost или 127.0.0.1
+    host: str = "0.0.0.0"
+    # Токен, с которым телеграм будет обращаться к боту. Допускаются только символы A-Z, a-z, 0-9, _, -
+    secret_telegram_token: str
 
-PORT = 8000
+    # время еженедельной статистики
+    weekly_stat_time: time
+    # дни недели для еженедельной статистики 0-6, где 0 - воскресенье
+    weekly_stat_week_days: int = 0
 
-TOKEN = get_string("TELEGRAM_TOKEN")
+    # время ежемесячной статистики
+    monthly_stat_time: time
+    # день для даты ежемесячной статистики
+    monthly_stat_day: int = 1
 
-# Параметры для аутентификации телеграма
-SECRET_TELEGRAM_TOKEN = get_string("SECRET_TELEGRAM_TOKEN")
+    # время для ежемесячного напоминания о чеке
+    monthly_receipt_reminder_time: time
+    # день для даты ежемесячного напоминания о чеке
+    monthly_receipt_reminder_day: int
 
-# Параметры рассылки статистики
-WEEKLY_STAT_TIME = get_time("WEEKLY_STAT_TIME", "10:00")
-WEEKLY_STAT_WEEK_DAYS = get_datetime_tuple("WEEKLY_STAT_WEEK_DAYS", "0")
-MONTHLY_STAT_TIME = get_time("MONTHLY_STAT_TIME", "11:00")
-MONTHLY_STAT_DAY = get_int("MONTHLY_STAT_DAY", "28")
+    # время ежедневного получения напоминаний о просроченных заявках
+    daily_consultations_reminder_time: time
 
-# Параметры рассылки чеков
-MONTHLY_RECEIPT_REMINDER_TIME = get_time("MONTHLY_RECEIPT_REMINDER_TIME", "12:00")
-MONTHLY_RECEIPT_REMINDER_DAY = get_int("MONTHLY_RECEIPT_REMINDER_DAY", "20")
+    # Токен(uuid) для идентификации бота на сайте.
+    site_api_bot_token: str
+    # адрес сервера, к которому будет отправлять запросы API клиент
+    url_ask_nenaprasno_api: str
+    # главный url nenaprasno
+    url_ask_nenaprasno: str
+    # флаг, определяющий какой АПИ клиент используется - боевой или "заглушка", отдающая фейковые данные
+    is_fake_api: bool = False
 
-# Параметры рассылки напоминаний
-DAILY_COLLECT_CONSULTATIONS_TIME = time(hour=0, minute=0, tzinfo=timezone.utc)
-DAILY_CONSULTATIONS_REMINDER_TIME = get_time("DAILY_CONSULTATIONS_REMINDER_TIME", "17:00")
+    # Уровень записи логов
+    log_level: str = "INFO"
 
-# Параметры запуска сбора недельной и месячной статистики - по умолчанию, полночь GTM+12
-__collect_time = get_time("STAT_COLLECTION_TIME", "00:00")
-STAT_COLLECTION_TIMEZONE = "Asia/Kamchatka"
-# STAT_COLLECTION_TIME = time(hour=0, minute=0, second=0, tzinfo=ZoneInfo(STAT_COLLECTION_TIMEZONE))
-STAT_COLLECTION_TIME = __collect_time.replace(tzinfo=ZoneInfo(STAT_COLLECTION_TIMEZONE))
+    # доска в TRELLO
+    trello_bord_id: str
 
-# Файл с сохраненными данными бота
-BOT_PERSISTENCE_FILE = DATA_PATH / "bot_persistence_file"
+    # статичные значения
+    port: int = Field(8000)
+    form_url_future_expert: str = Field("https://forms.gle/DGMUm35bxZytE3QLA")
+    url_service_rules: str = Field(
+        "https://docs.google.com/document/d/1hW2HUv9aWQMnUBuIE_YQEtmIDDbk8KhpychckbyaIEQ/edit"
+    )
+    bot_persistence_file: Path = Field(DATA_PATH / "bot_persistence_file")
+    stat_collection_time: time = Field(time(tzinfo=ZoneInfo("Asia/Kamchatka")))
+    log_path: Path = Field(logs_folder / "bot.log")
+    daily_collect_consultation_time: time = Field(time(tzinfo=timezone.utc))
 
-# Настройка отладки
-IS_FAKE_API = get_bool("IS_FAKE_API", "False")
+    class Config:  # pylint: disable=R0903
+        env_file = BASE_DIR.parent / ".env"
 
-# Параметры trello
-TRELLO_BORD_ID = get_string("TRELLO_BORD_ID")
 
-# Параметры внешнего api
-URL_ASK_NENAPRASNO_API = get_string("URL_ASK_NENAPRASNO_API")
-SITE_API_BOT_TOKEN = get_string("SITE_API_BOT_TOKEN")
-
-# URL nenaprasno
-FORM_URL_FUTURE_EXPERT = "https://forms.gle/DGMUm35bxZytE3QLA"
-URL_SERVICE_RULES = "https://docs.google.com/document/d/1hW2HUv9aWQMnUBuIE_YQEtmIDDbk8KhpychckbyaIEQ/edit"
-URL_ASK_NENAPRASNO = get_string("URL_ASK_NENAPRASNO")
+settings = Settings()

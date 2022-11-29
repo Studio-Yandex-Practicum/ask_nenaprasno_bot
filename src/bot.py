@@ -18,7 +18,7 @@ from constants.jobs import (
     USER_BILL_REMINDER_TEMPLATE,
 )
 from conversation.authorization import authorization_conversation
-from core import config
+from core.config import settings
 from core.logger import logger
 from core.send_message import edit_message
 from decorators.logger import async_error_logger
@@ -58,10 +58,10 @@ def create_bot():
     Create telegram bot application
     :return: Created telegram bot application
     """
-    bot_persistence = PicklePersistence(filepath=config.BOT_PERSISTENCE_FILE)
+    bot_persistence = PicklePersistence(filepath=settings.bot_persistence_file)
     bot_app = (
         ApplicationBuilder()
-        .token(config.TOKEN)
+        .token(settings.telegram_token)
         .rate_limiter(AIORateLimiter())
         .persistence(persistence=bot_persistence)
         .build()
@@ -82,21 +82,21 @@ def create_bot():
     # Once per week bot sends current week statistics (default: friday)
     bot_app.job_queue.run_daily(
         weekly_stat_job,
-        time=config.STAT_COLLECTION_TIME,
-        days=config.WEEKLY_STAT_WEEK_DAYS,
+        time=settings.stat_collection_time,
+        days=(settings.weekly_stat_week_days,),
     )
     # Once per month bot sends bill reminder (default: 1st day of month)
     bot_app.job_queue.run_monthly(
         monthly_bill_reminder_job,
-        when=config.STAT_COLLECTION_TIME,
-        day=config.MONTHLY_RECEIPT_REMINDER_DAY,
+        when=settings.stat_collection_time,
+        day=settings.monthly_receipt_reminder_day,
     )
 
     # Once per month bot sends previous month statistics
     bot_app.job_queue.run_monthly(
         monthly_stat_job,
-        when=config.STAT_COLLECTION_TIME,
-        day=config.MONTHLY_STAT_DAY,
+        when=settings.stat_collection_time,
+        day=settings.monthly_stat_day,
     )
 
     # Once per day (but for every time zone) bot collects overdue consultations and send reminder
@@ -104,7 +104,7 @@ def create_bot():
     bot_app.job_queue.run_repeating(
         daily_consulations_reminder_job,
         interval=timedelta(hours=1),
-        first=time(minute=int(config.DAILY_CONSULTATIONS_REMINDER_TIME.minute)),
+        first=time(minute=int(settings.daily_consultations_reminder_time.minute)),
         name=DAILY_OVERDUE_CONSULTATIONS_REMINDER_JOB,
     )
 
@@ -112,7 +112,7 @@ def create_bot():
     # at due_time + 1 hour
     bot_app.job_queue.run_daily(
         daily_consulations_duedate_is_today_reminder_job,
-        time=config.DAILY_COLLECT_CONSULTATIONS_TIME,
+        time=settings.daily_collect_consultation_time,
         name=DAILY_CONSULTATIONS_REMINDER_JOB,
     )
 
@@ -130,9 +130,9 @@ async def init_webhook() -> Application:
     bot_app = create_bot()
     bot_app.updater = None
     await bot_app.bot.set_webhook(
-        url=urljoin(config.APPLICATION_URL, "telegramWebhookApi"), secret_token=config.SECRET_TELEGRAM_TOKEN
+        url=urljoin(settings.application_url, "telegramWebhookApi"), secret_token=settings.secret_telegram_token
     )
-    logger.debug("Set webhook. App url: %s", config.APPLICATION_URL)
+    logger.debug("Set webhook. App url: %s", settings.application_url)
     return bot_app
 
 

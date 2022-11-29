@@ -1,4 +1,3 @@
-# pylint: disable=W0703
 import functools
 from typing import Callable
 
@@ -15,7 +14,7 @@ def async_error_logger(name: str) -> Callable:
             try:
                 logger.debug("User %s run %s", update.effective_user.id, func.__name__)
                 return await func(*args, **kwargs)
-            except Exception:
+            except Exception:  # pylint: disable=W0703
                 logger.exception("The error after command: %s", name)
 
         return wrapper

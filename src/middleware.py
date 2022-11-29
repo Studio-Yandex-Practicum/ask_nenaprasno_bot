@@ -3,7 +3,7 @@ from typing import Optional, Tuple
 from starlette.authentication import AuthCredentials, AuthenticationBackend, SimpleUser
 from starlette.requests import HTTPConnection
 
-from core import config
+from core.config import settings
 from core.logger import logger
 
 
@@ -11,11 +11,11 @@ class TokenAuthBackend(AuthenticationBackend):
     CREDENTIALS = {
         "Authorization": {
             "username": "nenaprasno",
-            "token": config.SITE_API_BOT_TOKEN,
+            "token": settings.site_api_bot_token,
         },
         "X-Telegram-Bot-Api-Secret-Token": {
             "username": "telegram",
-            "token": config.SECRET_TELEGRAM_TOKEN,
+            "token": settings.secret_telegram_token,
         },
     }
 
