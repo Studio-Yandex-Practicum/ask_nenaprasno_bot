@@ -223,12 +223,13 @@ async def monthly_bill_reminder_job(context: CallbackContext) -> None:
     """
     bill_stat = await service.get_bill()
     if bill_stat is None:
+        logger.debug("Monthly bill reminder job: no bills to send")
         return
 
     user_ids = bill_stat.telegram_ids
     for telegram_id in user_ids:
         user_tz = await get_user_timezone(int(telegram_id), context)
-        start_time = settings.monthly_receipt_reminder_day.replace(tzinfo=user_tz)
+        start_time = settings.monthly_receipt_reminder_time.replace(tzinfo=user_tz)
         job_name = USER_BILL_REMINDER_TEMPLATE.format(telegram_id=telegram_id)
 
         current_jobs = context.job_queue.get_jobs_by_name(job_name)
