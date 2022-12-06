@@ -143,6 +143,7 @@ class ForwardConsultationData(BaseConsultationData):
 @async_job_logger
 async def weekly_stat_job(context: CallbackContext) -> None:
     """Collects users timezones and adds statistic-sending jobs to queue."""
+    logger.debug("Running weekly_stat_job")
     week_statistics = await service.get_week_stat()
     # микропроблема: если у пользователя не выбрана таймзона, то в сете будет None,
     # который в send_weekly_statistic_job будет интрепретирован как таймзона по-умолчанию (МСК)
@@ -159,6 +160,7 @@ async def weekly_stat_job(context: CallbackContext) -> None:
 @async_job_logger
 async def monthly_stat_job(context: CallbackContext) -> None:
     """Collects users timezones and adds statistic-sending jobs to queue."""
+    logger.debug("Running monthly_stat_job")
     month_statistics = await service.get_month_stat()
 
     for statistic in month_statistics:
@@ -178,6 +180,7 @@ async def monthly_stat_job(context: CallbackContext) -> None:
 @async_job_logger
 async def send_weekly_statistic_job(context: CallbackContext) -> None:
     """Sends weekly statistics to users with specific timezone."""
+    logger.debug("Running send_weekly_statistic_job")
     current_tz = context.job.data
     week_statistics = await service.get_week_stat()
 
@@ -200,6 +203,7 @@ async def send_weekly_statistic_job(context: CallbackContext) -> None:
 @async_job_logger
 async def send_monthly_statistic_job(context: CallbackContext) -> None:
     """Send monthly statistic to user."""
+    logger.debug("Running send_monthly_statistic_job")
     statistic = context.job.data
     message = MONTHLY_STATISTIC_TEMPLATE.format(
         closed_consultations=statistic.closed_consultations,
@@ -221,14 +225,16 @@ async def monthly_bill_reminder_job(context: CallbackContext) -> None:
 
     Only for self-employed users.
     """
+    logger.debug("Running monthly_bill_reminder_job")
     bill_stat = await service.get_bill()
     if bill_stat is None:
+        logger.debug("Monthly bill reminder job: no bills to send")
         return
 
     user_ids = bill_stat.telegram_ids
     for telegram_id in user_ids:
         user_tz = await get_user_timezone(int(telegram_id), context)
-        start_time = settings.monthly_receipt_reminder_day.replace(tzinfo=user_tz)
+        start_time = settings.monthly_receipt_reminder_time.replace(tzinfo=user_tz)
         job_name = USER_BILL_REMINDER_TEMPLATE.format(telegram_id=telegram_id)
 
         current_jobs = context.job_queue.get_jobs_by_name(job_name)
@@ -250,6 +256,7 @@ async def monthly_bill_reminder_job(context: CallbackContext) -> None:
 @async_job_logger
 async def daily_bill_remind_job(context: CallbackContext) -> None:
     """Send message every day until delete job from JobQueue."""
+    logger.debug("Running daily_bill_remind_job")
     job = context.job
     message = "Вы активно работали весь месяц! Не забудьте отправить чек нашему кейс-менеджеру"
     menu = InlineKeyboardMarkup(
@@ -339,6 +346,7 @@ async def send_reminder_overdue(context: CallbackContext) -> None:
 @async_job_logger
 async def daily_overdue_consulations_reminder_job(context: CallbackContext, overdue: Dict) -> None:
     """Creates tasks to send reminders for consultations expired at least one day ago."""
+    logger.debug("Running daily_overdue_consulations_reminder_job")
     for telegram_id, consultations in overdue.items():
         if consultations:
             # Send reminder job for every doctor
@@ -357,6 +365,7 @@ async def daily_consulations_duedate_is_today_reminder_job(context: CallbackCont
     """Adds a reminder job to the bot's job queue according to the scenario:
     - the due date is today
     """
+    logger.debug("Running daily_consulations_duedate_is_today_reminder_job")
     now = datetime.utcnow()
     consultations = await service.get_daily_consultations()
 
@@ -396,6 +405,7 @@ async def daily_consulations_reminder_job(context: CallbackContext) -> None:
     - the due date has just expired;
     - the due date expired one hour ago.
     """
+    logger.debug("Running daily_consulations_reminder_job")
     now = datetime.utcnow()
     consultations = await service.get_daily_consultations()
     overdue = defaultdict(list)
