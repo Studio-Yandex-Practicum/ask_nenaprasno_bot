@@ -6,18 +6,23 @@ from typing import Dict, List, Optional
 from telegram import InlineKeyboardButton, InlineKeyboardMarkup
 from telegram.ext import CallbackContext
 
-from constants.callback_data import CALLBACK_DONE_BILL_COMMAND, CALLBACK_SKIP_BILL_COMMAND
-from constants.jobs import USER_BILL_REMINDER_TEMPLATE
-from conversation.menu import OVERDUE_TEMPLATE, format_average_user_answer_time, format_rating, make_consultations_list
+from bot.constants.callback_data import CALLBACK_DONE_BILL_COMMAND, CALLBACK_SKIP_BILL_COMMAND
+from bot.constants.jobs import USER_BILL_REMINDER_TEMPLATE
+from bot.conversation.menu import (
+    OVERDUE_TEMPLATE,
+    format_average_user_answer_time,
+    format_rating,
+    make_consultations_list
+)
+from bot.decorators.logger import async_job_logger
+from bot.get_timezone import get_timezone_from_str, get_user_timezone
+from bot.service.repeat_message import repeat_after_one_hour_button
 from core.config import settings
 from core.logger import logger
 from core.send_message import send_message
 from core.utils import build_consultation_url, build_trello_url, get_word_case, get_word_genitive
-from decorators.logger import async_job_logger
-from get_timezone import get_timezone_from_str, get_user_timezone
 from service.api_client import APIService
 from service.api_client.models import Consultation
-from service.repeat_message import repeat_after_one_hour_button
 
 REMINDER_BASE_TEMPLATE = (
     "[Открыть заявку на сайте]({site_url})\n"

@@ -4,13 +4,13 @@ from typing import Dict, List
 from telegram import InlineKeyboardButton, InlineKeyboardMarkup, Update
 from telegram.ext import CallbackQueryHandler, CommandHandler, ContextTypes, ConversationHandler
 
-from constants import callback_data, states
-from conversation.timezone import set_timezone_from_keyboard, timezone_conversation
+from bot.constants import callback_data, states
+from bot.conversation.timezone import set_timezone_from_keyboard, timezone_conversation
+from bot.decorators.logger import async_error_logger
+from bot.get_timezone import get_user_timezone
 from core.config import settings
 from core.send_message import reply_message
 from core.utils import build_consultation_url, build_trello_url, get_word_case
-from decorators.logger import async_error_logger
-from get_timezone import get_user_timezone
 from service.api_client import APIService
 
 OVERDUE_TEMPLATE = (

@@ -8,28 +8,26 @@ from telegram.ext import (
     ApplicationBuilder,
     CallbackQueryHandler,
     ContextTypes,
-    PicklePersistence,
+    PicklePersistence
 )
 
-from constants import callback_data
-from constants.jobs import (
+from bot.constants import callback_data
+from bot.constants.jobs import (
     DAILY_CONSULTATIONS_REMINDER_JOB,
     DAILY_OVERDUE_CONSULTATIONS_REMINDER_JOB,
-    USER_BILL_REMINDER_TEMPLATE,
+    USER_BILL_REMINDER_TEMPLATE
 )
-from conversation.authorization import authorization_conversation
+from bot.conversation.authorization import authorization_conversation
+from bot.decorators.logger import async_error_logger
+from bot.jobs import (
+    daily_consulations_duedate_is_today_reminder_job,
+    daily_consulations_reminder_job,
+    monthly_bill_reminder_job, monthly_stat_job, weekly_stat_job
+)
+from bot.service.repeat_message import repeat_message_after_1_hour_callback
 from core.config import settings
 from core.logger import logger
 from core.send_message import edit_message
-from decorators.logger import async_error_logger
-from jobs import (
-    daily_consulations_duedate_is_today_reminder_job,
-    daily_consulations_reminder_job,
-    monthly_bill_reminder_job,
-    monthly_stat_job,
-    weekly_stat_job,
-)
-from service.repeat_message import repeat_message_after_1_hour_callback
 
 
 @async_error_logger(name="skip_bill_callback_handler")

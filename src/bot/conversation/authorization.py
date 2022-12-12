@@ -3,13 +3,13 @@ from urllib.parse import urljoin
 from telegram import InlineKeyboardButton, InlineKeyboardMarkup, Update
 from telegram.ext import CallbackContext, CallbackQueryHandler, CommandHandler, ConversationHandler
 
-from constants import callback_data, states
-from conversation.menu import menu_conversation
-from conversation.timezone import ASK_FLAG, set_timezone_from_keyboard, timezone_conversation
+from bot.constants import callback_data, states
+from bot.conversation.menu import menu_conversation
+from bot.conversation.timezone import ASK_FLAG, set_timezone_from_keyboard, timezone_conversation
+from bot.decorators.logger import async_error_logger
+from bot.menu_button import COMMANDS_UNAUTHORIZED, menu_button
 from core.config import settings
 from core.send_message import edit_message, reply_message
-from decorators.logger import async_error_logger
-from menu_button import COMMANDS_UNAUTHORIZED, menu_button
 from service.api_client import APIService
 from service.api_client.models import UserData
 

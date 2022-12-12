@@ -7,7 +7,7 @@ from telegram import Update
 from telegram.ext import CallbackContext
 from timezonefinder import TimezoneFinder
 
-from constants.timezone import DEFAULT_TIMEZONE, MOSCOW_TIME_OFFSET, TIME_ZONE
+from bot.constants.timezone import DEFAULT_TIMEZONE, MOSCOW_TIME_OFFSET, TIME_ZONE
 from core.logger import logger
 from service.api_client import APIService
 
