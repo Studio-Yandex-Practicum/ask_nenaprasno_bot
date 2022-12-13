@@ -1,4 +1,3 @@
-# pylint: disable=no-member
 from collections import defaultdict
 from dataclasses import dataclass
 from datetime import date, datetime, timedelta
@@ -10,7 +9,7 @@ from telegram.ext import CallbackContext
 from constants.callback_data import CALLBACK_DONE_BILL_COMMAND, CALLBACK_SKIP_BILL_COMMAND
 from constants.jobs import USER_BILL_REMINDER_TEMPLATE
 from conversation.menu import OVERDUE_TEMPLATE, format_average_user_answer_time, format_rating, make_consultations_list
-from core import config
+from core.config import settings
 from core.logger import logger
 from core.send_message import send_message
 from core.utils import build_consultation_url, build_trello_url, get_word_case, get_word_genitive
@@ -144,6 +143,7 @@ class ForwardConsultationData(BaseConsultationData):
 @async_job_logger
 async def weekly_stat_job(context: CallbackContext) -> None:
     """Collects users timezones and adds statistic-sending jobs to queue."""
+    logger.debug("Running weekly_stat_job")
     week_statistics = await service.get_week_stat()
     # микропроблема: если у пользователя не выбрана таймзона, то в сете будет None,
     # который в send_weekly_statistic_job будет интрепретирован как таймзона по-умолчанию (МСК)
@@ -152,7 +152,7 @@ async def weekly_stat_job(context: CallbackContext) -> None:
 
     for tz_string in timezones:
         timezone_ = get_timezone_from_str(tz_string)
-        start_time = config.WEEKLY_STAT_TIME.replace(tzinfo=timezone_)
+        start_time = settings.weekly_stat_time.replace(tzinfo=timezone_)
         context.job_queue.run_once(send_weekly_statistic_job, when=start_time, data=tz_string)
         logger.debug("Add %s to job queue. Start at %s", send_weekly_statistic_job.__name__, start_time)
 
@@ -160,13 +160,14 @@ async def weekly_stat_job(context: CallbackContext) -> None:
 @async_job_logger
 async def monthly_stat_job(context: CallbackContext) -> None:
     """Collects users timezones and adds statistic-sending jobs to queue."""
+    logger.debug("Running monthly_stat_job")
     month_statistics = await service.get_month_stat()
 
     for statistic in month_statistics:
         if statistic.telegram_id is None:
             continue
         timezone_ = get_timezone_from_str(statistic.timezone)
-        start_time = config.MONTHLY_STAT_TIME.replace(tzinfo=timezone_)
+        start_time = settings.monthly_stat_time.replace(tzinfo=timezone_)
         context.job_queue.run_once(send_monthly_statistic_job, when=start_time, data=statistic)
         logger.debug(
             "Add %s to job queue. Start at %s for user %s",
@@ -179,6 +180,7 @@ async def monthly_stat_job(context: CallbackContext) -> None:
 @async_job_logger
 async def send_weekly_statistic_job(context: CallbackContext) -> None:
     """Sends weekly statistics to users with specific timezone."""
+    logger.debug("Running send_weekly_statistic_job")
     current_tz = context.job.data
     week_statistics = await service.get_week_stat()
 
@@ -201,6 +203,7 @@ async def send_weekly_statistic_job(context: CallbackContext) -> None:
 @async_job_logger
 async def send_monthly_statistic_job(context: CallbackContext) -> None:
     """Send monthly statistic to user."""
+    logger.debug("Running send_monthly_statistic_job")
     statistic = context.job.data
     message = MONTHLY_STATISTIC_TEMPLATE.format(
         closed_consultations=statistic.closed_consultations,
@@ -222,14 +225,16 @@ async def monthly_bill_reminder_job(context: CallbackContext) -> None:
 
     Only for self-employed users.
     """
+    logger.debug("Running monthly_bill_reminder_job")
     bill_stat = await service.get_bill()
     if bill_stat is None:
+        logger.debug("Monthly bill reminder job: no bills to send")
         return
 
     user_ids = bill_stat.telegram_ids
     for telegram_id in user_ids:
         user_tz = await get_user_timezone(int(telegram_id), context)
-        start_time = config.MONTHLY_RECEIPT_REMINDER_TIME.replace(tzinfo=user_tz)
+        start_time = settings.monthly_receipt_reminder_time.replace(tzinfo=user_tz)
         job_name = USER_BILL_REMINDER_TEMPLATE.format(telegram_id=telegram_id)
 
         current_jobs = context.job_queue.get_jobs_by_name(job_name)
@@ -251,6 +256,7 @@ async def monthly_bill_reminder_job(context: CallbackContext) -> None:
 @async_job_logger
 async def daily_bill_remind_job(context: CallbackContext) -> None:
     """Send message every day until delete job from JobQueue."""
+    logger.debug("Running daily_bill_remind_job")
     job = context.job
     message = "Вы активно работали весь месяц! Не забудьте отправить чек нашему кейс-менеджеру"
     menu = InlineKeyboardMarkup(
@@ -268,7 +274,7 @@ async def get_overdue_reminder_text(
 ) -> str:
     """Returns overdue reminder text if user have more than one overdue consultations."""
     link_nenaprasno = make_consultations_list(
-        [Consultation.to_dict(consultation.consultation) for consultation in consultations]
+        [Consultation.to_dict(consultation.consultation) for consultation in consultations]  # pylint: disable=E1101
     )
     trello_url = build_trello_url(consultations[0].consultation.username_trello, overdue=True)
 
@@ -340,6 +346,7 @@ async def send_reminder_overdue(context: CallbackContext) -> None:
 @async_job_logger
 async def daily_overdue_consulations_reminder_job(context: CallbackContext, overdue: Dict) -> None:
     """Creates tasks to send reminders for consultations expired at least one day ago."""
+    logger.debug("Running daily_overdue_consulations_reminder_job")
     for telegram_id, consultations in overdue.items():
         if consultations:
             # Send reminder job for every doctor
@@ -358,6 +365,7 @@ async def daily_consulations_duedate_is_today_reminder_job(context: CallbackCont
     """Adds a reminder job to the bot's job queue according to the scenario:
     - the due date is today
     """
+    logger.debug("Running daily_consulations_duedate_is_today_reminder_job")
     now = datetime.utcnow()
     consultations = await service.get_daily_consultations()
 
@@ -397,6 +405,7 @@ async def daily_consulations_reminder_job(context: CallbackContext) -> None:
     - the due date has just expired;
     - the due date expired one hour ago.
     """
+    logger.debug("Running daily_consulations_reminder_job")
     now = datetime.utcnow()
     consultations = await service.get_daily_consultations()
     overdue = defaultdict(list)
@@ -408,7 +417,7 @@ async def daily_consulations_reminder_job(context: CallbackContext) -> None:
         user_time = datetime.now(tz=user_timezone)
 
         # Important. This job starts every hour at 0 minutes 0 seconds, so we need to check only hour
-        if user_time.hour == config.DAILY_CONSULTATIONS_REMINDER_TIME.hour:
+        if user_time.hour == settings.daily_consultations_reminder_time.hour:
             # Check consultation in right timezone
             if due_time.date() < now.date():
                 # Group overdue consultations by doctor
