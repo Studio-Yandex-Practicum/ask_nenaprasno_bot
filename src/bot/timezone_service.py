@@ -7,11 +7,11 @@ from telegram import Update
 from telegram.ext import CallbackContext
 from timezonefinder import TimezoneFinder
 
-from bot.constants.timezone import DEFAULT_TIMEZONE, MOSCOW_TIME_OFFSET, TIME_ZONE
+from bot.constants import timezone as tz
 from core.logger import logger
 from service.api_client import APIService
 
-api = APIService()
+__api = APIService()
 
 
 def get_timezone_utc_format(txt_pattern: Optional[str]) -> Optional[datetime.timezone]:
@@ -40,12 +40,12 @@ def get_timezone_from_str(tz_string: Optional[str]) -> datetime.timezone:
     """Returns datetime.timezone based on string in format UTC+00:00."""
     tz_result = get_timezone_utc_format(tz_string)
     if tz_result is None:
-        return datetime.timezone(datetime.timedelta(hours=MOSCOW_TIME_OFFSET))
+        return datetime.timezone(datetime.timedelta(hours=tz.MOSCOW_TIME_OFFSET))
     return tz_result
 
 
 async def set_timezone(telegram_id: int, text_utc: str, context: CallbackContext) -> None:
-    await api.set_user_timezone(telegram_id=telegram_id, user_time_zone=text_utc)
+    await __api.set_user_timezone(telegram_id=telegram_id, user_time_zone=text_utc)
     context.bot_data.update({telegram_id: get_timezone_from_str(text_utc)})
 
 
@@ -60,7 +60,7 @@ async def get_timezone_from_location(update: Update, context: CallbackContext):
     if user_timezone is None:
         return None
     time_zone = pytz.timezone(user_timezone).localize(datetime.datetime.now()).strftime("%z")
-    text_utc = TIME_ZONE + time_zone[:3] + ":" + time_zone[3:]
+    text_utc = tz.TIME_ZONE + time_zone[:3] + ":" + time_zone[3:]
     await set_timezone(update.effective_chat.id, text_utc, context)
     return text_utc
 
@@ -88,8 +88,8 @@ async def get_user_timezone(telegram_id: int, context: CallbackContext) -> datet
     user_tz = context.bot_data.get(telegram_id, None)
 
     if user_tz is None:
-        user_data = await api.authenticate_user(telegram_id)
-        user_tz = get_timezone_from_str(user_data.timezone if hasattr(user_data, "timezone") else DEFAULT_TIMEZONE)
+        user_data = await __api.authenticate_user(telegram_id)
+        user_tz = get_timezone_from_str(user_data.timezone if hasattr(user_data, "timezone") else tz.DEFAULT_TIMEZONE)
         context.bot_data.update({telegram_id: user_tz})
 
     return user_tz

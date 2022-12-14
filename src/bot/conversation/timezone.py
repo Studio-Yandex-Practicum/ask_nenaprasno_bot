@@ -4,7 +4,7 @@ from telegram import (
     KeyboardButton,
     ReplyKeyboardMarkup,
     ReplyKeyboardRemove,
-    Update
+    Update,
 )
 from telegram.ext import (
     CallbackContext,
@@ -12,13 +12,13 @@ from telegram.ext import (
     ContextTypes,
     ConversationHandler,
     MessageHandler,
-    filters
+    filters,
 )
 
+from bot import timezone_service
 from bot.constants import callback_data, states
 from bot.constants.timezone import DEFAULT_TIMEZONE
 from bot.decorators.logger import async_error_logger
-from bot.get_timezone import get_timezone_from_location, get_timezone_from_text_message, set_timezone
 from bot.menu_button import COMMANDS, menu_button
 from core.config import settings
 from core.send_message import reply_message
@@ -118,7 +118,7 @@ async def get_timezone_from_location_callback(update: Update, context: CallbackC
     """
     Sets timezone by geolocation.
     """
-    timezone = await get_timezone_from_location(update, context)
+    timezone = await timezone_service.get_timezone_from_location(update, context)
     return await check_timezone(update, context, timezone)
 
 
@@ -127,7 +127,7 @@ async def get_timezone_from_text_message_callback(update: Update, context: Callb
     """
     Sets timezone based on a text message from the user.
     """
-    timezone = await get_timezone_from_text_message(update, context)
+    timezone = await timezone_service.get_timezone_from_text_message(update, context)
     return await check_timezone(update, context, timezone)
 
 
@@ -136,7 +136,7 @@ async def set_default_timezone(update: Update, context: CallbackContext) -> str:
     Sets default timezone (Moscow).
     """
     timezone = DEFAULT_TIMEZONE
-    await set_timezone(update.effective_chat.id, timezone, context)
+    await timezone_service.set_timezone(update.effective_chat.id, timezone, context)
     return await check_timezone(update, context, timezone)
 
 

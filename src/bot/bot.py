@@ -8,21 +8,18 @@ from telegram.ext import (
     ApplicationBuilder,
     CallbackQueryHandler,
     ContextTypes,
-    PicklePersistence
+    PicklePersistence,
 )
 
-from bot.constants import callback_data
-from bot.constants.jobs import (
-    DAILY_CONSULTATIONS_REMINDER_JOB,
-    DAILY_OVERDUE_CONSULTATIONS_REMINDER_JOB,
-    USER_BILL_REMINDER_TEMPLATE
-)
+from bot.constants import callback_data, jobs
 from bot.conversation.authorization import authorization_conversation
 from bot.decorators.logger import async_error_logger
 from bot.jobs import (
     daily_consulations_duedate_is_today_reminder_job,
     daily_consulations_reminder_job,
-    monthly_bill_reminder_job, monthly_stat_job, weekly_stat_job
+    monthly_bill_reminder_job,
+    monthly_stat_job,
+    weekly_stat_job,
 )
 from bot.service.repeat_message import repeat_message_after_1_hour_callback
 from core.config import settings
@@ -42,7 +39,7 @@ async def done_bill_callback_handler(update: Update, context: ContextTypes.DEFAU
     """Delete job from JobQueue."""
     query = update.callback_query
     user_id = query.from_user.id
-    job_name = USER_BILL_REMINDER_TEMPLATE.format(telegram_id=user_id)
+    job_name = jobs.USER_BILL_REMINDER_TEMPLATE.format(telegram_id=user_id)
     current_jobs = context.job_queue.get_jobs_by_name(job_name)
     for job in current_jobs:
         job.schedule_removal()
@@ -103,7 +100,7 @@ def create_bot():
         daily_consulations_reminder_job,
         interval=timedelta(hours=1),
         first=time(minute=int(settings.daily_consultations_reminder_time.minute)),
-        name=DAILY_OVERDUE_CONSULTATIONS_REMINDER_JOB,
+        name=jobs.DAILY_OVERDUE_CONSULTATIONS_REMINDER_JOB,
     )
 
     # Once per day at UTC+0 bot collects consultations where due_date is today and sends reminder to Doctor
@@ -111,7 +108,7 @@ def create_bot():
     bot_app.job_queue.run_daily(
         daily_consulations_duedate_is_today_reminder_job,
         time=settings.daily_collect_consultation_time,
-        name=DAILY_CONSULTATIONS_REMINDER_JOB,
+        name=jobs.DAILY_CONSULTATIONS_REMINDER_JOB,
     )
 
     # Initial data collection for daily consultation on bot start up
