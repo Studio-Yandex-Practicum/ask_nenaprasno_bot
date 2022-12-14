@@ -69,6 +69,7 @@ class MockAPIService(AbstractAPIService):
         return UserActiveConsultations(
             username_trello="user1@telegram",
             active_consultations=2,
+            expiring_consultations=2,
             active_consultations_data=[
                 {
                     "id": "kjdhsfkjhsd",
