@@ -1,6 +1,6 @@
 from starlette.routing import Route
 
-import run_webhook_api
+from src import run_webhook_api
 
 routes = [
     Route("/healthcheck", run_webhook_api.healthcheck_api, methods=["GET"]),
