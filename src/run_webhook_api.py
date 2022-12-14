@@ -14,14 +14,14 @@ from starlette.routing import Route
 from telegram import Bot, Update
 from telegram.error import TelegramError
 
-from src.api import context_models
-from src.api.routes import routes
-from src.bot import init_webhook
-from src.core.config import settings
-from src.core.logger import LOGGING_CONFIG, logger
-from src.middleware import TokenAuthBackend
-from src.service.api_client import APIService
-from src.service.bot_service import BotNotifierService
+from api import context_models
+from api.routes import routes
+from bot import init_webhook
+from core.config import settings
+from core.logger import LOGGING_CONFIG, logger
+from middleware import TokenAuthBackend
+from service.api_client import APIService
+from service.bot_service import BotNotifierService
 
 
 async def start_bot() -> None:
