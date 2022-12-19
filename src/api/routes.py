@@ -12,7 +12,7 @@ from telegram.error import TelegramError
 
 from src.api import context_models
 from src.core.logger import logger
-from src.run_webhook_api import api
+#from src.run_webhook_api import api
 from src.service.api_client import APIService
 
 # from src.service.bot_service import BotNotifierService
