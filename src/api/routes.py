@@ -12,19 +12,12 @@ from telegram.error import TelegramError
 
 from src.api import context_models
 from src.core.logger import logger
-#from src.run_webhook_api import api
 from src.service.api_client import APIService
-
-# from src.service.bot_service import BotNotifierService
-
-# bot_app = None
-# BotService = BotNotifierService
 
 
 async def healthcheck_api(request: Request) -> JSONResponse:
     health = context_models.HealthCheckResponseContext()
-    bot: Bot = api.state.bot_app.bot
-    # bot: Bot = bot_app.bot
+    bot: Bot = request.app.state.bot_app.bot
     try:
         await bot.get_me()
         health.bot_is_avaliable = True
@@ -67,17 +60,14 @@ async def consultation_assign(request: Request) -> Response:
 
     service = APIService()
     consultations_count = await service.get_consultations_count(telegram_id)
-    # await BotService.consultation_assignment(request_data, consultations_count)
-    await api.state.bot_service.consultation_assignment(request_data, consultations_count)
+    await request.app.state.bot_service.consultation_assignment(request_data, consultations_count)
     return Response(status_code=httpx.codes.OK)
 
 
 @requires("authenticated", status_code=401)
 async def consultation_close(request: Request) -> Response:
     request_data = await request_to_context(request, context_models.ClosedConsultationContext)
-
-    api.state.bot_service.consultation_close(request_data)
-    # BotService.consultation_close(request_data)
+    request.app.state.bot_service.consultation_close(request_data)
     return Response(status_code=httpx.codes.OK)
 
 
@@ -86,9 +76,7 @@ async def consultation_message(request: Request) -> Response:
     request_data = await request_to_context(request, context_models.ConsultationContext)
     if not request_data:
         return Response(status_code=httpx.codes.BAD_REQUEST)
-
-    await api.state.bot_service.consultation_message(request_data)
-    # await BotService.consultation_message(request_data)
+    await request.app.state.bot_service.consultation_message(request_data)
     return Response(status_code=httpx.codes.OK)
 
 
@@ -97,14 +85,8 @@ async def consultation_feedback(request: Request) -> Response:
     request_data = await request_to_context(request, context_models.FeedbackConsultationContext)
     if not request_data:
         return Response(status_code=httpx.codes.BAD_REQUEST)
-
-    await api.state.bot_service.consultation_feedback(request_data)
-    # await BotService.consultation_feedback(request_data)
+    await request.app.state.bot_service.consultation_feedback(request_data)
     return Response(status_code=httpx.codes.OK)
-
-
-async def http_exception(request: Request, exc: HTTPException):
-    return JSONResponse({"detail": exc.detail}, status_code=exc.status_code, headers=exc.headers)
 
 
 routes = [

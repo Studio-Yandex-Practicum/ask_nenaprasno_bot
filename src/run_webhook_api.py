@@ -11,13 +11,12 @@ from starlette.responses import JSONResponse, Response
 from starlette.routing import Route
 from telegram import Update
 
-# from api.routes import BotService
-from api.routes import routes
-from bot import init_webhook
-from core.config import settings
-from core.logger import LOGGING_CONFIG, logger
-from middleware import TokenAuthBackend
-from service.bot_service import BotNotifierService
+from src.api.routes import routes
+from src.bot import init_webhook
+from src.core.config import settings
+from src.core.logger import LOGGING_CONFIG, logger
+from src.middleware import TokenAuthBackend
+from src.service.bot_service import BotNotifierService
 
 
 async def start_bot() -> None:
@@ -32,7 +31,6 @@ async def start_bot() -> None:
     api.state.bot_app = bot_app
 
     api.state.bot_service = BotNotifierService(bot_app)
-    # api.state.bot_service = BotService
 
 
 async def stop_bot() -> None:
@@ -79,6 +77,4 @@ api = Starlette(
 )
 
 if __name__ == "__main__":
-    # bot_app = api.state.bot_app
-    # BotService = api.state.bot_service
     uvicorn.run(app=api, debug=True, host=settings.host, port=settings.port, log_config=LOGGING_CONFIG)
