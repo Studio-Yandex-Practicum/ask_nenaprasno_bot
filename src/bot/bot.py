@@ -139,3 +139,13 @@ def init_polling() -> None:
     bot_app = create_bot()
     bot_app.run_polling()
     logger.debug("Start polling")
+
+
+def init_polling_api() -> Application:
+    """
+    Init bot polling with API
+    :return: Initiated application
+    """
+    bot_app = create_bot()
+    logger.debug("Start polling with API")
+    return bot_app
