@@ -131,17 +131,7 @@ async def init_webhook() -> Application:
     return bot_app
 
 
-def init_polling() -> None:
-    """
-    Init bot polling
-    :return: Initiated application
-    """
-    bot_app = create_bot()
-    bot_app.run_polling()
-    logger.debug("Start polling")
-
-
-def init_polling_api() -> Application:
+def init_polling() -> Application:
     """
     Init bot polling with API
     :return: Initiated application
