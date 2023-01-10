@@ -10,10 +10,10 @@ from datetime import timedelta
 from telegram import InlineKeyboardButton, Update
 from telegram.ext import CallbackContext, ContextTypes
 
-from constants.callback_data import CALLBACK_REPEAT_COMMAND
+from bot.constants.callback_data import CALLBACK_REPEAT_COMMAND
+from bot.decorators.logger import async_error_logger, async_job_logger
 from core.logger import logger
 from core.send_message import edit_message, send_message
-from decorators.logger import async_error_logger, async_job_logger
 
 
 @async_error_logger(name="repeat_message_after_1_hour_callback")

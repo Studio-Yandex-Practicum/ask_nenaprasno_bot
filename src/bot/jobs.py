@@ -6,18 +6,18 @@ from typing import Dict, List, Optional
 from telegram import InlineKeyboardButton, InlineKeyboardMarkup
 from telegram.ext import CallbackContext
 
-from constants.callback_data import CALLBACK_DONE_BILL_COMMAND, CALLBACK_SKIP_BILL_COMMAND
-from constants.jobs import USER_BILL_REMINDER_TEMPLATE
-from conversation.menu import OVERDUE_TEMPLATE, format_average_user_answer_time, format_rating, make_consultations_list
+from bot.constants import callback_data
+from bot.constants.jobs import USER_BILL_REMINDER_TEMPLATE
+from bot.conversation import menu as mn
+from bot.decorators.logger import async_job_logger
+from bot.service.repeat_message import repeat_after_one_hour_button
+from bot.timezone_service import get_timezone_from_str, get_user_timezone
 from core.config import settings
 from core.logger import logger
 from core.send_message import send_message
 from core.utils import build_consultation_url, build_trello_url, get_word_case, get_word_genitive
-from decorators.logger import async_job_logger
-from get_timezone import get_timezone_from_str, get_user_timezone
 from service.api_client import APIService
 from service.api_client.models import Consultation
-from service.repeat_message import repeat_after_one_hour_button
 
 REMINDER_BASE_TEMPLATE = (
     "[Открыть заявку на сайте]({site_url})\n"
@@ -207,8 +207,8 @@ async def send_monthly_statistic_job(context: CallbackContext) -> None:
     statistic = context.job.data
     message = MONTHLY_STATISTIC_TEMPLATE.format(
         closed_consultations=statistic.closed_consultations,
-        rating=format_rating(statistic.rating),
-        average_user_answer_time=format_average_user_answer_time(statistic.average_user_answer_time),
+        rating=mn.format_rating(statistic.rating),
+        average_user_answer_time=mn.format_average_user_answer_time(statistic.average_user_answer_time),
         trello_url=build_trello_url(statistic.username_trello),
     )
     await send_message(
@@ -261,9 +261,9 @@ async def daily_bill_remind_job(context: CallbackContext) -> None:
     message = "Вы активно работали весь месяц! Не забудьте отправить чек нашему кейс-менеджеру"
     menu = InlineKeyboardMarkup(
         [
-            [InlineKeyboardButton("✅ Уже отправил(а)", callback_data=CALLBACK_DONE_BILL_COMMAND)],
+            [InlineKeyboardButton("✅ Уже отправил(а)", callback_data=callback_data.CALLBACK_DONE_BILL_COMMAND)],
             [repeat_after_one_hour_button],
-            [InlineKeyboardButton("🕑 Скоро отправлю", callback_data=CALLBACK_SKIP_BILL_COMMAND)],
+            [InlineKeyboardButton("🕑 Скоро отправлю", callback_data=callback_data.CALLBACK_SKIP_BILL_COMMAND)],
         ]
     )
     await send_message(context.bot, job.chat_id, message, menu)
@@ -273,12 +273,12 @@ async def get_overdue_reminder_text(
     consultations: List, active_consultations_count: int, expired_consultations_count: int, **kwargs
 ) -> str:
     """Returns overdue reminder text if user have more than one overdue consultations."""
-    link_nenaprasno = make_consultations_list(
+    link_nenaprasno = mn.make_consultations_list(
         [Consultation.to_dict(consultation.consultation) for consultation in consultations]  # pylint: disable=E1101
     )
     trello_url = build_trello_url(consultations[0].consultation.username_trello, overdue=True)
 
-    return OVERDUE_TEMPLATE.format(
+    return mn.OVERDUE_TEMPLATE.format(
         active_consultations=active_consultations_count,
         expired_consultations=expired_consultations_count,
         link_nenaprasno=link_nenaprasno,

@@ -1,7 +1,7 @@
 from telegram import BotCommand
 from telegram.ext import CallbackContext
 
-from constants import commands
+from bot.constants import commands
 
 COMMANDS_UNAUTHORIZED = (BotCommand(commands.START, "Начать работу с ботом."),)
 COMMANDS = (

@@ -19,6 +19,7 @@ from src.middleware import TokenAuthBackend
 from src.service.bot_service import BotNotifierService
 
 
+
 async def start_bot() -> None:
     bot_app = await init_webhook()
     await bot_app.initialize()
@@ -36,7 +37,6 @@ async def start_bot() -> None:
 async def stop_bot() -> None:
     await api.state.bot_app.stop()
     await api.state.bot_app.shutdown()
-
 
 async def telegram_webhook_api(request: Request) -> Response:
     response = {}
@@ -60,13 +60,11 @@ exception_handlers = {HTTPException: http_exception}
 
 middleware = [Middleware(AuthenticationMiddleware, backend=TokenAuthBackend())]
 
-
 telegram_routes = [
     Route("/telegramWebhookApi", telegram_webhook_api, methods=["POST"]),
 ]
 
 all_routes = telegram_routes + routes
-
 
 api = Starlette(
     routes=all_routes,
