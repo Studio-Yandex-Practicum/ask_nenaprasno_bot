@@ -127,6 +127,8 @@ async def init_webhook() -> Application:
     await bot_app.bot.set_webhook(
         url=urljoin(settings.application_url, "telegramWebhookApi"), secret_token=settings.secret_telegram_token
     )
+    await bot_app.initialize()
+    await bot_app.start()
     logger.debug("Set webhook. App url: %s", settings.application_url)
     return bot_app
 

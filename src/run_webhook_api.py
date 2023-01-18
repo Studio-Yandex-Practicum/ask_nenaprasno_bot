@@ -27,8 +27,6 @@ from service.api_client import APIService
 async def start_bot() -> None:
     if settings.run_webhook:
         bot_app = await init_webhook()
-        await bot_app.initialize()
-        await bot_app.start()
     else:
         bot_app = await init_polling_api()
 
@@ -42,6 +40,7 @@ async def stop_bot() -> None:
     if not settings.run_webhook:
         await api.state.bot_app.updater.stop()
     await api.state.bot_app.shutdown()
+    logger.debug("The bot has been stopped")
 
 
 async def healthcheck_api(request: Request) -> JSONResponse:
