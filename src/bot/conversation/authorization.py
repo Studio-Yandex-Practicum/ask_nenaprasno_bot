@@ -3,13 +3,13 @@ from urllib.parse import urljoin
 from telegram import InlineKeyboardButton, InlineKeyboardMarkup, Update
 from telegram.ext import CallbackContext, CallbackQueryHandler, CommandHandler, ConversationHandler
 
-from constants import callback_data, states
-from conversation.menu import menu_conversation
-from conversation.timezone import ASK_FLAG, set_timezone_from_keyboard, timezone_conversation
+from bot import menu_button
+from bot.constants import callback_data, states
+from bot.conversation import timezone
+from bot.conversation.menu import menu_conversation
+from bot.decorators.logger import async_error_logger
 from core.config import settings
 from core.send_message import edit_message, reply_message
-from decorators.logger import async_error_logger
-from menu_button import COMMANDS_UNAUTHORIZED, menu_button
 from service.api_client import APIService
 from service.api_client.models import UserData
 
@@ -56,10 +56,10 @@ async def start(update: Update, context: CallbackContext) -> str:
     user_data = await autorize(update.effective_user.id, context)
     if user_data is not None:
         await reply_message(update=update, text=BOT_GREETINGS_MESSAGE)
-        context.user_data[ASK_FLAG] = True
-        await set_timezone_from_keyboard(update, context)
+        context.user_data[timezone.ASK_FLAG] = True
+        await timezone.set_timezone_from_keyboard(update, context)
         return states.MENU_STATE
-    await menu_button(context, COMMANDS_UNAUTHORIZED)
+    await menu_button.menu_button(context, menu_button.COMMANDS_UNAUTHORIZED)
     keyboard = [
         [
             InlineKeyboardButton("Да", callback_data=callback_data.CALLBACK_IS_EXPERT_COMMAND),
@@ -138,8 +138,8 @@ async def is_expert_callback(update: Update, context: CallbackContext) -> str:
         await edit_message(update=update, new_text=message)
         return states.UNAUTHORIZED_STATE
     await edit_message(update=update, new_text=BOT_GREETINGS_MESSAGE)
-    context.user_data[ASK_FLAG] = True
-    await set_timezone_from_keyboard(update, context)
+    context.user_data[timezone.ASK_FLAG] = True
+    await timezone.set_timezone_from_keyboard(update, context)
     return states.MENU_STATE
 
 
@@ -163,7 +163,7 @@ authorization_conversation = ConversationHandler(
                 support_or_consult_callback, pattern=callback_data.CALLBACK_SUPPORT_OR_CONSULT_COMMAND
             ),
         ],
-        states.MENU_STATE: [menu_conversation, timezone_conversation],
+        states.MENU_STATE: [menu_conversation, timezone.timezone_conversation],
     },
     fallbacks=[],
 )

@@ -23,6 +23,8 @@ class Settings(BaseSettings):
     host: str = "0.0.0.0"
     # Токен, с которым телеграм будет обращаться к боту. Допускаются только символы A-Z, a-z, 0-9, _, -
     secret_telegram_token: str
+    # флаг, определяющий режим запуска бота: webhook или polling
+    run_webhook: bool = False
 
     # время еженедельной статистики
     weekly_stat_time: time

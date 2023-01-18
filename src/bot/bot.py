@@ -11,25 +11,20 @@ from telegram.ext import (
     PicklePersistence,
 )
 
-from constants import callback_data
-from constants.jobs import (
-    DAILY_CONSULTATIONS_REMINDER_JOB,
-    DAILY_OVERDUE_CONSULTATIONS_REMINDER_JOB,
-    USER_BILL_REMINDER_TEMPLATE,
-)
-from conversation.authorization import authorization_conversation
-from core.config import settings
-from core.logger import logger
-from core.send_message import edit_message
-from decorators.logger import async_error_logger
-from jobs import (
+from bot.constants import callback_data, jobs
+from bot.conversation.authorization import authorization_conversation
+from bot.decorators.logger import async_error_logger
+from bot.jobs import (
     daily_consulations_duedate_is_today_reminder_job,
     daily_consulations_reminder_job,
     monthly_bill_reminder_job,
     monthly_stat_job,
     weekly_stat_job,
 )
-from service.repeat_message import repeat_message_after_1_hour_callback
+from bot.service.repeat_message import repeat_message_after_1_hour_callback
+from core.config import settings
+from core.logger import logger
+from core.send_message import edit_message
 
 
 @async_error_logger(name="skip_bill_callback_handler")
@@ -44,7 +39,7 @@ async def done_bill_callback_handler(update: Update, context: ContextTypes.DEFAU
     """Delete job from JobQueue."""
     query = update.callback_query
     user_id = query.from_user.id
-    job_name = USER_BILL_REMINDER_TEMPLATE.format(telegram_id=user_id)
+    job_name = jobs.USER_BILL_REMINDER_TEMPLATE.format(telegram_id=user_id)
     current_jobs = context.job_queue.get_jobs_by_name(job_name)
     for job in current_jobs:
         job.schedule_removal()
@@ -105,7 +100,7 @@ def create_bot():
         daily_consulations_reminder_job,
         interval=timedelta(hours=1),
         first=time(minute=int(settings.daily_consultations_reminder_time.minute)),
-        name=DAILY_OVERDUE_CONSULTATIONS_REMINDER_JOB,
+        name=jobs.DAILY_OVERDUE_CONSULTATIONS_REMINDER_JOB,
     )
 
     # Once per day at UTC+0 bot collects consultations where due_date is today and sends reminder to Doctor
@@ -113,7 +108,7 @@ def create_bot():
     bot_app.job_queue.run_daily(
         daily_consulations_duedate_is_today_reminder_job,
         time=settings.daily_collect_consultation_time,
-        name=DAILY_CONSULTATIONS_REMINDER_JOB,
+        name=jobs.DAILY_CONSULTATIONS_REMINDER_JOB,
     )
 
     # Initial data collection for daily consultation on bot start up
@@ -132,6 +127,8 @@ async def init_webhook() -> Application:
     await bot_app.bot.set_webhook(
         url=urljoin(settings.application_url, "telegramWebhookApi"), secret_token=settings.secret_telegram_token
     )
+    await bot_app.initialize()
+    await bot_app.start()
     logger.debug("Set webhook. App url: %s", settings.application_url)
     return bot_app
 
@@ -144,3 +141,16 @@ def init_polling() -> None:
     bot_app = create_bot()
     bot_app.run_polling()
     logger.debug("Start polling")
+
+
+async def init_polling_api() -> Application:
+    """
+    Init bot polling with API
+    :return: Initiated application
+    """
+    bot_app = create_bot()
+    await bot_app.initialize()
+    await bot_app.start()
+    await bot_app.updater.start_polling()
+    logger.debug("Start polling with API")
+    return bot_app
