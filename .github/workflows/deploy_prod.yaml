@@ -11,6 +11,8 @@ env:
   IMAGE_NAME: nenaprasno-ask-bot
   DEPLOY_PATH: /opt/develop/ask-bot
   REP_OWNER: studio-yandex-practicum
+  ENVIRONMENT_NAME: Production
+  DOCKER_FILE_NAME: docker-compose.production.yaml
 
 defaults:
   run:
@@ -53,7 +55,7 @@ jobs:
     name: Deploy
     runs-on: ubuntu-latest
     environment:
-      name: Production
+      name: ${{ env.ENVIRONMENT_NAME }}
     needs: build_and_push
     steps:
       - name: Check out repository
@@ -64,7 +66,7 @@ jobs:
           host: ${{ secrets.HOST }}
           username: ${{ secrets.USER }}
           key: ${{ secrets.SSH_KEY }}
-          source: "infrastructure/docker-compose.production.yaml"
+          source: "infrastructure/${{ env.DOCKER_FILE_NAME }}"
           target: ${{ env.DEPLOY_PATH }}
           strip_components: 1
       - name: Create .env file
@@ -102,7 +104,7 @@ jobs:
     name: Start application
     runs-on: ubuntu-latest
     environment:
-      name: Production
+      name: ${{ env.ENVIRONMENT_NAME }}
     needs: deploy
     steps:
       - name: Start appication
@@ -116,6 +118,6 @@ jobs:
 
             sudo docker image prune -f
             sudo docker pull ${{ env.REGISTRY }}/${{ env.REP_OWNER }}/${{ env.IMAGE_NAME }}:production
-            sudo docker compose --file docker-compose.production.yaml stop
-            sudo docker compose --file docker-compose.production.yaml rm bot -f
-            sudo docker compose --file docker-compose.production.yaml up -d
+            sudo docker compose --file ${{ env.DOCKER_FILE_NAME }} stop
+            sudo docker compose --file ${{ env.DOCKER_FILE_NAME }} rm bot -f
+            sudo docker compose --file ${{ env.DOCKER_FILE_NAME }}  up -d
