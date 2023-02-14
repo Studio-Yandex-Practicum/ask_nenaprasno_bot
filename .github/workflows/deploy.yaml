@@ -7,7 +7,7 @@ on:
       - stage
       - production
       - feature/deploy_prod
-    types: [closed]
+    # types: [closed]
 
 env:
   REGISTRY: ghcr.io
