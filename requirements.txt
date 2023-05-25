@@ -28,7 +28,7 @@ six==1.16.0; python_version >= "3.7" and python_full_version < "3.0.0" or python
 sniffio==1.2.0; python_full_version >= "3.6.2" and python_version >= "3.7"
 starlette==0.20.4; python_version >= "3.7"
 timezonefinder==6.0.2; python_version >= "3.8" and python_version < "3.11"
-tornado==6.2; python_version >= "3.7"
+tornado==6.3.2; python_version >= "3.7"
 typing-extensions==4.3.0; python_version >= "3.7"
 typing-inspect==0.7.1; python_version >= "3.6"
 tzdata==2022.1; python_version >= "3.7" and python_full_version < "3.0.0" and platform_system == "Windows" or python_full_version >= "3.6.0" and python_version < "4" and python_version >= "3.7" and platform_system == "Windows"
