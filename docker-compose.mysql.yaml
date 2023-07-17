@@ -1,0 +1,25 @@
+version: '3.8'
+
+services:
+  nenaprasno_db:
+    image: mysql:8.0
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_DATABASE: nenaprasno
+      MYSQL_USER: admin
+      MYSQL_PASSWORD: admin
+
+    ports:
+      - '33061:3306'
+    volumes:
+      - mysql_data:/var/lib/mysql/
+
+  mysql_adminer:
+    image: adminer
+    restart: always
+    ports:
+      - '8081:8080'
+
+volumes:
+  mysql_data:
