@@ -111,7 +111,7 @@ async def send_reminder_overdue(context: CallbackContext) -> None:
     if len(consultations) == 1:
         message = get_reminder_text(consultations[0], **consultations_count)
     else:
-        message = await get_overdue_reminder_text(consultations, **consultations_count)
+        message = get_overdue_reminder_text(consultations, **consultations_count)
 
     await send_message(context.bot, telegram_id, message)
 
