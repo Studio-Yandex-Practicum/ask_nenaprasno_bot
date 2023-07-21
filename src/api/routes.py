@@ -7,12 +7,12 @@ from starlette.exceptions import HTTPException
 from starlette.requests import Request
 from starlette.responses import JSONResponse, Response
 from starlette.routing import Route
-from telegram import Bot
+from telegram import Bot, Update
 from telegram.error import TelegramError
 
-from src.api import context_models
-from src.core.logger import logger
-from src.service.api_client import APIService
+from api import context_models
+from core.logger import logger
+from service.api_client import APIService
 
 
 async def healthcheck_api(request: Request) -> JSONResponse:
@@ -88,6 +88,24 @@ async def consultation_feedback(request: Request) -> Response:
     await request.app.state.bot_service.consultation_feedback(request_data)
     return Response(status_code=httpx.codes.OK)
 
+
+async def telegram_webhook_api(request: Request) -> Response:
+    response = {}
+
+    try:
+        request_json = await request.json()
+        bot_app = request.app.state.bot_app
+        await bot_app.update_queue.put(Update.de_json(data=request_json, bot=bot_app.bot))
+    except JSONDecodeError as error:
+        logger.error("Got a JSONDecodeError: %s", error)
+        response = {"status_code": httpx.codes.BAD_REQUEST}
+
+    return Response(**response)
+
+
+telegram_routes = [
+    Route("/telegramWebhookApi", telegram_webhook_api, methods=["POST"]),
+]
 
 routes = [
     Route("/healthcheck", healthcheck_api, methods=["GET"]),

@@ -23,7 +23,7 @@ REMINDER_BASE_TEMPLATE = (
     "[Открыть заявку на сайте]({site_url})\n"
     "----\n"
     "В работе **{active_consultations}** {declination_consultation}\n"
-    "Истекает срок у **{expired_consultations}** {genitive_declination_consultation}\n\n"
+    "Истекает срок у **{expiring_consultations}** {genitive_declination_consultation}\n\n"
     "[Открыть Trello]({trello_overdue_url})"
 )
 
@@ -289,6 +289,7 @@ async def get_overdue_reminder_text(
 def get_reminder_text(
     data: [PastConsultationData | DueConsultationData | DueHourConsultationData | ForwardConsultationData],
     active_consultations_count: int,
+    expiring_consultations_count: int,
     expired_consultations_count: int,
     **kwargs,
 ) -> str:
@@ -298,8 +299,9 @@ def get_reminder_text(
     return message_template.format(
         consultation_id=consultation.id,
         consultation_number=consultation.number,
-        created=data.created_date,
+        created=data.created_date(),
         active_consultations=active_consultations_count,
+        expiring_consultations=expiring_consultations_count,
         expired_consultations=expired_consultations_count,
         site_url=build_consultation_url(consultation.id),
         trello_overdue_url=build_trello_url(consultation.username_trello, True),
@@ -324,6 +326,7 @@ async def send_reminder_now(context: CallbackContext) -> None:
     consultation = job_data.consultation
     telegram_id = consultation.telegram_id
     consultations_count = await service.get_consultations_count(telegram_id)
+
     text = get_reminder_text(job_data, **consultations_count)
 
     await send_message(context.bot, telegram_id, text)
