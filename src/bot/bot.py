@@ -14,7 +14,13 @@ from telegram.ext import (
 from bot.constants import callback_data, jobs
 from bot.conversation.authorization import authorization_conversation
 from bot.decorators.logger import async_error_logger
-from bot.jobs import daily, monthly, weekly
+from bot.jobs import (
+    daily_consulations_duedate_is_today_reminder_job,
+    daily_consulations_reminder_job,
+    monthly_bill_reminder_job,
+    monthly_stat_job,
+    weekly_stat_job,
+)
 from bot.service.repeat_message import repeat_message_after_1_hour_callback
 from core.config import settings
 from core.logger import logger
@@ -70,20 +76,20 @@ def create_bot():
     )
     # Once per week bot sends current week statistics (default: friday)
     bot_app.job_queue.run_daily(
-        weekly.weekly_stat_job,
+        weekly_stat_job,
         time=settings.stat_collection_time,
         days=(settings.weekly_stat_week_days,),
     )
     # Once per month bot sends bill reminder (default: 1st day of month)
     bot_app.job_queue.run_monthly(
-        monthly.monthly_bill_reminder_job,
+        monthly_bill_reminder_job,
         when=settings.stat_collection_time,
         day=settings.monthly_receipt_reminder_day,
     )
 
     # Once per month bot sends previous month statistics
     bot_app.job_queue.run_monthly(
-        monthly.monthly_stat_job,
+        monthly_stat_job,
         when=settings.stat_collection_time,
         day=settings.monthly_stat_day,
     )
@@ -91,7 +97,7 @@ def create_bot():
     # Once per day (but for every time zone) bot collects overdue consultations and send reminder
     # Doctor receives reminder at DAILY_OVERDUE_CONSULTATIONS_REMINDER_JOB his time zone
     bot_app.job_queue.run_repeating(
-        daily.daily_consulations_reminder_job,
+        daily_consulations_reminder_job,
         interval=timedelta(hours=1),
         first=time(minute=int(settings.daily_consultations_reminder_time.minute)),
         name=jobs.DAILY_OVERDUE_CONSULTATIONS_REMINDER_JOB,
@@ -100,13 +106,13 @@ def create_bot():
     # Once per day at UTC+0 bot collects consultations where due_date is today and sends reminder to Doctor
     # at due_time + 1 hour
     bot_app.job_queue.run_daily(
-        daily.daily_consulations_duedate_is_today_reminder_job,
+        daily_consulations_duedate_is_today_reminder_job,
         time=settings.daily_collect_consultation_time,
         name=jobs.DAILY_CONSULTATIONS_REMINDER_JOB,
     )
 
     # Initial data collection for daily consultation on bot start up
-    bot_app.job_queue.run_once(daily.daily_consulations_duedate_is_today_reminder_job, when=timedelta(seconds=1))
+    bot_app.job_queue.run_once(daily_consulations_duedate_is_today_reminder_job, when=timedelta(seconds=1))
 
     return bot_app
 
