@@ -2,7 +2,7 @@ from telegram.ext import CallbackContext
 
 from bot.decorators.logger import async_job_logger
 from bot.jobs import templates
-from bot.timezone_service import get_timezone_from_str
+from bot.services.timezone_service import get_timezone_from_str
 from core.config import settings
 from core.logger import logger
 from core.send_message import send_message

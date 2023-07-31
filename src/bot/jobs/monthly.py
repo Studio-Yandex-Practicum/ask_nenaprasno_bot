@@ -4,7 +4,7 @@ from bot.constants.jobs import USER_BILL_REMINDER_TEMPLATE
 from bot.conversation import menu as mn
 from bot.decorators.logger import async_job_logger
 from bot.jobs import daily, templates
-from bot.timezone_service import get_timezone_from_str, get_user_timezone
+from bot.services.timezone_service import get_timezone_from_str, get_user_timezone
 from core.config import settings
 from core.logger import logger
 from core.send_message import send_message
