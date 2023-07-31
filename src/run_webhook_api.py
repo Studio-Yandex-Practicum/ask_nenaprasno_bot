@@ -9,7 +9,7 @@ from starlette.routing import Route
 
 from api.routes import routes, telegram_routes
 from bot.bot import init_polling_api, init_webhook
-from bot.service.bot_service import BotNotifierService
+from bot.services.bot_service import BotNotifierService
 from core.config import settings
 from core.logger import LOGGING_CONFIG, logger
 from middleware import TokenAuthBackend

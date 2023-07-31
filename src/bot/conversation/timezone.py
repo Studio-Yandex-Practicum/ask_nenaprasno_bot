@@ -15,11 +15,11 @@ from telegram.ext import (
     filters,
 )
 
-from bot import timezone_service
 from bot.constants import callback_data, states
 from bot.constants.timezone import DEFAULT_TIMEZONE
 from bot.decorators.logger import async_error_logger
-from bot.menu_button import COMMANDS, menu_button
+from bot.services import timezone_service
+from bot.utils.menu_button import COMMANDS, menu_button
 from core.config import settings
 from core.send_message import reply_message
 
