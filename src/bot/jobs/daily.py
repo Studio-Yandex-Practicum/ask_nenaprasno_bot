@@ -180,16 +180,26 @@ async def daily_consulations_reminder_job(context: CallbackContext) -> None:
     - the due date has just expired;
     - the due date expired one hour ago.
     """
-    logger.debug("Running daily_consulations_reminder_job")
+    logger.debug("Running daily_consultations_reminder_job")
     now = datetime.utcnow()
     consultations = await __api.get_daily_consultations()
     overdue = defaultdict(list)
 
     for consultation in consultations:
         # Check every consultation
+        if consultation.telegram_id is None:
+            logger.debug("DCRJ: consultation.telegram_id: %s", consultation.telegram_id)
+            continue
         user_timezone = await get_user_timezone(int(consultation.telegram_id), context)
         due_time = datetime.strptime(consultation.due, templates.DATE_FORMAT)
         user_time = datetime.now(tz=user_timezone)
+        logger.debug(
+            "DCRJ: user_timezone: %s, due_time: %s, user_time: %s, telegram_id: %s",
+            user_timezone,
+            due_time,
+            user_time,
+            consultation.telegram_id,
+        )
 
         # Important. This job starts every hour at 0 minutes 0 seconds, so we need to check only hour
         if user_time.hour == settings.daily_consultations_reminder_time.hour:
@@ -198,7 +208,7 @@ async def daily_consulations_reminder_job(context: CallbackContext) -> None:
                 # Group overdue consultations by doctor
                 overdue[consultation.telegram_id].append(models.PastConsultationData(consultation))
             elif due_time.date() - now.date() == timedelta(days=1):
-                # Due date is tomorrow, send one reminder per consultationsnow
+                # Due date is tomorrow, send one reminder per consultations now
                 context.job_queue.run_once(
                     send_reminder_now,
                     when=timedelta(seconds=1),
