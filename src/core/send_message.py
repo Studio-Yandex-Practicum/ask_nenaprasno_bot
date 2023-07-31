@@ -21,7 +21,10 @@ async def send_message(
     except Forbidden:
         logger.warning("Forbidden: bot was blocked by the user: %s", chat_id)
     except TelegramError:
-        logging.exception("The error sending the message to the chat: %s", chat_id)
+        if logger.level == logging.DEBUG:
+            logging.exception("The error sending the message to the chat: %s", chat_id)
+        else:
+            logging.warning("The error sending the message to the chat: %s", chat_id)
     return False
 
 
