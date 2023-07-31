@@ -3,11 +3,11 @@ from urllib.parse import urljoin
 from telegram import InlineKeyboardButton, InlineKeyboardMarkup, Update
 from telegram.ext import CallbackContext, CallbackQueryHandler, CommandHandler, ConversationHandler
 
-from bot import menu_button
 from bot.constants import callback_data, states
 from bot.conversation import timezone
 from bot.conversation.menu import menu_conversation
 from bot.decorators.logger import async_error_logger
+from bot.utils import menu_button
 from core.config import settings
 from core.send_message import edit_message, reply_message
 from service.api_client import APIService

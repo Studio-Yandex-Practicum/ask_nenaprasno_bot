@@ -9,8 +9,8 @@ from bot.constants import callback_data
 from bot.conversation import menu as mn
 from bot.decorators.logger import async_job_logger
 from bot.jobs import models, templates
-from bot.service.repeat_message import repeat_after_one_hour_button
-from bot.timezone_service import get_user_timezone
+from bot.services.timezone_service import get_user_timezone
+from bot.utils.repeat_message import repeat_after_one_hour_button
 from core.config import settings
 from core.logger import logger
 from core.send_message import send_message

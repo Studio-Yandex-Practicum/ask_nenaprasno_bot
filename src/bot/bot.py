@@ -15,7 +15,7 @@ from bot.constants import callback_data, jobs
 from bot.conversation.authorization import authorization_conversation
 from bot.decorators.logger import async_error_logger
 from bot.jobs import daily, monthly, weekly
-from bot.service.repeat_message import repeat_message_after_1_hour_callback
+from bot.utils.repeat_message import repeat_message_after_1_hour_callback
 from core.config import settings
 from core.logger import logger
 from core.send_message import edit_message
